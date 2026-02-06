@@ -45,14 +45,14 @@ export class StarterSelectScene extends Phaser.Scene {
     this.add.text(width / 2, 40, 'Choose Your Starters', TEXT_STYLES.SCENE_TITLE).setOrigin(0.5);
 
     // Instruction
-    this.selectionCountText = this.add.text(width / 2, 90, 'Select up to 3 Starter Digimon', TEXT_STYLES.SCENE_SUBTITLE).setOrigin(0.5);
+    this.selectionCountText = this.add.text(width / 2, 95, 'Select up to 3 Starter Digimon', TEXT_STYLES.SCENE_SUBTITLE).setOrigin(0.5);
 
     // Starter grid: 4 columns x 2 rows
     const cols = 4;
     const cellWidth = 160;
     const cellHeight = 180;
     const gridStartX = (width - cols * cellWidth) / 2 + cellWidth / 2;
-    const gridStartY = 160;
+    const gridStartY = 210;
 
     this.starters.forEach((starter, index) => {
       const col = index % cols;

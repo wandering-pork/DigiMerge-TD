@@ -6,6 +6,7 @@ import { MainMenuScene } from '@/scenes/MainMenuScene';
 import { StarterSelectScene } from '@/scenes/StarterSelectScene';
 import { GameScene } from '@/scenes/GameScene';
 import { PauseScene } from '@/scenes/PauseScene';
+import { SettingsScene } from '@/scenes/SettingsScene';
 import { GameOverScene } from '@/scenes/GameOverScene';
 
 export const gameConfig: Phaser.Types.Core.GameConfig = {
@@ -27,6 +28,7 @@ export const gameConfig: Phaser.Types.Core.GameConfig = {
     StarterSelectScene,
     GameScene,
     PauseScene,
+    SettingsScene,
     GameOverScene,
   ],
 };

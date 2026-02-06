@@ -900,33 +900,65 @@ export class GameScene extends Phaser.Scene {
       }
     });
 
-    // Pause button (Container + Graphics)
-    const pauseBtnW = 140;
-    const pauseBtnH = 38;
-    const pauseContainer = this.add.container(rightPanelX + panelW / 2 - 15, hudY + 310);
+    // Pause & Settings buttons side by side
+    const smallBtnW = 105;
+    const smallBtnH = 38;
+    const btnRowY = hudY + 310;
+    const btnRowCenterX = rightPanelX + panelW / 2 - 15;
+
+    // Pause button (left)
+    const pauseContainer = this.add.container(btnRowCenterX - smallBtnW / 2 - 8, btnRowY);
     const pauseBtnBg = this.add.graphics();
-    drawButton(pauseBtnBg, pauseBtnW, pauseBtnH, COLORS.PRIMARY);
+    drawButton(pauseBtnBg, smallBtnW, smallBtnH, COLORS.PRIMARY);
     pauseContainer.add(pauseBtnBg);
 
-    const pauseBtnText = this.add.text(0, 0, 'Pause', TEXT_STYLES.BUTTON_SM).setOrigin(0.5);
+    const pauseBtnText = this.add.text(0, 0, '|| Pause', TEXT_STYLES.BUTTON_SM).setOrigin(0.5);
     pauseContainer.add(pauseBtnText);
 
-    const pauseHitArea = new Phaser.Geom.Rectangle(-pauseBtnW / 2, -pauseBtnH / 2, pauseBtnW, pauseBtnH);
+    const pauseHitArea = new Phaser.Geom.Rectangle(-smallBtnW / 2, -smallBtnH / 2, smallBtnW, smallBtnH);
     pauseContainer.setInteractive(pauseHitArea, Phaser.Geom.Rectangle.Contains);
     pauseContainer.input!.cursor = 'pointer';
     pauseContainer.setDepth(10);
 
     pauseContainer.on('pointerover', () => {
-      drawButton(pauseBtnBg, pauseBtnW, pauseBtnH, COLORS.PRIMARY_HOVER, { glowRing: true });
+      drawButton(pauseBtnBg, smallBtnW, smallBtnH, COLORS.PRIMARY_HOVER, { glowRing: true });
       animateButtonHover(this, pauseContainer, true);
     });
     pauseContainer.on('pointerout', () => {
-      drawButton(pauseBtnBg, pauseBtnW, pauseBtnH, COLORS.PRIMARY);
+      drawButton(pauseBtnBg, smallBtnW, smallBtnH, COLORS.PRIMARY);
       animateButtonHover(this, pauseContainer, false);
     });
     pauseContainer.on('pointerdown', () => {
       animateButtonPress(this, pauseContainer);
       this.scene.launch('PauseScene');
+      this.scene.pause();
+    });
+
+    // Settings button (right, gear icon)
+    const settingsContainer = this.add.container(btnRowCenterX + smallBtnW / 2 + 8, btnRowY);
+    const settingsBtnBg = this.add.graphics();
+    drawButton(settingsBtnBg, smallBtnW, smallBtnH, COLORS.BG_PANEL_LIGHT);
+    settingsContainer.add(settingsBtnBg);
+
+    const settingsBtnText = this.add.text(0, 0, '\u2699 Settings', TEXT_STYLES.BUTTON_SM).setOrigin(0.5);
+    settingsContainer.add(settingsBtnText);
+
+    const settingsHitArea = new Phaser.Geom.Rectangle(-smallBtnW / 2, -smallBtnH / 2, smallBtnW, smallBtnH);
+    settingsContainer.setInteractive(settingsHitArea, Phaser.Geom.Rectangle.Contains);
+    settingsContainer.input!.cursor = 'pointer';
+    settingsContainer.setDepth(10);
+
+    settingsContainer.on('pointerover', () => {
+      drawButton(settingsBtnBg, smallBtnW, smallBtnH, COLORS.BG_HOVER, { glowRing: true });
+      animateButtonHover(this, settingsContainer, true);
+    });
+    settingsContainer.on('pointerout', () => {
+      drawButton(settingsBtnBg, smallBtnW, smallBtnH, COLORS.BG_PANEL_LIGHT);
+      animateButtonHover(this, settingsContainer, false);
+    });
+    settingsContainer.on('pointerdown', () => {
+      animateButtonPress(this, settingsContainer);
+      this.scene.launch('SettingsScene');
       this.scene.pause();
     });
 
