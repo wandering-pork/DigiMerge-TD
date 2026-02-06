@@ -4,6 +4,7 @@ import { Enemy } from '@/entities/Enemy';
 import { Projectile } from '@/entities/Projectile';
 import { findTarget, MockTarget } from '@/systems/TargetingSystem';
 import { getAttributeMultiplier } from '@/systems/AttributeSystem';
+import { getBaseEffectType } from '@/data/StatusEffects';
 
 /**
  * CombatManager handles tower targeting and attack execution each frame.
@@ -87,6 +88,8 @@ export class CombatManager {
    * Create a new projectile from a tower aimed at an enemy.
    * Damage is the tower's level-scaled damage multiplied by the attribute
    * effectiveness against the target's attribute.
+   * If the tower has an effectType and the random roll succeeds, the projectile
+   * carries the status effect to apply on hit.
    */
   public fireProjectile(tower: Tower, target: Enemy): void {
     const baseDamage = tower.getAttackDamage();
@@ -101,6 +104,19 @@ export class CombatManager {
       target,
       tower.attribute,
     );
+    projectile.attributeMultiplier = attributeMult;
+
+    // Roll for status effect proc
+    const effectType = tower.stats.effectType;
+    const effectChance = tower.stats.effectChance ?? 0;
+    if (effectType && effectChance > 0 && Math.random() < effectChance) {
+      // Only attach the effect if it resolves to a valid base status effect
+      const baseEffect = getBaseEffectType(effectType);
+      if (baseEffect) {
+        projectile.effectType = effectType;
+        projectile.sourceDamage = baseDamage;
+      }
+    }
 
     this.projectileContainer.add(projectile);
   }

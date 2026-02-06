@@ -472,17 +472,35 @@ or
 Towers level up by **paying DigiBytes**, not through combat.
 
 ```
-Level Up Cost = 5 DB × Current Level
+Level Up Cost = Base Cost × Stage Multiplier
 
-Examples:
+Base Cost = 5 DB × Current Level
+
+Stage Multipliers:
+  In-Training: ×1.0
+  Rookie:      ×1.5
+  Champion:    ×2.0
+  Ultimate:    ×3.0
+  Mega:        ×4.0
+  Ultra:       ×5.0
+
+Examples (In-Training, ×1.0):
   Lv 1 → 2:    5 DB
   Lv 5 → 6:   25 DB
   Lv 10 → 11: 50 DB
-  Lv 20 → 21: 100 DB
-  Lv 35 → 36: 175 DB
 
-Total cost to reach Lv 20: ~1,000 DB
-Total cost to reach Lv 35: ~3,000 DB
+Examples (Champion, ×2.0):
+  Lv 1 → 2:   10 DB
+  Lv 10 → 11: 100 DB
+  Lv 20 → 21: 200 DB
+
+Examples (Mega, ×4.0):
+  Lv 1 → 2:   20 DB
+  Lv 10 → 11: 200 DB
+  Lv 35 → 36: 700 DB
+
+Rationale: Higher-stage Digimon are more powerful per level,
+so leveling them costs proportionally more.
 ```
 
 **Level Effects:**
@@ -996,14 +1014,21 @@ Abilities are divided into two categories: **Movement/Survival** (self-buffs) an
 ### Level Up Costs
 
 ```
-Cost = 5 DB × Current Level
+Cost = 5 DB × Current Level × Stage Multiplier
 
-Cumulative to reach level:
+Stage Multipliers:
+  In-Training: ×1.0  |  Rookie: ×1.5  |  Champion: ×2.0
+  Ultimate: ×3.0     |  Mega: ×4.0    |  Ultra: ×5.0
+
+Cumulative to reach level (at In-Training ×1.0):
   Lv 10:  ~275 DB
   Lv 20:  ~1,050 DB
-  Lv 35:  ~3,150 DB
-  Lv 50:  ~6,375 DB
-  Lv 70:  ~12,425 DB
+
+Cumulative to reach level (at Champion ×2.0):
+  Lv 35:  ~6,300 DB
+
+Cumulative to reach level (at Mega ×4.0):
+  Lv 70:  ~49,700 DB
 ```
 
 ### Digivolve Costs

@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { Attribute } from '@/types';
+import { EventBus, GameEvents } from '@/utils/EventBus';
 
 // ---------------------------------------------------------------------------
 // Local interfaces to avoid circular dependencies with Tower / Enemy
@@ -10,6 +11,7 @@ export interface ProjectileTarget {
   y: number;
   isAlive: boolean;
   takeDamage(amount: number): void;
+  applyEffect?(effectType: string, sourceDamage: number): void;
 }
 
 export interface ProjectileSource {
@@ -57,6 +59,15 @@ export class Projectile extends Phaser.GameObjects.Container {
 
   /** Whether this projectile is still in flight. */
   public isActive: boolean;
+
+  /** Status effect to apply on hit (null if none). */
+  public effectType: string | null = null;
+
+  /** Tower's base damage, used for DoT calculations on the applied effect. */
+  public sourceDamage: number = 0;
+
+  /** Attribute multiplier applied to this projectile's damage (for damage number coloring). */
+  public attributeMultiplier: number = 1;
 
   /** Graphics object used to render a simple trailing line. */
   public trailGraphics: Phaser.GameObjects.Graphics;
@@ -153,6 +164,19 @@ export class Projectile extends Phaser.GameObjects.Container {
   private hit(): void {
     if (this.target && this.target.isAlive) {
       this.target.takeDamage(this.damage);
+
+      // Emit damage dealt event for floating damage numbers
+      EventBus.emit(GameEvents.DAMAGE_DEALT, {
+        x: this.target.x,
+        y: this.target.y,
+        damage: this.damage,
+        multiplier: this.attributeMultiplier,
+      });
+
+      // Apply status effect if the projectile carries one
+      if (this.effectType && this.target.applyEffect) {
+        this.target.applyEffect(this.effectType, this.sourceDamage);
+      }
     }
 
     this.isActive = false;

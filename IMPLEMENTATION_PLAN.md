@@ -1,12 +1,12 @@
 # DigiMerge TD - Implementation Plan
 
-## Overall Status: MVP Playable
+## Overall Status: MVP + Gameplay Enhancements
 
-**292 tests passing | TypeScript compiles clean | Vite build succeeds**
+**368 tests passing | 15 test files | TypeScript compiles clean | Vite build succeeds**
 
-All 8 sprints complete. Core game logic fully implemented and tested.
-All must-have gaps filled: merge trigger, digivolve trigger, auto-save, ghost preview, boss UX.
-Remaining items are nice-to-have polish (drag-drop, HUD refactor, UI components, object pooling).
+All 8 sprints complete + gameplay enhancements. Core game logic fully implemented and tested.
+Post-MVP enhancements: stage-based level costs, status effects, damage numbers, wave preview, health bar/damage toggles, tower skills display.
+Remaining items are content expansion and polish (waves 21-100, drag-drop, object pooling, tutorial).
 
 ### Implementation Summary
 
@@ -22,24 +22,25 @@ Remaining items are nice-to-have polish (drag-drop, HUD refactor, UI components,
 | 7 | UI Polish | **Partially Done** | No HUD.ts, UIManager, or reusable components |
 | 8 | Content & Polish | **Done** | Boss health bar + announcement, auto-save, Continue button |
 
-### Test Inventory (292 tests, 14 files)
+### Test Inventory (368 tests, 15 files)
 
 | Test File | Tests |
 |-----------|-------|
 | AttributeSystem | 20 |
 | TargetingSystem | 13 |
 | DPSystem | 19 |
-| LevelSystem | 32 |
+| LevelSystem | 40 |
 | MergeSystem | 17 |
 | OriginSystem | 34 |
+| StatusEffects | 56 |
 | GridUtils | 16 |
-| Constants | 28 |
+| Constants | 31 |
 | DigimonDatabase | 15 |
 | EvolutionPaths | 12 |
 | WaveData | 10 |
 | GameStateManager | 52 |
 | SaveManager | 16 |
-| SpawnMenu | 8 |
+| SpawnMenu | 17 |
 
 ---
 
@@ -127,7 +128,7 @@ git push -u origin main
 
 - [x] TDD methodology followed for all pure logic systems
 - [x] Vitest configured and running
-- [x] 14 test files, 292 tests total
+- [x] 15 test files, 368 tests total
 
 ### Actual Test File Structure
 ```
@@ -136,9 +137,10 @@ tests/
 ├── systems/
 │   ├── AttributeSystem.test.ts    # 20 tests
 │   ├── DPSystem.test.ts           # 19 tests
-│   ├── LevelSystem.test.ts        # 32 tests
+│   ├── LevelSystem.test.ts        # 40 tests
 │   ├── MergeSystem.test.ts        # 17 tests
 │   ├── OriginSystem.test.ts       # 34 tests
+│   ├── StatusEffects.test.ts      # 56 tests
 │   └── TargetingSystem.test.ts    # 13 tests
 ├── data/
 │   ├── DigimonDatabase.test.ts    # 15 tests
@@ -148,9 +150,9 @@ tests/
 │   ├── GameStateManager.test.ts   # 52 tests
 │   └── SaveManager.test.ts        # 16 tests
 ├── ui/
-│   └── SpawnMenu.test.ts          # 8 tests
+│   └── SpawnMenu.test.ts          # 17 tests
 └── utils/
-    ├── Constants.test.ts          # 28 tests
+    ├── Constants.test.ts          # 31 tests
     └── GridUtils.test.ts          # 16 tests
 ```
 
@@ -656,35 +658,67 @@ which enters merge mode (highlights valid candidates), then clicking a candidate
 
 ---
 
+## Gameplay Enhancements - **DONE**
+
+**Goal:** Implement gameplay balance features and UX improvements from the Remaining Work list.
+
+### Completed Enhancements
+
+| Enhancement | Files Modified | Tests Added |
+|-------------|---------------|-------------|
+| **Stage-based level-up costs** | Constants.ts, LevelSystem.ts, TowerInfoPanel.ts | +8 LevelSystem, +3 Constants |
+| **Status effects system** | StatusEffects.ts, Enemy.ts, CombatManager.ts, Projectile.ts | +56 (new StatusEffects.test.ts) |
+| **Tower skills display** | TowerInfoPanel.ts | — (visual) |
+| **Floating damage numbers** | EventBus.ts, Projectile.ts, GameScene.ts | — (visual) |
+| **Health bar toggle** | Enemy.ts, SettingsScene.ts, GameTypes.ts | — (visual) |
+| **Wave preview** | GameScene.ts | — (visual) |
+| **Damage number toggle** | SettingsScene.ts, GameTypes.ts, SaveManager.ts | — (visual) |
+
+### Key Implementation Details
+
+- **Level-up cost formula**: `Math.ceil(3 * level * stageMultiplier)` where multiplier ranges from ×1 (In-Training) to ×5 (Ultra)
+- **Status effects**: 6 effects with runtime configs (burn/poison DoT, slow/freeze/stun CC, armorBreak debuff)
+- **Effect proc**: CombatManager rolls `tower.stats.effectChance`, Projectile carries effect and applies on hit via `Enemy.applyEffect()`
+- **Damage numbers**: Emitted via `DAMAGE_DEALT` event from Projectile.hit(), displayed by GameScene with color-coding (green=super effective, red=resisted)
+- **Settings toggles**: Stored in Phaser Registry (`showDamageNumbers`, `healthBarMode`), persisted via SaveManager
+
+---
+
 ## Remaining Work Summary
 
-### Must-Have for Playable MVP
+### High Priority (Next Up)
 
-| Item | Sprint | Priority | Status |
-|------|--------|----------|--------|
-| .gitignore | 0 | High | **Done** |
-| Git init + initial commit | 0 | High | Not done |
-| Merge trigger in gameplay | 6 | High | **Done** - Merge button + merge mode |
-| Digivolve trigger in gameplay | 5 | High | **Done** - Digivolve button at max level |
-| Auto-save wiring | 8 | Medium | **Done** - Saves after each wave |
-| Ghost preview for placement | 2/4 | Medium | **Done** - Semi-transparent sprite on valid slots |
-| Boss health bar + announcement | 8 | Medium | **Done** - Health bar + animated text |
-| Playtesting pass | 8 | High | Not done - never tested in browser end-to-end |
+| Item | Section | Status |
+|------|---------|--------|
+| Settings should NOT pause game | 9.1 | Not done |
+| Lower default SFX volume | 9.2 | Not done |
+| Lv MAX should level up to affordable level | 9.3 | Not done |
+| Regen enemy mechanic | 9.4 | Not done |
+| Shielded enemy mechanic | 9.5 | Not done |
+| Splitter enemy mechanic | 9.6 | Not done |
+
+### Content Expansion
+
+| Item | Section | Status |
+|------|---------|--------|
+| Phase 2: Waves 21-40 (Champion) | 9.7 | Not done |
+| Phase 3: Waves 41-60 (Ultimate) | 9.8 | Not done |
+| Phase 4: Waves 61-80 (Mega) | 9.9 | Not done |
+| Phase 5: Waves 81-100 + Endless | 9.10 | Not done |
 
 ### Nice-to-Have Improvements
 
-| Item | Sprint | Priority | Notes |
-|------|--------|----------|-------|
-| Drag-and-drop merge | 6 | Medium | Alternative to modal-based merge |
-| Separate HUD.ts | 7 | Low | Refactor from GameScene inline code |
-| UIManager.ts | 7 | Low | Centralized UI state management |
-| Reusable UI components | 7 | Low | Reduce code duplication across panels |
-| Object pooling | 8 | Low | Performance optimization for later phases |
-| Mute/unmute UI button | 8 | Low | AudioManager supports it, just needs UI |
-| Visual merge effect | 6 | Low | Particle/tween on merge |
-| Grid debug toggle | 2 | Low | Developer tool |
-| Panel show/hide animations | 7 | Low | Smooth transitions |
-| Placement confirmation/cancel | 4 | Low | Currently places immediately |
+| Item | Priority | Notes |
+|------|----------|-------|
+| Drag-and-drop merge | Medium | Alternative to modal-based merge |
+| Object pooling | Medium | Performance optimization for later phases |
+| Tutorial system | Medium | New player onboarding |
+| Separate HUD.ts | Low | Refactor from GameScene inline code |
+| UIManager.ts | Low | Centralized UI state management |
+| Reusable UI components | Low | Reduce code duplication across panels |
+| Visual merge effect | Low | Particle/tween on merge |
+| Panel show/hide animations | Low | Smooth transitions |
+| Placement confirmation/cancel | Low | Currently places immediately |
 
 ### Files Planned but Not Created
 
@@ -740,7 +774,7 @@ which enters merge mode (highlights valid candidates), then clicking a candidate
 
 A sprint is complete when:
 1. All acceptance criteria are met
-2. All unit tests pass (`npm run test`) - **292 passing**
+2. All unit tests pass (`npm run test`) - **368 passing**
 3. Code compiles without errors (`npm run build`) - **Clean**
 4. No console errors during gameplay - **Not yet verified (needs playtest)**
 5. Feature works in Chrome and Firefox - **Not yet verified (needs playtest)**
@@ -748,24 +782,120 @@ A sprint is complete when:
 
 ---
 
-## Post-MVP Roadmap
+## Next Phase: Bug Fixes, Enemy Mechanics & Content Expansion
 
-### Phase 2: Content Expansion
-- Waves 21-40 (Champion tier enemies)
-- Additional Digimon lines
-- New enemy types
+### Priority 1: Bug Fixes & UX Improvements
 
-### Phase 3: Features
+#### 9.1 Settings should NOT pause the game
+- [ ] SettingsScene currently pauses GameScene on open (`scene.pause('GameScene')`)
+- [ ] Change to overlay-only: launch SettingsScene alongside GameScene without pausing
+- [ ] Game continues running in the background while settings are open
+- [ ] Resume button becomes just "Close" since game isn't paused
+- **Files:** `GameScene.ts` (settings launch), `SettingsScene.ts` (remove pause/resume calls)
+
+#### 9.2 Lower default SFX volume
+- [ ] Current default volume is `0.15` (15%) — still too loud
+- [ ] Reduce default to `0.05` (5%) or lower
+- [ ] Consider per-SFX volume multipliers for particularly loud effects (e.g., attack sounds that play rapidly)
+- **Files:** `AudioManager.ts` (default volume)
+
+#### 9.3 Lv MAX should level up as far as current DigiBytes allow
+- [ ] Current behavior: Lv MAX tries to reach absolute max level, fails silently if can't afford
+- [ ] New behavior: Calculate the highest affordable level given current DigiBytes and level up to that
+- [ ] Binary search or iterative approach: find highest level where `getTotalLevelUpCost(current, target, stage) <= currentDigiBytes`
+- [ ] If already at max affordable level, show disabled state or "insufficient funds" feedback
+- [ ] Also apply same logic to Lv +5 button (level up as many as affordable up to +5)
+- **Files:** `TowerInfoPanel.ts` (`onLevelUpMulti`), possibly `LevelSystem.ts` (add `getMaxAffordableLevel` helper)
+- **Tests:** Add tests for `getMaxAffordableLevel` in `LevelSystem.test.ts`
+
+### Priority 2: Missing Enemy Type Mechanics
+
+#### 9.4 Regen enemy mechanic
+- [ ] Add passive HP regeneration to `regen` type enemies
+- [ ] Heal rate: 2% max HP per second (as per ENEMY_SPAWN_DESIGN.md)
+- [ ] Apply regeneration in `Enemy.update()` tick
+- [ ] Cap healing at maxHP
+- [ ] Poison status effect should suppress or reduce regeneration
+- [ ] Visual indicator: green heal tick numbers or subtle green pulse
+- [ ] Add Floramon to wave rotation (already in DB but not spawned)
+- **Files:** `Enemy.ts` (update loop), `StatusEffects.ts` (poison vs regen interaction)
+- **Tests:** Add regen tests in new or existing test file
+
+#### 9.5 Shielded enemy mechanic
+- [ ] Shielded enemies have 60% armor (as per ENEMY_SPAWN_DESIGN.md)
+- [ ] Armor Break status effect is the primary counter (already implemented, reduces armor 50%)
+- [ ] Add shielded enemies to DigimonDatabase: Centarumon (Champion), Andromon (Ultimate)
+- [ ] Visual indicator: shield icon or blue tint overlay on shielded enemies
+- [ ] Shielded enemies appear starting Wave 33 (Phase 2)
+- **Files:** `DigimonDatabase.ts` (new entries), `Enemy.ts` (visual indicator), `WaveData.ts` (wave compositions)
+- **Tests:** Verify armor + ArmorBreak interaction works for high-armor enemies
+
+#### 9.6 Splitter enemy mechanic
+- [ ] On death, splitter enemies spawn 2 smaller copies (or 4 for Diaboromon)
+- [ ] Split copies have reduced HP (50% of original), same speed, no further splitting
+- [ ] Splits spawn at the parent's current path position and continue from there
+- [ ] WaveManager/GameScene needs to handle dynamically spawned enemies mid-wave
+- [ ] Wave completion must account for split children (wave not done until all splits dead)
+- [ ] Add splitter enemies to DigimonDatabase: Mamemon (Ultimate), MetalMamemon (Ultimate), Diaboromon (Mega)
+- [ ] Splitters first appear in Wave 46 (Phase 3)
+- **Files:** `Enemy.ts` (onDeath split logic), `WaveManager.ts` (track split children), `DigimonDatabase.ts` (new entries), `GameScene.ts` (spawn split enemies)
+- **Tests:** Split spawning, wave completion with splits, HP reduction on splits
+
+### Priority 3: Content Expansion (Phases 2-5)
+
+#### 9.7 Phase 2 — Waves 21-40 (Champion tier)
+- [ ] Add Champion-tier enemies to DigimonDatabase (Centarumon, Togemon, Monochromon, Andromon, etc.)
+- [ ] Define wave compositions for waves 21-40 in WaveData.ts
+- [ ] Boss waves at 30 and 40
+- [ ] Introduce Regen enemies (Wave 32) and Shielded enemies (Wave 33)
+- [ ] Scale HP multipliers for Phase 2 difficulty curve
+
+#### 9.8 Phase 3 — Waves 41-60 (Ultimate tier)
+- [ ] Add Ultimate-tier enemies to DigimonDatabase
+- [ ] Define wave compositions for waves 41-60
+- [ ] Boss waves at 50 and 60
+- [ ] Introduce Splitter enemies (Wave 46)
+- [ ] Mamemon splits into 2, MetalMamemon is shielded splitter
+
+#### 9.9 Phase 4 — Waves 61-80 (Mega tier)
+- [ ] Add Mega-tier enemies to DigimonDatabase
+- [ ] Define wave compositions for waves 61-80
+- [ ] Boss waves at 70 and 80
+- [ ] Diaboromon splits into 4
+
+#### 9.10 Phase 5 — Waves 81-100 (Mega/Ultra tier) + Endless
+- [ ] Define wave compositions for waves 81-100
+- [ ] Boss waves at 90 and 100 (final boss: VenomMyotismon with regen + special abilities)
+- [ ] Endless mode (101+): scaling HP/speed/armor multipliers per wave
+- [ ] Victory screen update for Wave 100 clear
+
+### Implementation Order
+
+| Step | Task | Priority | Depends On |
+|------|------|----------|------------|
+| 1 | Settings non-pausing (9.1) | High | — |
+| 2 | Lower SFX volume (9.2) | High | — |
+| 3 | Lv MAX affordable fix (9.3) | High | — |
+| 4 | Regen mechanic (9.4) | Medium | — |
+| 5 | Shielded mechanic (9.5) | Medium | — |
+| 6 | Splitter mechanic (9.6) | Medium | — |
+| 7 | Phase 2 waves (9.7) | Medium | 9.4, 9.5 |
+| 8 | Phase 3 waves (9.8) | Medium | 9.6, 9.7 |
+| 9 | Phase 4 waves (9.9) | Low | 9.8 |
+| 10 | Phase 5 + Endless (9.10) | Low | 9.9 |
+
+---
+
+## Future Roadmap
+
+### Polish & Features (post-content)
 - Tutorial system
 - Encyclopedia/Digimon browser
-- Full settings menu
-- Endless mode
-
-### Phase 4: Polish
+- Drag-and-drop merge (alternative UX)
 - Background music
-- Advanced visual effects
-- Achievements
-- Leaderboards
+- Advanced visual effects / particles
+- Object pooling (performance)
+- Achievements / Leaderboards
 
 ---
 

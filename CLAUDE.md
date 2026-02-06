@@ -29,40 +29,36 @@ SPAWN → LEVEL UP → MERGE → DIGIVOLVE → DEFEND → REPEAT
 digimerge-td/
 ├── public/
 │   ├── assets/
-│   │   ├── sprites/          # Digimon sprites (64x64, 128x128)
-│   │   ├── ui/               # UI elements, buttons, panels
-│   │   ├── effects/          # Particle effects, status icons
-│   │   ├── audio/
-│   │   │   ├── sfx/          # Sound effects
-│   │   │   └── music/        # Background music
-│   │   └── fonts/            # Pixel fonts
+│   │   ├── sprites/Idle Frame Only/  # 842 Digimon sprite PNGs (~16x16)
+│   │   ├── sfx/                      # 17 WAV sound effects
+│   │   └── tiles/                    # Sprout Lands tileset PNGs
 │   └── favicon.ico
+├── .github/workflows/
+│   └── deploy.yml            # GitHub Pages deployment
 ├── src/
 │   ├── main.ts               # Entry point, Phaser game config
 │   ├── config/
 │   │   ├── GameConfig.ts     # Phaser configuration
-│   │   └── Constants.ts      # Game constants (costs, damage, etc.)
+│   │   └── Constants.ts      # Game constants (costs, damage, speeds, etc.)
 │   ├── scenes/
 │   │   ├── BootScene.ts      # Asset loading
-│   │   ├── PreloadScene.ts   # Loading screen
+│   │   ├── PreloadScene.ts   # Loading screen + tileset loading
 │   │   ├── MainMenuScene.ts  # Title screen
 │   │   ├── StarterSelectScene.ts
-│   │   ├── GameScene.ts      # Main gameplay
-│   │   ├── PauseScene.ts     # Overlay scene
-│   │   ├── GameOverScene.ts
-│   │   └── EncyclopediaScene.ts
+│   │   ├── GameScene.ts      # Main gameplay + HUD + grid
+│   │   ├── PauseScene.ts     # Simple pause overlay (click/ESC to resume)
+│   │   ├── SettingsScene.ts  # Volume, restart, main menu
+│   │   └── GameOverScene.ts
 │   ├── entities/
 │   │   ├── Tower.ts          # Digimon tower class
 │   │   ├── Enemy.ts          # Enemy class
-│   │   ├── Projectile.ts     # Attack projectiles
-│   │   └── Boss.ts           # Boss enemy class
+│   │   └── Projectile.ts     # Attack projectiles
 │   ├── managers/
 │   │   ├── GameStateManager.ts    # DigiBytes, lives, wave
 │   │   ├── WaveManager.ts         # Enemy spawning
 │   │   ├── CombatManager.ts       # Damage, effects
 │   │   ├── TowerManager.ts        # Tower placement, selection
-│   │   ├── UIManager.ts           # HUD, panels, modals
-│   │   ├── AudioManager.ts        # Sound effects, music
+│   │   ├── AudioManager.ts        # Sound effects (volume/mute via registry)
 │   │   └── SaveManager.ts         # LocalStorage save/load
 │   ├── data/
 │   │   ├── DigimonDatabase.ts     # All Digimon stats
@@ -70,12 +66,12 @@ digimerge-td/
 │   │   ├── EvolutionPaths.ts      # Evolution trees
 │   │   └── StatusEffects.ts       # Effect definitions
 │   ├── ui/
-│   │   ├── HUD.ts                 # Top bar (lives, DB, wave)
+│   │   ├── UITheme.ts             # Design tokens (colors, fonts, styles)
+│   │   ├── UIHelpers.ts           # drawPanel, drawButton, animations
 │   │   ├── TowerInfoPanel.ts      # Selected tower details
-│   │   ├── SpawnMenu.ts           # Spawn configuration
+│   │   ├── SpawnMenu.ts           # Spawn configuration + starter placement
 │   │   ├── EvolutionModal.ts      # Evolution selection
-│   │   ├── MergeModal.ts          # Merge confirmation
-│   │   └── components/            # Reusable UI components
+│   │   └── MergeModal.ts          # Merge confirmation
 │   ├── systems/
 │   │   ├── AttributeSystem.ts     # Damage multipliers
 │   │   ├── DPSystem.ts            # DP calculations
@@ -84,8 +80,7 @@ digimerge-td/
 │   │   └── TargetingSystem.ts     # Tower targeting priorities
 │   ├── utils/
 │   │   ├── EventBus.ts            # Global event system
-│   │   ├── PathfindingUtils.ts    # Waypoint path helpers
-│   │   └── MathUtils.ts           # Common calculations
+│   │   └── GridUtils.ts           # Grid/pixel conversion, path positions
 │   └── types/
 │       ├── DigimonTypes.ts        # Type definitions
 │       ├── GameTypes.ts           # Game state types
@@ -129,6 +124,11 @@ npm run lint     # ESLint check
 npm run test     # Run Vitest tests
 ```
 
+### Deployment
+- **GitHub Pages**: Auto-deploys on push to `main` via `.github/workflows/deploy.yml`
+- **Live URL**: https://wandering-pork.github.io/DigiMerge-TD/
+- **Vite base**: `base: '/DigiMerge-TD/'` in `vite.config.ts`
+
 ### Claude Code Skill
 A `/phaser` skill is available for Phaser 3 API questions, game development patterns, sprites, tweens, scenes, game objects, physics, input handling, audio, and asset loading specific to this project.
 
@@ -157,7 +157,8 @@ const SPAWN_COSTS = {
 
 const DIGIVOLVE_COSTS = [100, 150, 200, 250]; // Per stage
 
-const LEVEL_UP_COST = (level: number) => 5 * level;
+const LEVEL_UP_COST = (level: number, stageMultiplier: number) => Math.ceil(3 * level * stageMultiplier);
+// Stage multipliers: In-Training ×1, Rookie ×1.5, Champion ×2, Ultimate ×3, Mega ×4, Ultra ×5
 ```
 
 ### Stage Configuration
@@ -242,10 +243,10 @@ const ATTRIBUTE_MULTIPLIERS: Record<Attribute, Record<Attribute, number>> = {
 ### Scene Flow
 ```
 BootScene → PreloadScene → MainMenuScene → StarterSelectScene → GameScene
-                                ↓                                    ↓
-                         EncyclopediaScene                      PauseScene
-                                                                     ↓
-                                                              GameOverScene
+                                                                  ↓    ↓
+                                                          PauseScene  SettingsScene
+                                                                         ↓
+                                                                   GameOverScene
 ```
 
 ### GameScene Structure
@@ -331,7 +332,7 @@ interface SaveData {
 ## Available Assets
 
 ### Sprites (842 PNG files)
-**Location**: `assets/sprites/Idle Frame Only/`
+**Location**: `public/assets/sprites/Idle Frame Only/`
 - **Format**: PNG, pixel art (~16x16 native, scale up as needed)
 - **Naming**: `{DigimonName}.png` (e.g., `Agumon.png`, `Greymon.png`)
 - **Variants**: Some have suffixes like `_X`, `_2006`, `_Black`
@@ -349,7 +350,7 @@ interface SaveData {
 | Viximon | `Viximon.png` | `Renamon.png`, `Kyubimon.png`, `Taomon.png` |
 
 ### Sound Effects (17 WAV files)
-**Location**: `assets/sfx/`
+**Location**: `public/assets/sfx/`
 
 | File | Usage |
 |------|-------|
@@ -371,11 +372,20 @@ interface SaveData {
 | `wave_complete.wav` | Wave finished |
 | `wave_start.wav` | Wave begins |
 
-### Missing Assets (Create or Skip for MVP)
-- **UI Elements**: Buttons, panels, health bars (use Phaser graphics)
-- **Map Tiles**: Path/slot visuals (use colored rectangles)
-- **Effects**: Status effect particles (use simple shapes)
-- **Music**: Background tracks (skip for MVP)
+### Tiles (Sprout Lands pack)
+**Location**: `public/assets/tiles/`
+
+| File | Size | Frames | Usage |
+|------|------|--------|-------|
+| `grass.png` | 176x112 | 11x7 (16x16) | Tower slot backgrounds |
+| `dirt.png` | 128x128 | 8x8 (16x16) | Enemy path tiles |
+| `water.png` | 64x16 | 4x1 (16x16) | Border/outside area |
+| `decorations.png` | 144x80 | 9x5 (16x16) | Trees, bushes, rocks, flowers |
+
+### Other Assets
+- **UI Elements**: Built with Phaser Graphics + UITheme.ts design tokens
+- **Effects**: Simple shapes (particles, tweens)
+- **Music**: Not included (skip for MVP)
 
 ---
 
@@ -443,14 +453,15 @@ survivorDP = Math.max(digimonA.dp, digimonB.dp) + 1;
 
 ### Level Up Cost
 ```typescript
-cost = 5 * currentLevel;  // Lv 1→2 costs 5 DB, Lv 20→21 costs 100 DB
+cost = Math.ceil(3 * currentLevel * stageMultiplier);
+// Stage multipliers: In-Training ×1, Rookie ×1.5, Champion ×2, Ultimate ×3, Mega ×4, Ultra ×5
 ```
 
 ---
 
 ## MVP Scope
 
-### Included in MVP
+### MVP + Post-MVP Features
 | Feature | Status | Notes |
 |---------|--------|-------|
 | Core TD loop | ✅ | Spawn, place, attack, waves |
@@ -461,27 +472,31 @@ cost = 5 * currentLevel;  // Lv 1→2 costs 5 DB, Lv 20→21 costs 100 DB
 | Merge system | ✅ | Same attribute + stage |
 | DP & Origin systems | ✅ | Core mechanics |
 | Attribute triangle | ✅ | Vaccine/Data/Virus/Free |
-| Basic HUD | ✅ | Lives, DB, wave counter |
+| HUD | ✅ | Lives, DB, wave counter, speed, pause, settings |
 | Tower info panel | ✅ | Stats, buttons |
-| Spawn menu | ✅ | Stage + type selection |
-| Sound effects | ✅ | All 17 SFX available |
-| Save/Load | ✅ | LocalStorage |
+| Spawn menu | ✅ | Stage + type selection, starter placement |
+| Sound effects | ✅ | All 17 SFX + volume control |
+| Save/Load | ✅ | LocalStorage + auto-save |
+| UI Theme System | ✅ | UITheme.ts tokens + UIHelpers.ts components |
+| Volume Control | ✅ | Slider + mute in SettingsScene |
+| Game Speed | ✅ | 1x/2x/3x toggle + keyboard shortcuts |
+| Sprout Lands Tileset | ✅ | Grass, dirt, water tiles + decorations |
+| GitHub Pages Deploy | ✅ | Auto-deploy via GitHub Actions |
+| Stage-based level-up costs | ✅ | Higher stages cost proportionally more (×1 to ×5) |
+| Status effects system | ✅ | Burn, Poison, Slow, Freeze, Stun, Armor Break |
+| Tower skills display | ✅ | Effect name + proc chance in TowerInfoPanel |
+| Floating damage numbers | ✅ | Color-coded by effectiveness, toggleable |
+| Health bar toggle | ✅ | All / Bosses Only / Off in Settings |
+| Wave preview | ✅ | Next wave composition in HUD |
 
-### Excluded from MVP (Later)
-- Tutorial popups
-- Endless mode (waves 101+)
-- Encyclopedia/Digimon browser
-- Settings menu (full)
-- Phases 2-5 (waves 21-100)
-- All 150+ Digimon
+### Remaining Work
 
-### Implementation Phases
-1. **Foundation**: Project setup, scenes, asset loading
-2. **Core Gameplay**: Tower, Enemy, Projectile, waves 1-5
-3. **Economy**: DigiBytes, level up, spawn menu
-4. **Evolution**: Digivolve, DP system, origin system
-5. **Merge**: Drag-drop merge, attribute matching
-6. **Polish**: Full Phase 1 (waves 1-20), boss, save/load, SFX
+**Content:**
+- Phases 2-5 (waves 21-100), Endless mode (waves 101+)
+- Full Digimon roster (~150), DNA Digivolution, Encyclopedia
+
+**UX & Polish:**
+- Drag-and-drop merge, visual merge effects, object pooling, tutorial, music
 
 ---
 

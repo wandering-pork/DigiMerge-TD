@@ -10,6 +10,7 @@ import {
   ATTRIBUTE_MULTIPLIERS,
   STAGE_CONFIG,
   SPAWN_COSTS,
+  STAGE_LEVEL_COST_MULTIPLIER,
 } from '@/config/Constants';
 import { Stage, Attribute } from '@/types';
 
@@ -80,6 +81,28 @@ describe('Constants', () => {
 
     it('level 20 costs 60 DigiBytes', () => {
       expect(getLevelUpCost(20)).toBe(60);
+    });
+
+    it('stage multiplier increases cost for higher stages', () => {
+      // Rookie: 3 * 10 * 1.5 = 45
+      expect(getLevelUpCost(10, Stage.ROOKIE)).toBe(45);
+      // Champion: 3 * 10 * 2 = 60
+      expect(getLevelUpCost(10, Stage.CHAMPION)).toBe(60);
+    });
+  });
+
+  describe('STAGE_LEVEL_COST_MULTIPLIER', () => {
+    it('should have multipliers for all 6 stages', () => {
+      for (let s = Stage.IN_TRAINING; s <= Stage.ULTRA; s++) {
+        expect(STAGE_LEVEL_COST_MULTIPLIER[s as Stage]).toBeDefined();
+        expect(STAGE_LEVEL_COST_MULTIPLIER[s as Stage]).toBeGreaterThan(0);
+      }
+    });
+
+    it('multipliers should increase with stage', () => {
+      expect(STAGE_LEVEL_COST_MULTIPLIER[Stage.IN_TRAINING]).toBeLessThan(STAGE_LEVEL_COST_MULTIPLIER[Stage.ROOKIE]);
+      expect(STAGE_LEVEL_COST_MULTIPLIER[Stage.ROOKIE]).toBeLessThan(STAGE_LEVEL_COST_MULTIPLIER[Stage.CHAMPION]);
+      expect(STAGE_LEVEL_COST_MULTIPLIER[Stage.CHAMPION]).toBeLessThan(STAGE_LEVEL_COST_MULTIPLIER[Stage.ULTIMATE]);
     });
   });
 

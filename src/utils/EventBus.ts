@@ -17,6 +17,9 @@ export const GameEvents = {
   ENEMY_DIED: 'enemy:died',
   ENEMY_REACHED_BASE: 'enemy:reachedBase',
 
+  // Combat events
+  DAMAGE_DEALT: 'combat:damageDealt',
+
   // Wave events
   WAVE_STARTED: 'wave:started',
   WAVE_COMPLETED: 'wave:completed',

@@ -139,6 +139,8 @@ describe('SaveManager', () => {
         musicVolume: 0.3,
         showGrid: false,
         showRanges: true,
+        showDamageNumbers: true,
+        healthBarMode: 'all',
       });
       const settings = SaveManager.loadSettings();
       expect(settings.sfxVolume).toBe(0.8);
@@ -152,6 +154,8 @@ describe('SaveManager', () => {
         musicVolume: 0.5,
         showGrid: true,
         showRanges: true,
+        showDamageNumbers: true,
+        healthBarMode: 'all',
       });
       const loaded = SaveManager.load();
       expect(loaded!.gameState.digibytes).toBe(500);

@@ -27,7 +27,7 @@ export class SettingsScene extends Phaser.Scene {
 
     // Panel background
     const panelWidth = 320;
-    const panelHeight = 400;
+    const panelHeight = 530;
     const panelX = (width - panelWidth) / 2;
     const panelY = (height - panelHeight) / 2;
 
@@ -53,7 +53,7 @@ export class SettingsScene extends Phaser.Scene {
       color: COLORS.TEXT_LABEL,
     });
 
-    const currentVolume = audioManager ? audioManager.getVolume() : 0.5;
+    const currentVolume = audioManager ? audioManager.getVolume() : 0.15;
     const isMuted = audioManager ? !audioManager.isEnabled() : false;
 
     // Slider track
@@ -162,26 +162,102 @@ export class SettingsScene extends Phaser.Scene {
       }
     });
 
+    // ---- Damage Numbers Toggle ----
+    const dmgToggleY = sliderY + 90;
+    const showDmgNumbers = this.registry.get('showDamageNumbers') !== false; // default ON
+
+    this.add.text(panelX + 30, dmgToggleY, 'Damage Numbers', {
+      fontFamily: FONTS.DISPLAY,
+      fontSize: '14px',
+      color: COLORS.TEXT_LABEL,
+    });
+
+    const dmgBtnW = 80;
+    const dmgBtnH = 28;
+    const dmgContainer = this.add.container(sliderX + sliderWidth / 2, dmgToggleY + 24);
+    const dmgBtnBg = this.add.graphics();
+    drawButton(dmgBtnBg, dmgBtnW, dmgBtnH, showDmgNumbers ? COLORS.PRIMARY : COLORS.DANGER);
+    dmgContainer.add(dmgBtnBg);
+
+    const dmgText = this.add.text(0, 0, showDmgNumbers ? 'ON' : 'OFF', {
+      fontFamily: FONTS.DISPLAY,
+      fontSize: '13px',
+      color: '#ffffff',
+      fontStyle: 'bold',
+    }).setOrigin(0.5);
+    dmgContainer.add(dmgText);
+
+    const dmgHitArea = new Phaser.Geom.Rectangle(-dmgBtnW / 2, -dmgBtnH / 2, dmgBtnW, dmgBtnH);
+    dmgContainer.setInteractive(dmgHitArea, Phaser.Geom.Rectangle.Contains);
+    dmgContainer.input!.cursor = 'pointer';
+
+    dmgContainer.on('pointerdown', () => {
+      const current = this.registry.get('showDamageNumbers') !== false;
+      const newValue = !current;
+      this.registry.set('showDamageNumbers', newValue);
+      dmgText.setText(newValue ? 'ON' : 'OFF');
+      drawButton(dmgBtnBg, dmgBtnW, dmgBtnH, newValue ? COLORS.PRIMARY : COLORS.DANGER);
+    });
+
+    // ---- Health Bar Mode Toggle ----
+    const hpToggleY = dmgToggleY + 56;
+    const HEALTH_MODES: Array<'all' | 'bosses' | 'off'> = ['all', 'bosses', 'off'];
+    const HEALTH_MODE_LABELS: Record<string, string> = { all: 'All', bosses: 'Bosses', off: 'Off' };
+    let currentHpMode: string = this.registry.get('healthBarMode') ?? 'all';
+
+    this.add.text(panelX + 30, hpToggleY, 'Health Bars', {
+      fontFamily: FONTS.DISPLAY,
+      fontSize: '14px',
+      color: COLORS.TEXT_LABEL,
+    });
+
+    const hpBtnW = 100;
+    const hpBtnH = 28;
+    const hpContainer = this.add.container(sliderX + sliderWidth / 2, hpToggleY + 24);
+    const hpBtnBg = this.add.graphics();
+    drawButton(hpBtnBg, hpBtnW, hpBtnH, COLORS.PRIMARY);
+    hpContainer.add(hpBtnBg);
+
+    const hpText = this.add.text(0, 0, HEALTH_MODE_LABELS[currentHpMode], {
+      fontFamily: FONTS.DISPLAY,
+      fontSize: '13px',
+      color: '#ffffff',
+      fontStyle: 'bold',
+    }).setOrigin(0.5);
+    hpContainer.add(hpText);
+
+    const hpHitArea = new Phaser.Geom.Rectangle(-hpBtnW / 2, -hpBtnH / 2, hpBtnW, hpBtnH);
+    hpContainer.setInteractive(hpHitArea, Phaser.Geom.Rectangle.Contains);
+    hpContainer.input!.cursor = 'pointer';
+
+    hpContainer.on('pointerdown', () => {
+      const idx = HEALTH_MODES.indexOf(currentHpMode as 'all' | 'bosses' | 'off');
+      const nextIdx = (idx + 1) % HEALTH_MODES.length;
+      currentHpMode = HEALTH_MODES[nextIdx];
+      this.registry.set('healthBarMode', currentHpMode);
+      hpText.setText(HEALTH_MODE_LABELS[currentHpMode]);
+    });
+
     // ---- Action Buttons ----
     const btnW = 200;
     const btnH = 44;
     const btnCenterX = width / 2;
 
     // Resume button
-    this.createActionButton(btnCenterX, panelY + 200, btnW, btnH, 'Resume', COLORS.PRIMARY, COLORS.PRIMARY_HOVER, () => {
+    this.createActionButton(btnCenterX, panelY + 330, btnW, btnH, 'Resume', COLORS.PRIMARY, COLORS.PRIMARY_HOVER, () => {
       this.scene.resume('GameScene');
       this.scene.stop();
     });
 
     // Restart button
-    this.createActionButton(btnCenterX, panelY + 260, btnW, btnH, 'Restart', COLORS.SPECIAL, COLORS.SPECIAL_HOVER, () => {
+    this.createActionButton(btnCenterX, panelY + 390, btnW, btnH, 'Restart', COLORS.SPECIAL, COLORS.SPECIAL_HOVER, () => {
       this.scene.stop('GameScene');
       this.scene.stop();
       this.scene.start('GameScene');
     });
 
     // Main Menu button
-    this.createActionButton(btnCenterX, panelY + 320, btnW, btnH, 'Main Menu', COLORS.DANGER, COLORS.DANGER_HOVER, () => {
+    this.createActionButton(btnCenterX, panelY + 450, btnW, btnH, 'Main Menu', COLORS.DANGER, COLORS.DANGER_HOVER, () => {
       this.scene.stop('GameScene');
       this.scene.stop();
       this.scene.start('MainMenuScene');

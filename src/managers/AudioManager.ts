@@ -30,7 +30,7 @@ const SFX = {
  */
 export class AudioManager {
   private scene: Phaser.Scene;
-  private sfxVolume: number = 0.5;
+  private sfxVolume: number = 0.15;
   private enabled: boolean = true;
 
   constructor(scene: Phaser.Scene) {

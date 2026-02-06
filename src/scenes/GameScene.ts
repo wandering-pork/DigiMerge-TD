@@ -27,6 +27,7 @@ import { Tower } from '@/entities/Tower';
 import { Enemy } from '@/entities/Enemy';
 import { canMerge, MergeCandidate } from '@/systems/MergeSystem';
 import { DIGIMON_DATABASE } from '@/data/DigimonDatabase';
+import { WAVE_DATA } from '@/data/WaveData';
 import { Stage, TargetPriority } from '@/types';
 import { COLORS, TEXT_STYLES, FONTS, ANIM } from '@/ui/UITheme';
 import { drawPanel, drawButton, drawSeparator, drawDigitalGrid, animateButtonHover, animateButtonPress } from '@/ui/UIHelpers';
@@ -92,6 +93,17 @@ export class GameScene extends Phaser.Scene {
   // Ghost preview
   private ghostSprite: Phaser.GameObjects.Image | null = null;
 
+  // Wave preview
+  private wavePreviewText: Phaser.GameObjects.Text | null = null;
+
+  // Auto-start wave
+  private autoStartWave: boolean = false;
+  private autoStartBtnBg!: Phaser.GameObjects.Graphics;
+  private autoStartBtnText!: Phaser.GameObjects.Text;
+
+  // Starter display (hideable after first placement)
+  private starterDisplayObjects: Phaser.GameObjects.GameObject[] = [];
+
   constructor() {
     super({ key: 'GameScene' });
   }
@@ -109,6 +121,8 @@ export class GameScene extends Phaser.Scene {
     this.gameSpeed = 1;
     this.speedBtnBgs = [];
     this.speedBtnTexts = [];
+    this.autoStartWave = false;
+    this.starterDisplayObjects = [];
 
     // Initialize free spawn flag in registry for SpawnMenu access
     this.registry.set('hasUsedFreeSpawn', false);
@@ -197,6 +211,7 @@ export class GameScene extends Phaser.Scene {
     EventBus.on(GameEvents.DIGIVOLVE_INITIATED, this.onDigivolveInitiated, this);
     EventBus.on(GameEvents.BOSS_SPAWNED, this.onBossSpawned, this);
     EventBus.on(GameEvents.TOWER_PLACED, this.onTowerPlaced, this);
+    EventBus.on(GameEvents.DAMAGE_DEALT, this.onDamageDealt, this);
 
     // Setup ghost preview sprite (hidden by default)
     this.setupGhostPreview();
@@ -244,6 +259,7 @@ export class GameScene extends Phaser.Scene {
     EventBus.off(GameEvents.DIGIVOLVE_INITIATED, this.onDigivolveInitiated, this);
     EventBus.off(GameEvents.BOSS_SPAWNED, this.onBossSpawned, this);
     EventBus.off(GameEvents.TOWER_PLACED, this.onTowerPlaced, this);
+    EventBus.off(GameEvents.DAMAGE_DEALT, this.onDamageDealt, this);
 
     this.waveManager.cleanup();
     this.combatManager.cleanup();
@@ -846,10 +862,11 @@ export class GameScene extends Phaser.Scene {
     const sepGfx = this.add.graphics().setDepth(10);
     drawSeparator(sepGfx, rightPanelX - 10, hudY + 140, rightPanelX + panelW - 30);
 
-    // Selected starters display
+    // Selected starters display (hidden after first tower placement)
     const selectedStarters: string[] = this.registry.get('selectedStarters') || [];
     if (selectedStarters.length > 0) {
-      this.add.text(rightPanelX, hudY + 152, 'Starters:', TEXT_STYLES.HUD_LABEL).setDepth(10);
+      const starterLabel = this.add.text(rightPanelX, hudY + 152, 'Starters:', TEXT_STYLES.HUD_LABEL).setDepth(10);
+      this.starterDisplayObjects.push(starterLabel);
 
       selectedStarters.forEach((key, index) => {
         if (this.textures.exists(key)) {
@@ -857,6 +874,7 @@ export class GameScene extends Phaser.Scene {
             rightPanelX + 20 + index * 50, hudY + 195, key,
           );
           starterSprite.setScale(2.5).setDepth(10);
+          this.starterDisplayObjects.push(starterSprite);
         }
       });
     }
@@ -891,19 +909,46 @@ export class GameScene extends Phaser.Scene {
     });
     this.startWaveBtn.on('pointerdown', () => {
       if (!this.isWaveActive) {
-        this.isWaveActive = true;
-        drawButton(this.startWaveBtnBg, btnW, btnH, COLORS.DISABLED);
-        this.startWaveBtnText.setText('Wave in progress...');
-        this.startWaveBtnText.setColor(COLORS.DISABLED_TEXT);
         animateButtonPress(this, this.startWaveBtn);
-        this.waveManager.startWave(this.currentWave);
+        this.startNextWave();
       }
+    });
+
+    // Auto-start toggle (below start wave button)
+    const autoW = 200;
+    const autoH = 30;
+    const autoContainer = this.add.container(rightPanelX + panelW / 2 - 15, hudY + 300);
+    this.autoStartBtnBg = this.add.graphics();
+    drawButton(this.autoStartBtnBg, autoW, autoH, COLORS.BG_PANEL_LIGHT);
+    autoContainer.add(this.autoStartBtnBg);
+
+    this.autoStartBtnText = this.add.text(0, 0, 'Auto Start: OFF', {
+      ...TEXT_STYLES.BUTTON_SM,
+      fontSize: '12px',
+    }).setOrigin(0.5);
+    autoContainer.add(this.autoStartBtnText);
+
+    const autoHitArea = new Phaser.Geom.Rectangle(-autoW / 2, -autoH / 2, autoW, autoH);
+    autoContainer.setInteractive(autoHitArea, Phaser.Geom.Rectangle.Contains);
+    autoContainer.input!.cursor = 'pointer';
+    autoContainer.setDepth(10);
+
+    autoContainer.on('pointerdown', () => {
+      this.autoStartWave = !this.autoStartWave;
+      this.updateAutoStartDisplay();
+      animateButtonPress(this, autoContainer);
+    });
+    autoContainer.on('pointerover', () => {
+      drawButton(this.autoStartBtnBg, autoW, autoH, COLORS.BG_HOVER);
+    });
+    autoContainer.on('pointerout', () => {
+      this.updateAutoStartDisplay();
     });
 
     // Pause & Settings buttons side by side
     const smallBtnW = 105;
     const smallBtnH = 38;
-    const btnRowY = hudY + 310;
+    const btnRowY = hudY + 345;
     const btnRowCenterX = rightPanelX + panelW / 2 - 15;
 
     // Pause button (left)
@@ -963,13 +1008,13 @@ export class GameScene extends Phaser.Scene {
     });
 
     // Speed control buttons (1x / 2x / 3x)
-    this.add.text(rightPanelX, hudY + 345, 'Speed:', TEXT_STYLES.HUD_LABEL).setDepth(10);
+    this.add.text(rightPanelX, hudY + 380, 'Speed:', TEXT_STYLES.HUD_LABEL).setDepth(10);
 
     GAME_SPEEDS.forEach((speed, i) => {
       const sBtnW = 60;
       const sBtnH = 32;
       const sBtnX = rightPanelX + 15 + i * 75 + sBtnW / 2;
-      const sBtnY = hudY + 375;
+      const sBtnY = hudY + 410;
 
       const sContainer = this.add.container(sBtnX, sBtnY);
       const sBg = this.add.graphics();
@@ -1002,6 +1047,62 @@ export class GameScene extends Phaser.Scene {
       this.speedBtnBgs.push(sBg);
       this.speedBtnTexts.push(sText);
     });
+
+    // Wave preview section
+    const previewY = hudY + 450;
+    const waveSepGfx = this.add.graphics().setDepth(10);
+    drawSeparator(waveSepGfx, rightPanelX - 10, previewY, rightPanelX + panelW - 30);
+
+    this.add.text(rightPanelX, previewY + 8, 'Next Wave:', TEXT_STYLES.HUD_LABEL).setDepth(10);
+    this.wavePreviewText = this.add.text(rightPanelX, previewY + 26, '', {
+      fontFamily: FONTS.MONO,
+      fontSize: '11px',
+      color: COLORS.TEXT_DIM,
+      wordWrap: { width: panelW - 40 },
+      lineSpacing: 2,
+    }).setDepth(10);
+
+    this.updateWavePreview();
+  }
+
+  // ============================================================
+  // Wave Preview
+  // ============================================================
+
+  private updateWavePreview(): void {
+    if (!this.wavePreviewText) return;
+
+    const waveConfig = WAVE_DATA[this.currentWave];
+    if (!waveConfig) {
+      this.wavePreviewText.setText('No data');
+      return;
+    }
+
+    const lines: string[] = [];
+    let totalEnemies = 0;
+
+    for (const entry of waveConfig.enemies) {
+      const enemyStats = DIGIMON_DATABASE.enemies[entry.id];
+      const name = enemyStats?.name || entry.id.replace('enemy_', '');
+      lines.push(`  ${name} x${entry.count}`);
+      totalEnemies += entry.count;
+    }
+
+    if (waveConfig.boss) {
+      const bossStats = DIGIMON_DATABASE.enemies[waveConfig.boss];
+      const bossName = bossStats?.name || waveConfig.boss;
+      lines.push(`  BOSS: ${bossName}`);
+      totalEnemies++;
+    }
+
+    const header = `Wave ${this.currentWave} (${totalEnemies} enemies)`;
+    this.wavePreviewText.setText(header + '\n' + lines.join('\n'));
+
+    if (waveConfig.boss) {
+      this.wavePreviewText.setColor('#ff8844');
+    } else {
+      this.wavePreviewText.setColor(COLORS.TEXT_DIM);
+    }
   }
 
   // ============================================================
@@ -1018,6 +1119,41 @@ export class GameScene extends Phaser.Scene {
         drawButton(this.speedBtnBgs[i], 60, 32, s === speed ? COLORS.CYAN : COLORS.BG_PANEL_LIGHT);
       }
     });
+  }
+
+  // ============================================================
+  // Auto Start
+  // ============================================================
+
+  private updateAutoStartDisplay(): void {
+    if (this.autoStartWave) {
+      this.autoStartBtnText.setText('Auto Start: ON');
+      drawButton(this.autoStartBtnBg, 200, 30, COLORS.CYAN);
+    } else {
+      this.autoStartBtnText.setText('Auto Start: OFF');
+      drawButton(this.autoStartBtnBg, 200, 30, COLORS.BG_PANEL_LIGHT);
+    }
+  }
+
+  private startNextWave(): void {
+    if (this.isWaveActive) return;
+    this.isWaveActive = true;
+    drawButton(this.startWaveBtnBg, 200, 44, COLORS.DISABLED);
+    this.startWaveBtnText.setText('Wave in progress...');
+    this.startWaveBtnText.setColor(COLORS.DISABLED_TEXT);
+    this.waveManager.startWave(this.currentWave);
+  }
+
+  // ============================================================
+  // Starter Display
+  // ============================================================
+
+  private hideStarterDisplay(): void {
+    for (const obj of this.starterDisplayObjects) {
+      if (obj && 'setVisible' in obj) {
+        (obj as unknown as { setVisible(v: boolean): void }).setVisible(false);
+      }
+    }
   }
 
   // ============================================================
@@ -1063,6 +1199,61 @@ export class GameScene extends Phaser.Scene {
       this.hasUsedFreeSpawn = true;
       this.registry.set('hasUsedFreeSpawn', true);
     }
+    // Hide starters display after first tower is placed
+    this.hideStarterDisplay();
+  }
+
+  // ============================================================
+  // Damage Numbers
+  // ============================================================
+
+  private onDamageDealt(data: { x: number; y: number; damage: number; multiplier: number }): void {
+    if (this.registry.get('showDamageNumbers') === false) return;
+
+    const worldX = GRID_OFFSET_X + data.x;
+    const worldY = GRID_OFFSET_Y + data.y;
+    this.showDamageNumber(worldX, worldY, data.damage, data.multiplier);
+  }
+
+  private showDamageNumber(x: number, y: number, damage: number, multiplier: number): void {
+    // Random jitter for visual variety when multiple hits land at once
+    const jitterX = (Math.random() - 0.5) * 20; // +/-10px
+    const jitterY = (Math.random() - 0.5) * 20;
+
+    const displayDamage = Math.round(damage);
+    if (displayDamage <= 0) return;
+
+    // Color based on attribute effectiveness
+    let color = '#ffffff'; // neutral
+    if (multiplier > 1.0) {
+      color = '#44ff44'; // super effective (green)
+    } else if (multiplier < 1.0) {
+      color = '#ff6666'; // not effective (red)
+    }
+
+    // Slightly larger font for big hits (damage >= 50 or super effective)
+    const fontSize = (damage >= 50 || multiplier > 1.0) ? '16px' : '14px';
+
+    const dmgText = this.add.text(x + jitterX, y + jitterY, `${displayDamage}`, {
+      fontFamily: FONTS.MONO,
+      fontSize: fontSize,
+      color: color,
+      fontStyle: 'bold',
+      stroke: '#000000',
+      strokeThickness: 3,
+    }).setOrigin(0.5).setDepth(50);
+
+    // Float up 40px over 600ms, fade out, then destroy
+    this.tweens.add({
+      targets: dmgText,
+      y: dmgText.y - 40,
+      alpha: { from: 1, to: 0 },
+      duration: 600,
+      ease: 'Cubic.easeOut',
+      onComplete: () => {
+        dmgText.destroy();
+      },
+    });
   }
 
   private onWaveCompleted(data: { wave: number }) {
@@ -1087,9 +1278,21 @@ export class GameScene extends Phaser.Scene {
     this.currentWave++;
     this.waveText.setText(`${this.currentWave} / ${TOTAL_WAVES_MVP}`);
 
+    // Update wave preview for next wave
+    this.updateWavePreview();
+
     // Re-enable start wave button
     this.startWaveBtnText.setText('Start Wave');
     this.startWaveBtnText.setColor(COLORS.TEXT_WHITE);
     drawButton(this.startWaveBtnBg, 200, 44, COLORS.PRIMARY);
+
+    // Auto-start next wave after a brief delay
+    if (this.autoStartWave) {
+      this.time.delayedCall(2000, () => {
+        if (this.autoStartWave && !this.isWaveActive) {
+          this.startNextWave();
+        }
+      });
+    }
   }
 }

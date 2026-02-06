@@ -94,9 +94,13 @@ export interface GameStatistics {
   totalDigibytesEarned: number;
 }
 
+export type HealthBarMode = 'all' | 'bosses' | 'off';
+
 export interface GameSettings {
   sfxVolume: number;
   musicVolume: number;
   showGrid: boolean;
   showRanges: boolean;
+  showDamageNumbers: boolean;
+  healthBarMode: HealthBarMode;
 }

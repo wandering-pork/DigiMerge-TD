@@ -51,9 +51,20 @@ export const MAX_LIVES = 20;
 export const STARTING_DIGIBYTES = 500;
 export const TOTAL_WAVES_MVP = 20;
 
-// Level up cost formula: 3 * currentLevel
-export function getLevelUpCost(currentLevel: number): number {
-  return 3 * currentLevel;
+// Stage multipliers for level up cost
+export const STAGE_LEVEL_COST_MULTIPLIER: Record<Stage, number> = {
+  [Stage.IN_TRAINING]: 1,
+  [Stage.ROOKIE]: 1.5,
+  [Stage.CHAMPION]: 2,
+  [Stage.ULTIMATE]: 3,
+  [Stage.MEGA]: 4,
+  [Stage.ULTRA]: 5,
+};
+
+// Level up cost formula: 3 * currentLevel * stageMultiplier
+export function getLevelUpCost(currentLevel: number, stage?: Stage): number {
+  const multiplier = stage !== undefined ? STAGE_LEVEL_COST_MULTIPLIER[stage] : 1;
+  return Math.ceil(3 * currentLevel * multiplier);
 }
 
 // All 8 starter Digimon IDs (In-Training stage)

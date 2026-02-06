@@ -28,6 +28,40 @@ describe('LevelSystem', () => {
       expect(getLevelUpCost(50)).toBe(150);
       expect(getLevelUpCost(100)).toBe(300);
     });
+
+    it('In-Training uses 1x multiplier', () => {
+      expect(getLevelUpCost(10, Stage.IN_TRAINING)).toBe(30);
+    });
+
+    it('Rookie uses 1.5x multiplier', () => {
+      // 3 * 10 * 1.5 = 45
+      expect(getLevelUpCost(10, Stage.ROOKIE)).toBe(45);
+    });
+
+    it('Champion uses 2x multiplier', () => {
+      // 3 * 10 * 2 = 60
+      expect(getLevelUpCost(10, Stage.CHAMPION)).toBe(60);
+    });
+
+    it('Ultimate uses 3x multiplier', () => {
+      // 3 * 10 * 3 = 90
+      expect(getLevelUpCost(10, Stage.ULTIMATE)).toBe(90);
+    });
+
+    it('Mega uses 4x multiplier', () => {
+      // 3 * 10 * 4 = 120
+      expect(getLevelUpCost(10, Stage.MEGA)).toBe(120);
+    });
+
+    it('Ultra uses 5x multiplier', () => {
+      // 3 * 10 * 5 = 150
+      expect(getLevelUpCost(10, Stage.ULTRA)).toBe(150);
+    });
+
+    it('stage multiplier rounds up fractional costs', () => {
+      // Rookie Lv1: 3 * 1 * 1.5 = 4.5 -> ceil = 5
+      expect(getLevelUpCost(1, Stage.ROOKIE)).toBe(5);
+    });
   });
 
   describe('canLevelUp', () => {
@@ -168,6 +202,11 @@ describe('LevelSystem', () => {
     it('Lv1 -> Lv20: sum of 3*i for i=1..19 = 3 * 190 = 570', () => {
       // Sum = 3 * (1+2+...+19) = 3 * (19*20/2) = 3 * 190 = 570
       expect(getTotalLevelUpCost(1, 20)).toBe(570);
+    });
+
+    it('stage multiplier applies to total cost', () => {
+      // Champion Lv1 -> Lv5: ceil(3*1*2) + ceil(3*2*2) + ceil(3*3*2) + ceil(3*4*2) = 6+12+18+24 = 60
+      expect(getTotalLevelUpCost(1, 5, Stage.CHAMPION)).toBe(60);
     });
   });
 });

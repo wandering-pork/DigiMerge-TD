@@ -26,6 +26,8 @@ function defaultSettings(): GameSettings {
     musicVolume: 0.3,
     showGrid: true,
     showRanges: false,
+    showDamageNumbers: true,
+    healthBarMode: 'all',
   };
 }
 

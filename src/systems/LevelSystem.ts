@@ -6,10 +6,11 @@ import {
 
 /**
  * Get the DigiBytes cost to level up from currentLevel to currentLevel + 1.
- * Formula: 5 * currentLevel
+ * Formula: 3 * currentLevel * stageMultiplier
+ * Stage multipliers: In-Training ×1, Rookie ×1.5, Champion ×2, Ultimate ×3, Mega ×4, Ultra ×5
  */
-export function getLevelUpCost(currentLevel: number): number {
-  return constantsGetLevelUpCost(currentLevel);
+export function getLevelUpCost(currentLevel: number, stage?: Stage): number {
+  return constantsGetLevelUpCost(currentLevel, stage);
 }
 
 /**
@@ -52,17 +53,17 @@ export function getScaledSpeed(baseSpeed: number, level: number): number {
 
 /**
  * Calculate the total DigiBytes cost to level from fromLevel to toLevel.
- * Sums getLevelUpCost(i) for i = fromLevel .. toLevel - 1.
+ * Sums getLevelUpCost(i, stage) for i = fromLevel .. toLevel - 1.
  * Returns 0 if toLevel <= fromLevel.
  */
-export function getTotalLevelUpCost(fromLevel: number, toLevel: number): number {
+export function getTotalLevelUpCost(fromLevel: number, toLevel: number, stage?: Stage): number {
   if (toLevel <= fromLevel) {
     return 0;
   }
 
   let total = 0;
   for (let i = fromLevel; i < toLevel; i++) {
-    total += getLevelUpCost(i);
+    total += getLevelUpCost(i, stage);
   }
   return total;
 }

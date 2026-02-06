@@ -2,12 +2,78 @@ import Phaser from 'phaser';
 import { Tower } from '@/entities/Tower';
 import { EventBus, GameEvents } from '@/utils/EventBus';
 import { STAGE_NAMES, ATTRIBUTE_NAMES, TargetPriority } from '@/types';
-import { getLevelUpCost, canLevelUp, calculateMaxLevel } from '@/systems/LevelSystem';
+import { getLevelUpCost, getTotalLevelUpCost, canLevelUp, calculateMaxLevel } from '@/systems/LevelSystem';
 import { getEvolutions } from '@/data/EvolutionPaths';
 import { canMerge, MergeCandidate } from '@/systems/MergeSystem';
 import { GRID, GRID_OFFSET_X } from '@/config/Constants';
+import { STATUS_EFFECTS } from '@/data/StatusEffects';
 import { COLORS, ATTRIBUTE_COLORS_STR, TEXT_STYLES, ANIM } from './UITheme';
 import { drawPanel, drawButton, drawSeparator, animateSlideIn, animateSlideOut, animateButtonHover, animateButtonPress } from './UIHelpers';
+
+/**
+ * Parse a compound effect type (e.g., 'burn_aoe', 'slow_pierce') into
+ * a human-readable skill description.
+ */
+function getSkillDisplay(effectType?: string, effectChance?: number): { name: string; description: string; chance: string } | null {
+  if (!effectType || !effectChance) return null;
+
+  // Parse compound effects: take the base effect name
+  const parts = effectType.split('_');
+  const baseEffect = parts[0];
+  const modifiers = parts.slice(1);
+
+  // Look up the base effect in STATUS_EFFECTS
+  const effectDef = STATUS_EFFECTS[baseEffect];
+  let name = effectDef?.name || baseEffect.charAt(0).toUpperCase() + baseEffect.slice(1);
+  let description = effectDef?.description || effectType;
+
+  // Add modifier info
+  const modLabels: string[] = [];
+  for (const mod of modifiers) {
+    switch (mod) {
+      case 'aoe': modLabels.push('AoE'); break;
+      case 'pierce': modLabels.push('Pierce'); break;
+      case 'multihit': case 'multishot': modLabels.push('Multi-hit'); break;
+      case 'kb': case 'knockback': modLabels.push('Knockback'); break;
+      case 'burn': modLabels.push('+ Burn'); break;
+      case 'poison': modLabels.push('+ Poison'); break;
+      case 'stun': modLabels.push('+ Stun'); break;
+      case 'holy': modLabels.push('+ Holy'); break;
+      case 'reflect': modLabels.push('Reflect'); break;
+      case 'lifesteal': modLabels.push('+ Lifesteal'); break;
+      case 'all': modLabels.push('All'); break;
+      case 'air': modLabels.push('Anti-Air'); break;
+      case 'fear': modLabels.push('+ Fear'); break;
+      case 'damage': modLabels.push('Damage'); break;
+      case 'break': modLabels.push('Break'); break;
+    }
+  }
+
+  if (modLabels.length > 0) {
+    name += ` (${modLabels.join(', ')})`;
+  }
+
+  // Handle special compound names
+  if (effectType === 'armor_break') {
+    name = 'Armor Break';
+    description = 'Reduces target armor';
+  } else if (effectType === 'armor_pierce') {
+    name = 'Armor Pierce';
+    description = 'Ignores target armor';
+  } else if (effectType === 'anti_air') {
+    name = 'Anti-Air';
+    description = 'Bonus damage vs Flying';
+  } else if (effectType === 'aura_damage') {
+    name = 'Damage Aura';
+    description = 'Buffs nearby tower damage';
+  } else if (effectType === 'aura_all_holy') {
+    name = 'Holy Aura';
+    description = 'Buffs all nearby + holy dmg';
+  }
+
+  const chance = `${Math.round(effectChance * 100)}%`;
+  return { name, description, chance };
+}
 
 /**
  * Ordered list of target priorities for cycling through with the selector.
@@ -53,7 +119,7 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
 
   // Panel dimensions
   private static readonly PANEL_WIDTH = 260;
-  private static readonly PANEL_HEIGHT = 580;
+  private static readonly PANEL_HEIGHT = 660;
 
   // Panel position X (saved for animations)
   private panelBaseX: number;
@@ -74,11 +140,21 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
   private damageText!: Phaser.GameObjects.Text;
   private speedText!: Phaser.GameObjects.Text;
   private rangeText!: Phaser.GameObjects.Text;
+  private skillNameText!: Phaser.GameObjects.Text;
+  private skillChanceText!: Phaser.GameObjects.Text;
 
   // Level up section
   private levelUpBtn!: Phaser.GameObjects.Container;
   private levelUpBtnBg!: Phaser.GameObjects.Graphics;
   private levelUpBtnText!: Phaser.GameObjects.Text;
+
+  // Level up +5 / max buttons
+  private levelUp5Btn!: Phaser.GameObjects.Container;
+  private levelUp5BtnBg!: Phaser.GameObjects.Graphics;
+  private levelUp5BtnText!: Phaser.GameObjects.Text;
+  private levelUpMaxBtn!: Phaser.GameObjects.Container;
+  private levelUpMaxBtnBg!: Phaser.GameObjects.Graphics;
+  private levelUpMaxBtnText!: Phaser.GameObjects.Text;
 
   // Target priority section
   private priorityLabel!: Phaser.GameObjects.Text;
@@ -207,6 +283,22 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
     this.rangeText = this.createStatRow('Range', statsX, statsValueX, statsY);
     statsY += lineH;
 
+    // Skill display row
+    this.skillNameText = this.scene.add.text(statsX, statsY, '', {
+      ...TEXT_STYLES.PANEL_LABEL,
+      color: '#ffaa44',
+      fontSize: '12px',
+    });
+    this.add(this.skillNameText);
+
+    this.skillChanceText = this.scene.add.text(statsValueX, statsY, '', {
+      ...TEXT_STYLES.PANEL_VALUE,
+      color: '#ffaa44',
+      fontSize: '12px',
+    }).setOrigin(1, 0);
+    this.add(this.skillChanceText);
+    statsY += lineH;
+
     // Third separator
     const separator3 = this.scene.add.graphics();
     drawSeparator(separator3, 10, statsY + 2, w - 10);
@@ -230,7 +322,47 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
     this.levelUpBtn.on('pointerout', () => this.onLevelUpHover(false));
     this.add(this.levelUpBtn);
 
-    statsY += 50;
+    statsY += 42;
+
+    // --- Level Up +5 and Max buttons (side by side) ---
+    const smallBtnW = 95;
+    const smallBtnH = 30;
+
+    // +5 button (left)
+    this.levelUp5Btn = this.scene.add.container(w / 2 - smallBtnW / 2 - 3, statsY);
+    this.levelUp5BtnBg = this.scene.add.graphics();
+    drawButton(this.levelUp5BtnBg, smallBtnW, smallBtnH, COLORS.SUCCESS);
+    this.levelUp5Btn.add(this.levelUp5BtnBg);
+
+    this.levelUp5BtnText = this.scene.add.text(0, 0, 'Lv +5', { ...TEXT_STYLES.BUTTON_SM, fontSize: '11px' }).setOrigin(0.5);
+    this.levelUp5Btn.add(this.levelUp5BtnText);
+
+    const lv5HitArea = new Phaser.Geom.Rectangle(-smallBtnW / 2, -smallBtnH / 2, smallBtnW, smallBtnH);
+    this.levelUp5Btn.setInteractive(lv5HitArea, Phaser.Geom.Rectangle.Contains);
+    this.levelUp5Btn.input!.cursor = 'pointer';
+    this.levelUp5Btn.on('pointerdown', () => this.onLevelUpMulti(5));
+    this.levelUp5Btn.on('pointerover', () => this.onMultiBtnHover(this.levelUp5BtnBg, smallBtnW, smallBtnH, this.levelUp5Btn, 5, true));
+    this.levelUp5Btn.on('pointerout', () => this.onMultiBtnHover(this.levelUp5BtnBg, smallBtnW, smallBtnH, this.levelUp5Btn, 5, false));
+    this.add(this.levelUp5Btn);
+
+    // Max button (right)
+    this.levelUpMaxBtn = this.scene.add.container(w / 2 + smallBtnW / 2 + 3, statsY);
+    this.levelUpMaxBtnBg = this.scene.add.graphics();
+    drawButton(this.levelUpMaxBtnBg, smallBtnW, smallBtnH, COLORS.SPECIAL);
+    this.levelUpMaxBtn.add(this.levelUpMaxBtnBg);
+
+    this.levelUpMaxBtnText = this.scene.add.text(0, 0, 'Lv MAX', { ...TEXT_STYLES.BUTTON_SM, fontSize: '11px' }).setOrigin(0.5);
+    this.levelUpMaxBtn.add(this.levelUpMaxBtnText);
+
+    const lvMaxHitArea = new Phaser.Geom.Rectangle(-smallBtnW / 2, -smallBtnH / 2, smallBtnW, smallBtnH);
+    this.levelUpMaxBtn.setInteractive(lvMaxHitArea, Phaser.Geom.Rectangle.Contains);
+    this.levelUpMaxBtn.input!.cursor = 'pointer';
+    this.levelUpMaxBtn.on('pointerdown', () => this.onLevelUpMulti(-1));
+    this.levelUpMaxBtn.on('pointerover', () => this.onMultiBtnHover(this.levelUpMaxBtnBg, smallBtnW, smallBtnH, this.levelUpMaxBtn, -1, true));
+    this.levelUpMaxBtn.on('pointerout', () => this.onMultiBtnHover(this.levelUpMaxBtnBg, smallBtnW, smallBtnH, this.levelUpMaxBtn, -1, false));
+    this.add(this.levelUpMaxBtn);
+
+    statsY += 42;
 
     // --- Target Priority Selector ---
     this.priorityLabel = this.scene.add.text(15, statsY, 'Target:', TEXT_STYLES.PANEL_LABEL);
@@ -432,8 +564,21 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
     const rangeInCells = tower.getRangeCells();
     this.rangeText.setText(`${rangeInCells.toFixed(1)} cells`);
 
-    // Level Up button
+    // Skill display
+    const skillInfo = getSkillDisplay(tower.stats.effectType, tower.stats.effectChance);
+    if (skillInfo) {
+      this.skillNameText.setText(skillInfo.name);
+      this.skillChanceText.setText(skillInfo.chance);
+      this.skillNameText.setVisible(true);
+      this.skillChanceText.setVisible(true);
+    } else {
+      this.skillNameText.setVisible(false);
+      this.skillChanceText.setVisible(false);
+    }
+
+    // Level Up buttons
     this.refreshLevelUpButton(maxLevel);
+    this.refreshMultiLevelButtons(maxLevel);
 
     // Target priority
     this.priorityBtnText.setText(TARGET_PRIORITY_LABELS[tower.targetPriority]);
@@ -473,7 +618,7 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
       return;
     }
 
-    const cost = getLevelUpCost(tower.level);
+    const cost = getLevelUpCost(tower.level, tower.stage);
     const canAfford = this.getDigibytes() >= cost;
 
     this.levelUpBtnText.setText(`Level Up (${cost} DB)`);
@@ -494,7 +639,7 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
     const maxLevel = calculateMaxLevel(tower.stage, tower.dp, tower.originStage, tower.stage);
     if (!canLevelUp(tower.level, maxLevel)) return;
 
-    const cost = getLevelUpCost(tower.level);
+    const cost = getLevelUpCost(tower.level, tower.stage);
     if (!this.spendDigibytes(cost)) return;
 
     tower.setLevel(tower.level + 1);
@@ -515,7 +660,7 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
     const isMaxed = !canLevelUp(tower.level, maxLevel);
     if (isMaxed) return;
 
-    const cost = getLevelUpCost(tower.level);
+    const cost = getLevelUpCost(tower.level, tower.stage);
     const canAfford = this.getDigibytes() >= cost;
     if (!canAfford) return;
 
@@ -525,6 +670,108 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
     } else {
       drawButton(this.levelUpBtnBg, 200, 36, COLORS.SUCCESS);
       animateButtonHover(this.scene, this.levelUpBtn, false);
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Multi-Level Up (+5 / Max)
+  // ---------------------------------------------------------------------------
+
+  private refreshMultiLevelButtons(maxLevel: number): void {
+    const tower = this.currentTower;
+    if (!tower) return;
+
+    const isMaxed = !canLevelUp(tower.level, maxLevel);
+
+    if (isMaxed) {
+      this.levelUp5Btn.setVisible(false);
+      this.levelUpMaxBtn.setVisible(false);
+      return;
+    }
+
+    this.levelUp5Btn.setVisible(true);
+    this.levelUpMaxBtn.setVisible(true);
+
+    // +5 button
+    const targetLv5 = Math.min(tower.level + 5, maxLevel);
+    const cost5 = getTotalLevelUpCost(tower.level, targetLv5, tower.stage);
+    const levels5 = targetLv5 - tower.level;
+    const canAfford5 = this.getDigibytes() >= cost5;
+
+    this.levelUp5BtnText.setText(`+${levels5} (${cost5})`);
+    if (canAfford5) {
+      drawButton(this.levelUp5BtnBg, 95, 30, COLORS.SUCCESS);
+      this.levelUp5BtnText.setColor('#ffffff');
+    } else {
+      drawButton(this.levelUp5BtnBg, 95, 30, COLORS.DISABLED);
+      this.levelUp5BtnText.setColor(COLORS.TEXT_LIVES);
+    }
+
+    // Max button
+    const costMax = getTotalLevelUpCost(tower.level, maxLevel, tower.stage);
+    const levelsMax = maxLevel - tower.level;
+    const canAffordMax = this.getDigibytes() >= costMax;
+
+    this.levelUpMaxBtnText.setText(`MAX (${costMax})`);
+    if (canAffordMax) {
+      drawButton(this.levelUpMaxBtnBg, 95, 30, COLORS.SPECIAL);
+      this.levelUpMaxBtnText.setColor('#ffffff');
+    } else {
+      drawButton(this.levelUpMaxBtnBg, 95, 30, COLORS.DISABLED);
+      this.levelUpMaxBtnText.setColor(COLORS.TEXT_LIVES);
+    }
+  }
+
+  /**
+   * Level up multiple times. levels = -1 means level to max.
+   */
+  private onLevelUpMulti(levels: number): void {
+    const tower = this.currentTower;
+    if (!tower) return;
+
+    const maxLevel = calculateMaxLevel(tower.stage, tower.dp, tower.originStage, tower.stage);
+    if (!canLevelUp(tower.level, maxLevel)) return;
+
+    const targetLevel = levels === -1
+      ? maxLevel
+      : Math.min(tower.level + levels, maxLevel);
+
+    const totalCost = getTotalLevelUpCost(tower.level, targetLevel, tower.stage);
+    if (!this.spendDigibytes(totalCost)) return;
+
+    tower.setLevel(targetLevel);
+
+    EventBus.emit(GameEvents.TOWER_LEVELED, {
+      towerID: tower.towerID,
+      level: tower.level,
+    });
+
+    this.refresh();
+  }
+
+  private onMultiBtnHover(
+    bg: Phaser.GameObjects.Graphics, w: number, h: number,
+    container: Phaser.GameObjects.Container, levels: number, isOver: boolean,
+  ): void {
+    const tower = this.currentTower;
+    if (!tower) return;
+
+    const maxLevel = calculateMaxLevel(tower.stage, tower.dp, tower.originStage, tower.stage);
+    if (!canLevelUp(tower.level, maxLevel)) return;
+
+    const targetLevel = levels === -1 ? maxLevel : Math.min(tower.level + levels, maxLevel);
+    const cost = getTotalLevelUpCost(tower.level, targetLevel, tower.stage);
+    if (this.getDigibytes() < cost) return;
+
+    const baseColor = levels === -1 ? COLORS.SPECIAL : COLORS.SUCCESS;
+    const hoverColor = levels === -1 ? COLORS.SPECIAL_HOVER : COLORS.SUCCESS_HOVER;
+
+    if (isOver) {
+      drawButton(bg, w, h, hoverColor, { glowRing: true });
+      animateButtonHover(this.scene, container, true);
+    } else {
+      drawButton(bg, w, h, baseColor);
+      animateButtonHover(this.scene, container, false);
     }
   }
 
