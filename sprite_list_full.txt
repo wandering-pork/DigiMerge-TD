@@ -1,0 +1,615 @@
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Airdramon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Algomon_Adult.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Allomon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Angemon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Baboongamon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Bakemon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Birdramon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/BlackGalgomon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/BlackGaogamon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/BlackGrowmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/BlackTailmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Burgermon_Mama.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Burgermon_Papa.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Centalmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Chamblemon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Clockmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Coelamon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Cyclomon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Damemon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/DarkTyranomon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Death-X-DORUgamon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Devimon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Diginorimon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Dinohumon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Dobermon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Dogmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Dokugumon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/DORUgamon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Drimogemon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Ebidramon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Filmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Firamon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Fugamon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Galgomon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Gaogamon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Garurumon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Garurumon_Black.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Gawappamon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Gekomon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/GeoGreymon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Geremon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Gesomon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Ginryumon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Gokimon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/GoldNumemon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Greymon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Greymon_2010.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Greymon_Blue.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Greymon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Growmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Growmon_Orange.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Growmon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Gryzmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Guardromon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Guardromon_Gold.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Gururumon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Hanumon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Hookmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Hyougamon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/IceDevimon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Icemon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Igamon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Ikkakumon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Jazardmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Kabuterimon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/KaratsukiNumemon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Kiwimon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Kougamon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Kuwagamon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Kuwagamon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Kyubimon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Kyubimon_Silver.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Lavorvomon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Lekismon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Leomon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Leomon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/MadLeomon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Mantaraymon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Mechanorimon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Meicoomon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Meramon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Meramon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Mikemon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Mimicmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Monochromon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Monochromon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/MoriShellmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Nefertimon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/NiseDrimogemon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Numemon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Numemon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Ogremon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Ogremon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Omekamon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Paledramon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Parasaurmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Pegasmon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Pidmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/PlatinumScumon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Porcupamon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Pteranomon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Raptordramon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/RedV-dramon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/RedVegimon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Reppamon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Rhinomon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Rukamon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Saberdramon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/SandYanmamon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Sangloupmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Scumon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Seadramon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Seadramon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Shellmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/ShimaUnimon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Siesamon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Sorcerymon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Soulmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Starmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Sunflowmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Tailmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Tailmon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Tankmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Targetmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Thunderballmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/TiaLudomon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Tobiumon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Tobucatmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Togemon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Togemon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Tortamon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Troopmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Tsuchidarumon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Turuiemon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Tylomon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Tyrannomon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Tyrannomon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/V-dramon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/V-dramon_Black.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Vegimon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Waspmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Wizarmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Wizarmon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Woodmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/XV-mon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/XV-mon_Black.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Yanmamon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Youkomon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Yukidarumon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Adult/Zassoumon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Baby II/Algomon_BabyII.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Baby II/Arkadimon_Baby.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Baby II/Babydmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Baby II/Bibimon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Baby II/Budmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Baby II/Caprimon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Baby II/Chibimon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Baby II/Chicchimon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Baby II/Chocomon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Baby II/Cupimon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Baby II/Dorimon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Baby II/Gigimon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Baby II/Goromon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Baby II/Gummymon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Baby II/Hiyarimon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Baby II/Kakkinmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Baby II/Koromon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Baby II/Kozenimon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Baby II/Kyokyomon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Baby II/MeicooBaby.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Baby II/Minomon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Baby II/Mochimon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Baby II/Monimon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Baby II/Moonmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Baby II/Nyaromon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Baby II/Pagumon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Baby II/PetiMeramon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Baby II/Pickmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Baby II/Pokomon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Baby II/Poromon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Baby II/Pukamon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Baby II/Puroromon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Baby II/Pusurimon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Baby II/Pyocomon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Baby II/Sunmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Baby II/Tanemon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Baby II/Tokomon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Baby II/TorikaraBallmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Baby II/Tsumemon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Baby II/Tsunomon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Baby II/Upamon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Baby II/Wanyamon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Baby II/Xiaomon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Baby II/Yaamon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Agumon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Agumon_2006.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Agumon_Black.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Agumon_Black_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Agumon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Algomon_Child.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Alraumon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Arkadimon_Child.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Armadimon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Bakumon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Bearmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/BlackGuilmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Blucomon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Candmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/ClearAgumon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Commandramon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Coronamon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Dokunemon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/DORUmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Dracomon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Dracumon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Ekakimon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Elecmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Elecmon_Violet.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Floramon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Funbeemon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Gabumon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Gammamon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Ganimon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Gaomon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Gazimon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Gazimon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Ghostmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Gizamon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Gomamon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Gomamon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Gotsumon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Guilmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Guilmon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Hackmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Hagurumon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Herissmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Hyokomon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Impmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Impmon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Jazamon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Junkmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Keramon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Keramon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Koemon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Kokabuterimon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Kokuwamon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Kokuwamon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Kunemon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Labramon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Lalamon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Lopmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Lopmon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Lucemon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Ludomon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Lunamon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/MeicooChild.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Morphomon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Muchomon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Mushmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Otamamon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Otamamon_Red.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Otamamon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Palmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Palmon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Penmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/PetitMamon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Phascomon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/PicoDevimon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Piyomon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Plotmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Plotmon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Pulsemon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Renamon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Renamon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Ryudamon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Sangomon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Shakomon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Shakomon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Sistermon_Blanc.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Solarmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Sunarizamon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Swimmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Tentomon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Terriermon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Terriermon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Tinkermon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/ToyAgumon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/ToyAgumon_Black.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/V-mon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Vorvomon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Wormmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/YukiAgumon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Child/Zenimon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/AeroV-dramon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Andiramon_Data.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Andiramon_Virus.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Andromon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Angewomon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Angewomon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Anomalocarimon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Anomalocarimon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Archnemon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Astamon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Asuramon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/AtlurKabuterimon_Blue.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/AtlurKabuterimon_Red.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Baalmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/BigMamemon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/BlackKingNumemon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/BlackMachGaogamon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/BlackMegaloGrowmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/BlackRapidmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Blossomon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/BlueMeramon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Boutmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Cannonbeemon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/CatchMamemon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Caturamon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Cerberumon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Chimairamon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/ChoHakkaimon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Crescemon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/CrysPaledramon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Cyberdramon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Cyberdramon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Dagomon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/DarkKnightmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/DarkSuperstarmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/DeathMeramon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Delumon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Digitamamon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/DORUguremon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Duramon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Entmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Etemon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Flaremon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Garudamon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Garudamon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Gerbemon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Gigadramon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Giromon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Gogmamon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Grademon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Grappleomon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/GreatKingScumon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Gusokumon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Hangyomon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Hisyaryumon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/HolyAngemon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Insekimon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Jazarichmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Jyagamon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Jyureimon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Knightmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/LadyDevimon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/LadyDevimon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Lavogaritamon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Lilamon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Lilimon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Lilimon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Lucemon_Falldown.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/MachGaogamon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Mamemon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Mamemon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Mametyramon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Mammon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Mammon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Manticoremon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/MarinChimairamon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/MarinDevimon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Megadramon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/MegaloGrowmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/MegaloGrowmon_Orange.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/MegaloGrowmon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/MegaSeadramon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/MegaSeadramon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Meicrackmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Meicrackmon_Vicious.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Mephismon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Mephismon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Mermaimon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/MetalGreymon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/MetalGreymon_Virus.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/MetalGreymon_Virus_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/MetalGreymon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/MetalMamemon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/MetalMamemon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/MetalPhantomon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/MetalTyranomon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/MetalTyranomon_V2.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/MetalTyranomon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Monzaemon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Monzaemon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Nanomon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/NeoDevimon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Okuwamon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Okuwamon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/OmegaShoutmon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Orochimon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Paildramon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Pandamon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Panjyamon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Panjyamon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Phantomon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Piccolomon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Piranimon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Pumpmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/RaijiLudomon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Rapidmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Rebellimon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/RizeGreymon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/RizeGreymon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Sagomon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/SaviorHackmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Scorpiomon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Shawujinmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Shootmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Sirenmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/SkullBaluchimon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/SkullGreymon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Stiffilmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Superstarmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Tekkamon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/TonosamaGekomon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Triceramon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Triceramon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Vademon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Vamdemon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Vamdemon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Vermillimon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/WaruMonzaemon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/WaruSeadramon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/WereGarurumon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/WereGarurumon_Black.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/WereGarurumon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Whamon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Yatagaramon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Yatagaramon_2006.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Perfect/Zudomon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Aegisdramon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Agumon_YnK.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Algomon_Ultimate.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Alphamon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Alphamon_Ouryuken.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/AncientBeatmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/AncientMegatheriumon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/AncientMermaimon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/AncientSphinxmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Apocalymon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Apollomon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Armagemon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Bagramon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/BanchoLeomon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/BanchoLilimon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/BanchoMamemon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Barbamon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Barbamon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/BeelStarmon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Beelzebumon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Beelzebumon_Blast.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Beelzebumon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/BelialVamdemon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Belphemon_Rage.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Belphemon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/BlackSaintGalgomon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/BlackSeraphimon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/BlackWarGreymon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/BlackWarGreymon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/BlitzGreymon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/BloomLordmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Boltmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Bryweludramon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Chaosdramon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Chaosdramon_V2.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Chaosdramon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/ChaosDukemon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/ChaosDukemon_Core.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Chaosmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Cherubimon_Vice.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Cherubimon_Vice_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Cherubimon_Virtue.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Cherubimon_Virtue_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Craniummon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Craniummon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/CresGarurumon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Cthyllamon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Darkdramon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/DarkKnightmon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/DarknessBagramon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Deathmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Deathmon_Black.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Demon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Demon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Diablomon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Diablomon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Dianamon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Dinorexmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Dinotigermon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/DORUgoramon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Duftmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Duftmon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Dukemon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Dukemon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Dynasmon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Ebemon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Ebemon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Examon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Gaioumon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Gankoomon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Gankoomon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/GigaSeadramon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Goddramon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Gokumon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/GraceNovamon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/GrandDracumon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/GrandisKuwagamon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/GrandLocomon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Griffomon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Gundramon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/HerakleKabuterimon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Hexeblaumon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/HiAndromon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/HolyDigitamamon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Holydramon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Holydramon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Hououmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Hououmon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Imperialdramon_Fighter.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Imperialdramon_Fighter_Black.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Imperialdramon_Paladin.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Jesmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Jesmon_GX.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Jesmon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Justimon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Kazuchimon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/KingEtemon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Kuzuhamon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Leviamon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Leviamon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Lilithmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Lilithmon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/LordKnightmon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Lotusmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Lucemon_Satan.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Lucemon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Magnamon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/MarinAngemon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Mastemon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Megidramon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Megidramon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/MetalEtemon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/MetalGarurumon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/MetalGarurumon_Black.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/MetalGarurumon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Metallicdramon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/MetalPiranimon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/MetalSeadramon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Millenniumon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Minervamon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Mugendramon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/NoblePumpmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Ogudomon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Ogudomon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Omegamon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Omegamon_Alter-S.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Omegamon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Omegamon_Zwart.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Ophanimon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Ophanimon_Core.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Ophanimon_Falldown_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Ophanimon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Ordinemon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Ouryumon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Piemon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Pinochimon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/PlatinumNumemon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Plesiomon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Plesiomon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/PrinceMamemon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/PrinceMamemon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Pukumon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Rafflesimon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/RagnaLordmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Raguelmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Raidenmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Rapidmon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Rasenmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Rasenmon_Fury.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Rasielmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Regalecusmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Rosemon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Rosemon_Burst.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Rosemon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/RustTyrannomon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/SaberLeomon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/SaintGalgomon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Sakuyamon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Sakuyamon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Seraphimon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/ShinMonzaemon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/SkullMammon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/SkullMammon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Sleipmon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Susanoomon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/TigerVespamon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Titamon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/UlforceV-dramon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/UlforceV-dramon_X.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/UltimateBrachimon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Valdurmon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/VenomVamdemon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/Volcanicdramon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/VoltoBautamon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/WarGreymon.png
+E:\tools\assets\digimon sprites\sprite sheets/sprite sheets/Ultimate-Super Ultimate/WarGreymon_X.png
