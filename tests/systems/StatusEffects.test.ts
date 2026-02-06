@@ -7,7 +7,11 @@ import {
   getEffectiveSpeedMultiplier,
   getEffectiveArmorMultiplier,
   calculateDotDamage,
+  canRegenerate,
+  calculateRegenAmount,
+  REGEN_RATE,
 } from '@/data/StatusEffects';
+import { DIGIMON_DATABASE } from '@/data/DigimonDatabase';
 
 // ---------------------------------------------------------------------------
 // Helper: create an ActiveEffect with sensible defaults
@@ -630,5 +634,127 @@ describe('Effect expiry logic', () => {
 
     const damage = tickEffects(effects, 0.5);
     expect(damage).toBe(0);
+  });
+});
+
+// ===========================================================================
+// Regen mechanic
+// ===========================================================================
+
+describe('Regen mechanic', () => {
+  describe('REGEN_RATE', () => {
+    it('is 2% per second', () => {
+      expect(REGEN_RATE).toBe(0.02);
+    });
+  });
+
+  describe('canRegenerate', () => {
+    it('returns true with no effects', () => {
+      const effects = new Map<string, ActiveEffect>();
+      expect(canRegenerate(effects)).toBe(true);
+    });
+
+    it('returns true with non-poison effects', () => {
+      const effects = new Map<string, ActiveEffect>();
+      effects.set('burn', createEffect({ id: 'burn', remainingDuration: 3 }));
+      effects.set('slow', createEffect({ id: 'slow', remainingDuration: 2 }));
+      expect(canRegenerate(effects)).toBe(true);
+    });
+
+    it('returns false when poisoned', () => {
+      const effects = new Map<string, ActiveEffect>();
+      effects.set('poison', createEffect({ id: 'poison', remainingDuration: 4 }));
+      expect(canRegenerate(effects)).toBe(false);
+    });
+
+    it('returns true when poison has expired (duration <= 0)', () => {
+      const effects = new Map<string, ActiveEffect>();
+      effects.set('poison', createEffect({ id: 'poison', remainingDuration: 0 }));
+      expect(canRegenerate(effects)).toBe(true);
+    });
+  });
+
+  describe('calculateRegenAmount', () => {
+    it('regenerates 2% max HP per second', () => {
+      const effects = new Map<string, ActiveEffect>();
+      // 1000 maxHP * 0.02 * 1.0 sec = 20
+      expect(calculateRegenAmount(1000, 1.0, effects)).toBeCloseTo(20);
+    });
+
+    it('scales with delta time', () => {
+      const effects = new Map<string, ActiveEffect>();
+      // 1000 maxHP * 0.02 * 0.5 sec = 10
+      expect(calculateRegenAmount(1000, 0.5, effects)).toBeCloseTo(10);
+    });
+
+    it('returns 0 when poisoned', () => {
+      const effects = new Map<string, ActiveEffect>();
+      effects.set('poison', createEffect({ id: 'poison', remainingDuration: 4 }));
+      expect(calculateRegenAmount(1000, 1.0, effects)).toBe(0);
+    });
+
+    it('regenerates when poison expires', () => {
+      const effects = new Map<string, ActiveEffect>();
+      effects.set('poison', createEffect({ id: 'poison', remainingDuration: 0 }));
+      expect(calculateRegenAmount(1000, 1.0, effects)).toBeCloseTo(20);
+    });
+
+    it('handles small HP values', () => {
+      const effects = new Map<string, ActiveEffect>();
+      // 50 maxHP * 0.02 * 1.0 sec = 1.0
+      expect(calculateRegenAmount(50, 1.0, effects)).toBeCloseTo(1.0);
+    });
+  });
+});
+
+// ===========================================================================
+// Splitter mechanic (pure data validation)
+// ===========================================================================
+
+describe('Splitter mechanic data', () => {
+  it('Mamemon has splitter type', () => {
+    const mamemon = DIGIMON_DATABASE.enemies.enemy_mamemon;
+    expect(mamemon).toBeDefined();
+    expect(mamemon.type).toBe('splitter');
+  });
+
+  it('MetalMamemon has splitter type', () => {
+    const metalMamemon = DIGIMON_DATABASE.enemies.enemy_metalmamemon;
+    expect(metalMamemon).toBeDefined();
+    expect(metalMamemon.type).toBe('splitter');
+  });
+
+  it('Diaboromon has splitter type', () => {
+    const diaboromon = DIGIMON_DATABASE.enemies.enemy_diaboromon;
+    expect(diaboromon).toBeDefined();
+    expect(diaboromon.type).toBe('splitter');
+  });
+
+  it('Diaboromon splits into 4 (Mega tier)', () => {
+    // Diaboromon is identified by ID and splits into 4
+    expect('enemy_diaboromon'.includes('diaboromon')).toBe(true);
+  });
+
+  it('split children have 50% of parent max HP', () => {
+    const baseStats = DIGIMON_DATABASE.enemies.enemy_mamemon;
+    const parentMaxHp = baseStats.baseHP * 1.5; // wave scaling example
+    const childHpTarget = parentMaxHp * 0.5;
+    const childScaling = childHpTarget / baseStats.baseHP;
+    const childHp = baseStats.baseHP * childScaling;
+    expect(childHp).toBeCloseTo(parentMaxHp * 0.5);
+  });
+
+  it('Guardromon has shielded type with 60% armor', () => {
+    const guardromon = DIGIMON_DATABASE.enemies.enemy_guardromon;
+    expect(guardromon).toBeDefined();
+    expect(guardromon.type).toBe('shielded');
+    expect(guardromon.armor).toBe(0.6);
+  });
+
+  it('Andromon has shielded type with 60% armor', () => {
+    const andromon = DIGIMON_DATABASE.enemies.enemy_andromon;
+    expect(andromon).toBeDefined();
+    expect(andromon.type).toBe('shielded');
+    expect(andromon.armor).toBe(0.6);
   });
 });

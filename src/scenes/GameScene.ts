@@ -27,10 +27,13 @@ import { Tower } from '@/entities/Tower';
 import { Enemy } from '@/entities/Enemy';
 import { canMerge, MergeCandidate } from '@/systems/MergeSystem';
 import { DIGIMON_DATABASE } from '@/data/DigimonDatabase';
-import { WAVE_DATA } from '@/data/WaveData';
+import { getWaveConfig } from '@/data/WaveData';
 import { Stage, TargetPriority } from '@/types';
 import { COLORS, TEXT_STYLES, FONTS, ANIM } from '@/ui/UITheme';
 import { drawPanel, drawButton, drawSeparator, drawDigitalGrid, animateButtonHover, animateButtonPress } from '@/ui/UIHelpers';
+import { BossAbilityAction, getCooldownProgress } from '@/systems/BossAbilitySystem';
+import { Projectile } from '@/entities/Projectile';
+import { TutorialOverlay } from '@/ui/TutorialOverlay';
 
 export class GameScene extends Phaser.Scene {
   // Graphics
@@ -84,6 +87,8 @@ export class GameScene extends Phaser.Scene {
   private bossBarFill: Phaser.GameObjects.Graphics | null = null;
   private bossNameText: Phaser.GameObjects.Text | null = null;
   private bossAnnounceText: Phaser.GameObjects.Text | null = null;
+  private bossAbilityText: Phaser.GameObjects.Text | null = null;
+  private bossShieldIndicator: Phaser.GameObjects.Graphics | null = null;
 
   // Game speed
   private gameSpeed: number = 1;
@@ -95,6 +100,7 @@ export class GameScene extends Phaser.Scene {
 
   // Wave preview
   private wavePreviewText: Phaser.GameObjects.Text | null = null;
+  private wavePreviewSprites: Phaser.GameObjects.GameObject[] = [];
 
   // Auto-start wave
   private autoStartWave: boolean = false;
@@ -109,7 +115,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   create() {
-    this.cameras.main.setBackgroundColor('#0a0a18');
+    this.cameras.main.setBackgroundColor('#060614');
 
     this.currentWave = 1;
     this.lives = STARTING_LIVES;
@@ -218,6 +224,15 @@ export class GameScene extends Phaser.Scene {
 
     // Load saved game if applicable
     this.loadSavedGame();
+
+    // Show tutorial on first play (only if not loading a save)
+    const isLoadingSave = this.registry.get('loadSave');
+    if (!isLoadingSave && !TutorialOverlay.isComplete()) {
+      const tutorial = new TutorialOverlay(this, () => {
+        // Tutorial complete — game continues
+      });
+      this.add.existing(tutorial);
+    }
   }
 
   update(time: number, delta: number) {
@@ -243,8 +258,16 @@ export class GameScene extends Phaser.Scene {
     // Combat: tower targeting, firing, projectile movement
     this.combatManager.update(time, scaledDelta);
 
+    // Process boss ability actions
+    this.processBossAbilities();
+
     // Update boss health bar if active
     this.updateBossBar();
+
+    // Reset tower range reduction each frame (passive auras re-apply every frame)
+    for (const tower of this.towerContainer.list) {
+      (tower as Tower).rangeReductionPercent = 0;
+    }
   }
 
   shutdown() {
@@ -731,6 +754,16 @@ export class GameScene extends Phaser.Scene {
       fontStyle: 'bold',
     }).setOrigin(0.5, 1).setDepth(15);
 
+    // Show boss ability name below the health bar
+    if (bossStats?.bossAbility) {
+      this.bossAbilityText = this.add.text(barX + barWidth / 2, barY + barHeight + 4,
+        `${bossStats.bossAbility.name}: ${bossStats.bossAbility.description}`, {
+          fontSize: '10px',
+          color: '#ffaa44',
+          fontStyle: 'italic',
+        }).setOrigin(0.5, 0).setDepth(15);
+    }
+
     // Track boss death to clean up bar
     const bossRef = this.bossEnemy;
     bossRef.once('destroy', () => {
@@ -763,6 +796,241 @@ export class GameScene extends Phaser.Scene {
     if (this.bossBarBg) { this.bossBarBg.destroy(); this.bossBarBg = null; }
     if (this.bossBarFill) { this.bossBarFill.destroy(); this.bossBarFill = null; }
     if (this.bossNameText) { this.bossNameText.destroy(); this.bossNameText = null; }
+    if (this.bossAbilityText) { this.bossAbilityText.destroy(); this.bossAbilityText = null; }
+    if (this.bossShieldIndicator) { this.bossShieldIndicator.destroy(); this.bossShieldIndicator = null; }
+  }
+
+  // ============================================================
+  // Boss Ability Execution
+  // ============================================================
+
+  private processBossAbilities(): void {
+    if (!this.bossEnemy || !this.bossEnemy.isAlive) return;
+
+    const actions = this.bossEnemy.pendingBossActions;
+    if (actions.length === 0) return;
+
+    // Drain all pending actions
+    this.bossEnemy.pendingBossActions = [];
+
+    for (const action of actions) {
+      this.executeBossAction(action);
+    }
+  }
+
+  private executeBossAction(action: BossAbilityAction): void {
+    switch (action.type) {
+      case 'stun_tower': {
+        // Stun the nearest tower to the boss
+        const nearest = this.findNearestTower();
+        if (nearest) {
+          nearest.applyStun(action.params.stunDuration);
+          this.showBossAbilityPopup('Nova Blast!');
+        }
+        break;
+      }
+
+      case 'speed_boost': {
+        // Speed up nearby enemies temporarily
+        const bossX = this.bossEnemy!.x;
+        const bossY = this.bossEnemy!.y;
+        const range = action.params.range;
+        const duration = this.bossEnemy!.bossAbilityState?.ability.duration ?? 3;
+        const affectedEnemies: Enemy[] = [];
+        for (const child of this.enemyContainer.list) {
+          const enemy = child as Enemy;
+          if (!enemy.isAlive || enemy === this.bossEnemy) continue;
+          const dx = enemy.x - bossX;
+          const dy = enemy.y - bossY;
+          if (Math.sqrt(dx * dx + dy * dy) <= range) {
+            enemy.speed = enemy.stats.moveSpeed * (1 + action.params.speedBoost);
+            affectedEnemies.push(enemy);
+          }
+        }
+        // Revert speeds after duration expires
+        this.time.delayedCall(duration * 1000, () => {
+          for (const enemy of affectedEnemies) {
+            if (enemy.active && enemy.isAlive) {
+              enemy.speed = enemy.stats.moveSpeed;
+            }
+          }
+        });
+        this.showBossAbilityPopup('Mega Flame!');
+        break;
+      }
+
+      case 'drain_db': {
+        const drain = Math.min(this.digibytes, action.params.amount);
+        if (drain > 0) {
+          this.digibytes -= drain;
+          this.digibytesText.setText(`${this.digibytes}`);
+          // Floating drain indicator near DB display
+          const drainText = this.add.text(
+            this.digibytesText.x + 40, this.digibytesText.y,
+            `-${drain}`, { fontFamily: FONTS.MONO, fontSize: '12px', color: '#ff4444', fontStyle: 'bold' },
+          ).setDepth(15);
+          this.tweens.add({
+            targets: drainText, y: drainText.y - 20, alpha: 0,
+            duration: 800, ease: 'Power2',
+            onComplete: () => drainText.destroy(),
+          });
+        }
+        break;
+      }
+
+      case 'heal_self': {
+        if (this.bossEnemy && this.bossEnemy.isAlive) {
+          this.bossEnemy.heal(action.params.healAmount);
+          this.showBossAbilityPopup('Crimson Lightning!');
+        }
+        break;
+      }
+
+      case 'destroy_projectiles': {
+        // Destroy all active projectiles
+        const projectiles = [...this.projectileContainer.list] as Projectile[];
+        for (const proj of projectiles) {
+          proj.destroy();
+        }
+        this.showBossAbilityPopup('Ground Zero!');
+        // Screen shake
+        this.cameras.main.shake(300, 0.01);
+        break;
+      }
+
+      case 'spawn_minions': {
+        // Spawn swarm minions at boss position (use first available In-Training/Rookie enemy)
+        const minionId = this.getSwarmMinionId();
+        if (minionId && this.bossEnemy) {
+          for (let i = 0; i < action.params.minionCount; i++) {
+            try {
+              const minion = new Enemy(this, minionId, this.waveManager.currentWave <= 100 ? 1 + 0.05 * (this.waveManager.currentWave - 1) : 1);
+              minion.pathIndex = this.bossEnemy.pathIndex;
+              minion.pathProgress = this.bossEnemy.pathProgress;
+              minion.x = this.bossEnemy.x + (i - 1) * 15;
+              minion.y = this.bossEnemy.y;
+              this.enemyContainer.add(minion);
+            } catch (err) { console.warn('[GameScene] Failed to spawn minion:', minionId, err); }
+          }
+        }
+        this.showBossAbilityPopup('Venom Infuse!');
+        break;
+      }
+
+      case 'range_reduction': {
+        // Applied as passive aura — reduce all tower ranges
+        for (const child of this.towerContainer.list) {
+          (child as Tower).rangeReductionPercent = action.params.rangeReduction;
+        }
+        break;
+      }
+
+      case 'damage_shield': {
+        this.showBossAbilityPopup('Transcendent Sword!');
+        // Shield visual on boss bar
+        this.showBossShieldIndicator();
+        break;
+      }
+
+      case 'stun_top_towers': {
+        // Sort towers by DPS (damage * speed), stun the top N
+        const towers = (this.towerContainer.list as Tower[])
+          .map(t => ({ tower: t, dps: t.getAttackDamage() * t.getAttackSpeed() }))
+          .sort((a, b) => b.dps - a.dps);
+        const count = Math.min(action.params.towerCount, towers.length);
+        for (let i = 0; i < count; i++) {
+          towers[i].tower.applyStun(action.params.stunDuration);
+        }
+        this.showBossAbilityPopup('Garuru Cannon!');
+        this.cameras.main.flash(200, 100, 150, 255, false);
+        break;
+      }
+
+      case 'stun_all_towers': {
+        for (const child of this.towerContainer.list) {
+          (child as Tower).applyStun(action.params.stunDuration);
+        }
+        this.showBossAbilityPopup('Total Annihilation!');
+        this.cameras.main.shake(500, 0.02);
+        this.cameras.main.flash(300, 255, 50, 50, false);
+        break;
+      }
+    }
+  }
+
+  private findNearestTower(): Tower | null {
+    if (!this.bossEnemy) return null;
+    const bossX = this.bossEnemy.x;
+    const bossY = this.bossEnemy.y;
+    let nearest: Tower | null = null;
+    let bestDist = Infinity;
+    for (const child of this.towerContainer.list) {
+      const tower = child as Tower;
+      const dx = tower.x - bossX;
+      const dy = tower.y - bossY;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < bestDist) {
+        bestDist = dist;
+        nearest = tower;
+      }
+    }
+    return nearest;
+  }
+
+  private getSwarmMinionId(): string | null {
+    // Find a low-tier enemy ID to use as minions
+    const candidates = ['enemy_koromon', 'enemy_tsunomon', 'enemy_tokomon', 'enemy_pagumon'];
+    for (const id of candidates) {
+      if (DIGIMON_DATABASE.enemies[id]) return id;
+    }
+    return null;
+  }
+
+  private showBossAbilityPopup(text: string): void {
+    const popupX = GRID_OFFSET_X + (GRID.COLUMNS * GRID.CELL_SIZE) / 2;
+    const popupY = GRID_OFFSET_Y + 40;
+
+    const popup = this.add.text(popupX, popupY, text, {
+      fontSize: '20px',
+      color: '#ffaa00',
+      fontStyle: 'bold',
+      stroke: '#000000',
+      strokeThickness: 3,
+    }).setOrigin(0.5).setDepth(55);
+
+    this.tweens.add({
+      targets: popup,
+      y: popup.y - 30,
+      alpha: { from: 1, to: 0 },
+      duration: 1200,
+      ease: 'Cubic.easeOut',
+      onComplete: () => popup.destroy(),
+    });
+
+    EventBus.emit(GameEvents.BOSS_ABILITY_ACTIVATED, { abilityName: text });
+  }
+
+  private showBossShieldIndicator(): void {
+    if (this.bossShieldIndicator) {
+      this.bossShieldIndicator.destroy();
+    }
+    // Golden glow around the boss bar area
+    const barWidth = GRID.COLUMNS * GRID.CELL_SIZE - 20;
+    const barX = GRID_OFFSET_X + 10;
+    const barY = GRID_OFFSET_Y - 45;
+    this.bossShieldIndicator = this.add.graphics();
+    this.bossShieldIndicator.lineStyle(2, 0xffdd44, 0.8);
+    this.bossShieldIndicator.strokeRoundedRect(barX - 2, barY - 2, barWidth + 4, 20, 5);
+    this.bossShieldIndicator.setDepth(16);
+
+    // Auto-remove after shield duration (read from boss ability state)
+    const shieldDuration = this.bossEnemy?.bossAbilityState?.ability.duration ?? 4;
+    this.time.delayedCall(shieldDuration * 1000, () => {
+      if (this.bossShieldIndicator) {
+        this.bossShieldIndicator.destroy();
+        this.bossShieldIndicator = null;
+      }
+    });
   }
 
   // ============================================================
@@ -837,41 +1105,54 @@ export class GameScene extends Phaser.Scene {
     // HUD panel background
     const hudPanelBg = this.add.graphics();
     drawPanel(hudPanelBg, rightPanelX - 15, 0, panelW, GAME_HEIGHT, {
-      borderColor: COLORS.CYAN_DIM, borderAlpha: 0.4,
+      borderColor: COLORS.CYAN_DIM, borderAlpha: 0.3,
     });
     hudPanelBg.setDepth(9);
 
+    // Stat cards - small grouped backgrounds for visual hierarchy
+    const statCardGfx = this.add.graphics().setDepth(9);
+
+    // Wave stat card
+    statCardGfx.fillStyle(COLORS.BG_CARD, 0.6);
+    statCardGfx.fillRoundedRect(rightPanelX - 5, hudY, panelW - 20, 40, 4);
+
+    // Lives + DB stat card
+    statCardGfx.fillStyle(COLORS.BG_CARD, 0.6);
+    statCardGfx.fillRoundedRect(rightPanelX - 5, hudY + 46, (panelW - 25) / 2, 40, 4);
+    statCardGfx.fillRoundedRect(rightPanelX - 5 + (panelW - 25) / 2 + 5, hudY + 46, (panelW - 25) / 2, 40, 4);
+
     // Wave label + value
-    this.add.text(rightPanelX, hudY, 'WAVE', TEXT_STYLES.HUD_LABEL).setDepth(10);
-    this.waveText = this.add.text(rightPanelX, hudY + 16, `${this.currentWave} / ${TOTAL_WAVES_MVP}`, TEXT_STYLES.HUD_VALUE)
+    this.add.text(rightPanelX + 4, hudY + 4, 'WAVE', TEXT_STYLES.HUD_LABEL).setDepth(10);
+    this.waveText = this.add.text(rightPanelX + 4, hudY + 18, `${this.currentWave} / ${TOTAL_WAVES_MVP}`, TEXT_STYLES.HUD_VALUE)
       .setDepth(10);
 
-    // Lives label + value
-    this.add.text(rightPanelX, hudY + 46, 'LIVES', TEXT_STYLES.HUD_LABEL).setDepth(10);
-    this.livesText = this.add.text(rightPanelX, hudY + 62, `${this.lives}`, {
+    // Lives label + value (left half)
+    this.add.text(rightPanelX + 4, hudY + 50, 'LIVES', TEXT_STYLES.HUD_LABEL).setDepth(10);
+    this.livesText = this.add.text(rightPanelX + 4, hudY + 64, `${this.lives}`, {
       ...TEXT_STYLES.HUD_VALUE, color: COLORS.TEXT_LIVES,
     }).setDepth(10);
 
-    // DigiBytes label + value
-    this.add.text(rightPanelX, hudY + 92, 'DB', TEXT_STYLES.HUD_LABEL).setDepth(10);
-    this.digibytesText = this.add.text(rightPanelX, hudY + 108, `${this.digibytes}`, {
+    // DigiBytes label + value (right half)
+    const dbX = rightPanelX + (panelW - 25) / 2 + 4;
+    this.add.text(dbX, hudY + 50, 'DB', TEXT_STYLES.HUD_LABEL).setDepth(10);
+    this.digibytesText = this.add.text(dbX, hudY + 64, `${this.digibytes}`, {
       ...TEXT_STYLES.HUD_VALUE, color: COLORS.TEXT_CURRENCY,
     }).setDepth(10);
 
     // Separator
     const sepGfx = this.add.graphics().setDepth(10);
-    drawSeparator(sepGfx, rightPanelX - 10, hudY + 140, rightPanelX + panelW - 30);
+    drawSeparator(sepGfx, rightPanelX - 10, hudY + 95, rightPanelX + panelW - 30);
 
     // Selected starters display (hidden after first tower placement)
     const selectedStarters: string[] = this.registry.get('selectedStarters') || [];
     if (selectedStarters.length > 0) {
-      const starterLabel = this.add.text(rightPanelX, hudY + 152, 'Starters:', TEXT_STYLES.HUD_LABEL).setDepth(10);
+      const starterLabel = this.add.text(rightPanelX, hudY + 107, 'Starters:', TEXT_STYLES.HUD_LABEL).setDepth(10);
       this.starterDisplayObjects.push(starterLabel);
 
       selectedStarters.forEach((key, index) => {
         if (this.textures.exists(key)) {
           const starterSprite = this.add.image(
-            rightPanelX + 20 + index * 50, hudY + 195, key,
+            rightPanelX + 20 + index * 50, hudY + 148, key,
           );
           starterSprite.setScale(2.5).setDepth(10);
           this.starterDisplayObjects.push(starterSprite);
@@ -880,9 +1161,9 @@ export class GameScene extends Phaser.Scene {
     }
 
     // Start Wave button (Container + Graphics)
-    const btnW = 200;
+    const btnW = 220;
     const btnH = 44;
-    this.startWaveBtn = this.add.container(rightPanelX + panelW / 2 - 15, hudY + 250);
+    this.startWaveBtn = this.add.container(rightPanelX + panelW / 2 - 15, hudY + 200);
     this.startWaveBtnBg = this.add.graphics();
     drawButton(this.startWaveBtnBg, btnW, btnH, COLORS.PRIMARY);
     this.startWaveBtn.add(this.startWaveBtnBg);
@@ -915,9 +1196,9 @@ export class GameScene extends Phaser.Scene {
     });
 
     // Auto-start toggle (below start wave button)
-    const autoW = 200;
-    const autoH = 30;
-    const autoContainer = this.add.container(rightPanelX + panelW / 2 - 15, hudY + 300);
+    const autoW = 220;
+    const autoH = 28;
+    const autoContainer = this.add.container(rightPanelX + panelW / 2 - 15, hudY + 250);
     this.autoStartBtnBg = this.add.graphics();
     drawButton(this.autoStartBtnBg, autoW, autoH, COLORS.BG_PANEL_LIGHT);
     autoContainer.add(this.autoStartBtnBg);
@@ -947,8 +1228,8 @@ export class GameScene extends Phaser.Scene {
 
     // Pause & Settings buttons side by side
     const smallBtnW = 105;
-    const smallBtnH = 38;
-    const btnRowY = hudY + 345;
+    const smallBtnH = 36;
+    const btnRowY = hudY + 290;
     const btnRowCenterX = rightPanelX + panelW / 2 - 15;
 
     // Pause button (left)
@@ -1004,17 +1285,16 @@ export class GameScene extends Phaser.Scene {
     settingsContainer.on('pointerdown', () => {
       animateButtonPress(this, settingsContainer);
       this.scene.launch('SettingsScene');
-      this.scene.pause();
     });
 
     // Speed control buttons (1x / 2x / 3x)
-    this.add.text(rightPanelX, hudY + 380, 'Speed:', TEXT_STYLES.HUD_LABEL).setDepth(10);
+    this.add.text(rightPanelX, hudY + 326, 'SPEED', TEXT_STYLES.HUD_LABEL).setDepth(10);
 
     GAME_SPEEDS.forEach((speed, i) => {
       const sBtnW = 60;
-      const sBtnH = 32;
+      const sBtnH = 30;
       const sBtnX = rightPanelX + 15 + i * 75 + sBtnW / 2;
-      const sBtnY = hudY + 410;
+      const sBtnY = hudY + 352;
 
       const sContainer = this.add.container(sBtnX, sBtnY);
       const sBg = this.add.graphics();
@@ -1049,7 +1329,7 @@ export class GameScene extends Phaser.Scene {
     });
 
     // Wave preview section
-    const previewY = hudY + 450;
+    const previewY = hudY + 392;
     const waveSepGfx = this.add.graphics().setDepth(10);
     drawSeparator(waveSepGfx, rightPanelX - 10, previewY, rightPanelX + panelW - 30);
 
@@ -1072,36 +1352,118 @@ export class GameScene extends Phaser.Scene {
   private updateWavePreview(): void {
     if (!this.wavePreviewText) return;
 
-    const waveConfig = WAVE_DATA[this.currentWave];
+    // Clear old preview sprites
+    for (const obj of this.wavePreviewSprites) {
+      obj.destroy();
+    }
+    this.wavePreviewSprites = [];
+
+    const waveConfig = getWaveConfig(this.currentWave);
     if (!waveConfig) {
       this.wavePreviewText.setText('No data');
       return;
     }
 
-    const lines: string[] = [];
     let totalEnemies = 0;
+    for (const entry of waveConfig.enemies) totalEnemies += entry.count;
+    if (waveConfig.boss) totalEnemies++;
+
+    const header = `Wave ${this.currentWave} (${totalEnemies} enemies)`;
+    this.wavePreviewText.setText(header);
+    this.wavePreviewText.setColor(waveConfig.boss ? '#ff8844' : COLORS.TEXT_DIM);
+
+    // Render visual enemy entries with sprites
+    const rightPanelX = GRID_OFFSET_X + GRID.COLUMNS * GRID.CELL_SIZE + 30;
+    const previewBaseY = this.wavePreviewText.y + 18;
+    let yOffset = 0;
+
+    const TYPE_COLORS: Record<string, string> = {
+      swarm: '#88cc44',
+      standard: '#aaaaaa',
+      tank: '#6688cc',
+      speedster: '#ffaa00',
+      flying: '#cc88ff',
+      regen: '#44cc88',
+      shielded: '#4488ff',
+      splitter: '#ff88cc',
+    };
 
     for (const entry of waveConfig.enemies) {
       const enemyStats = DIGIMON_DATABASE.enemies[entry.id];
-      const name = enemyStats?.name || entry.id.replace('enemy_', '');
-      lines.push(`  ${name} x${entry.count}`);
-      totalEnemies += entry.count;
+      if (!enemyStats) continue;
+
+      const spriteKey = entry.id.replace(/^(enemy_|boss_)/, '');
+      const rowY = previewBaseY + yOffset;
+
+      // Small sprite
+      if (this.textures.exists(spriteKey)) {
+        const sprite = this.add.image(rightPanelX + 12, rowY + 8, spriteKey);
+        sprite.setScale(1.5).setDepth(10);
+        this.wavePreviewSprites.push(sprite);
+      }
+
+      // Name + count
+      const nameText = this.add.text(rightPanelX + 28, rowY, `${enemyStats.name} x${entry.count}`, {
+        fontFamily: FONTS.MONO,
+        fontSize: '11px',
+        color: '#cccccc',
+      }).setDepth(10);
+      this.wavePreviewSprites.push(nameText);
+
+      // Type tag
+      const typeColor = TYPE_COLORS[enemyStats.type] ?? '#888888';
+      const typeText = this.add.text(rightPanelX + 28, rowY + 13, enemyStats.type, {
+        fontFamily: FONTS.MONO,
+        fontSize: '9px',
+        color: typeColor,
+      }).setDepth(10);
+      this.wavePreviewSprites.push(typeText);
+
+      yOffset += 28;
+
+      // Limit preview rows to prevent overflow
+      if (yOffset > 180) {
+        const moreText = this.add.text(rightPanelX + 28, previewBaseY + yOffset, '...', {
+          fontFamily: FONTS.MONO,
+          fontSize: '11px',
+          color: COLORS.TEXT_DIM,
+        }).setDepth(10);
+        this.wavePreviewSprites.push(moreText);
+        break;
+      }
     }
 
+    // Boss entry with gold highlight
     if (waveConfig.boss) {
       const bossStats = DIGIMON_DATABASE.enemies[waveConfig.boss];
-      const bossName = bossStats?.name || waveConfig.boss;
-      lines.push(`  BOSS: ${bossName}`);
-      totalEnemies++;
-    }
+      if (bossStats) {
+        const rowY = previewBaseY + yOffset;
+        const bossSpriteKey = waveConfig.boss.replace(/^boss_/, '');
 
-    const header = `Wave ${this.currentWave} (${totalEnemies} enemies)`;
-    this.wavePreviewText.setText(header + '\n' + lines.join('\n'));
+        if (this.textures.exists(bossSpriteKey)) {
+          const sprite = this.add.image(rightPanelX + 12, rowY + 8, bossSpriteKey);
+          sprite.setScale(1.5).setDepth(10);
+          this.wavePreviewSprites.push(sprite);
+        }
 
-    if (waveConfig.boss) {
-      this.wavePreviewText.setColor('#ff8844');
-    } else {
-      this.wavePreviewText.setColor(COLORS.TEXT_DIM);
+        const bossText = this.add.text(rightPanelX + 28, rowY, `BOSS: ${bossStats.name}`, {
+          fontFamily: FONTS.MONO,
+          fontSize: '11px',
+          color: '#ffaa44',
+          fontStyle: 'bold',
+        }).setDepth(10);
+        this.wavePreviewSprites.push(bossText);
+
+        if (bossStats.bossAbility) {
+          const abilityText = this.add.text(rightPanelX + 28, rowY + 13, bossStats.bossAbility.name, {
+            fontFamily: FONTS.MONO,
+            fontSize: '9px',
+            color: '#ff8844',
+            fontStyle: 'italic',
+          }).setDepth(10);
+          this.wavePreviewSprites.push(abilityText);
+        }
+      }
     }
   }
 
@@ -1116,7 +1478,7 @@ export class GameScene extends Phaser.Scene {
     // Update button highlights
     GAME_SPEEDS.forEach((s, i) => {
       if (this.speedBtnBgs[i]) {
-        drawButton(this.speedBtnBgs[i], 60, 32, s === speed ? COLORS.CYAN : COLORS.BG_PANEL_LIGHT);
+        drawButton(this.speedBtnBgs[i], 60, 30, s === speed ? COLORS.CYAN : COLORS.BG_PANEL_LIGHT);
       }
     });
   }
@@ -1128,17 +1490,17 @@ export class GameScene extends Phaser.Scene {
   private updateAutoStartDisplay(): void {
     if (this.autoStartWave) {
       this.autoStartBtnText.setText('Auto Start: ON');
-      drawButton(this.autoStartBtnBg, 200, 30, COLORS.CYAN);
+      drawButton(this.autoStartBtnBg, 220, 28, COLORS.CYAN);
     } else {
       this.autoStartBtnText.setText('Auto Start: OFF');
-      drawButton(this.autoStartBtnBg, 200, 30, COLORS.BG_PANEL_LIGHT);
+      drawButton(this.autoStartBtnBg, 220, 28, COLORS.BG_PANEL_LIGHT);
     }
   }
 
   private startNextWave(): void {
     if (this.isWaveActive) return;
     this.isWaveActive = true;
-    drawButton(this.startWaveBtnBg, 200, 44, COLORS.DISABLED);
+    drawButton(this.startWaveBtnBg, 220, 44, COLORS.DISABLED);
     this.startWaveBtnText.setText('Wave in progress...');
     this.startWaveBtnText.setColor(COLORS.DISABLED_TEXT);
     this.waveManager.startWave(this.currentWave);
@@ -1284,7 +1646,7 @@ export class GameScene extends Phaser.Scene {
     // Re-enable start wave button
     this.startWaveBtnText.setText('Start Wave');
     this.startWaveBtnText.setColor(COLORS.TEXT_WHITE);
-    drawButton(this.startWaveBtnBg, 200, 44, COLORS.PRIMARY);
+    drawButton(this.startWaveBtnBg, 220, 44, COLORS.PRIMARY);
 
     // Auto-start next wave after a brief delay
     if (this.autoStartWave) {

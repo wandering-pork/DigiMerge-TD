@@ -7,7 +7,7 @@ import { EvolutionPath } from '@/types';
  * The `minDP` and `maxDP` define the DP range required to unlock that path.
  * The `isDefault` flag marks the primary/standard evolution for that Digimon.
  *
- * 8 Starter Lines:
+ * 21 Starter Lines:
  * - Koromon (Vaccine): Koromon -> Agumon -> Greymon/Tyrannomon -> MetalGreymon/SkullGreymon -> WarGreymon
  * - Tsunomon (Data): Tsunomon -> Gabumon -> Garurumon/BlackGarurumon -> WereGarurumon -> MetalGarurumon
  * - Tokomon (Vaccine): Tokomon -> Patamon -> Angemon/Unimon -> MagnaAngemon/Shakkoumon -> Seraphimon
@@ -16,6 +16,19 @@ import { EvolutionPath } from '@/types';
  * - DemiVeemon (Free): DemiVeemon -> Veemon -> ExVeemon/Flamedramon -> Paildramon -> ImperialdramonFM
  * - Pagumon (Virus): Pagumon -> DemiDevimon -> Devimon/IceDevimon/Bakemon -> Myotismon/NeoDevimon -> VenomMyotismon/Beelzemon
  * - Viximon (Data): Viximon -> Renamon -> Kyubimon -> Taomon -> Sakuyamon
+ * - Nyaromon (Vaccine): Nyaromon -> Plotmon -> Tailmon -> Angewomon -> Ophanimon
+ * - Gummymon (Vaccine): Gummymon -> Terriermon -> Galgomon -> Rapidmon -> SaintGalgomon
+ * - Chocomon (Free): Chocomon -> Lopmon -> Turuiemon -> Andiramon -> Cherubimon (Virtue)
+ * - Pyocomon (Data): Pyocomon -> Piyomon -> Birdramon -> Garudamon -> Hououmon
+ * - Mochimon (Data): Mochimon -> Tentomon -> Kabuterimon -> AtlurKabuterimon -> HerakleKabuterimon
+ * - Pukamon (Vaccine): Pukamon -> Gomamon -> Ikkakumon -> Zudomon -> Plesiomon
+ * - Dorimon (Data): Dorimon -> Dorumon -> Dorugamon -> DoruGreymon -> Alphamon
+ * - Sunmon (Vaccine): Sunmon -> Coronamon -> Firamon -> Flaremon -> Apollomon
+ * - Moonmon (Data): Moonmon -> Lunamon -> Lekismon -> Crescemon -> Dianamon
+ * - Kyokyomon (Vaccine): Kyokyomon -> Ryudamon -> Ginryumon -> Hisyaryumon -> Ouryumon
+ * - Puroromon (Free): Puroromon -> Funbeemon -> Waspmon -> Cannonbeemon -> TigerVespamon
+ * - Budmon (Data): Budmon -> Lalamon -> Sunflowmon -> Lilamon -> Lotusmon
+ * - Caprimon (Vaccine): Caprimon -> Hackmon -> Reppamon -> SaviorHackmon -> Jesmon
  */
 export const EVOLUTION_PATHS: Record<string, EvolutionPath[]> = {
   // ========================================
@@ -190,6 +203,266 @@ export const EVOLUTION_PATHS: Record<string, EvolutionPath[]> = {
 
   taomon: [
     { resultId: 'sakuyamon', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  // ========================================
+  // Nyaromon Line (Vaccine) — Holy / Healing
+  // ========================================
+
+  nyaromon: [
+    { resultId: 'plotmon', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  plotmon: [
+    { resultId: 'tailmon', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  tailmon: [
+    { resultId: 'angewomon', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  angewomon: [
+    { resultId: 'ophanimon', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  // ========================================
+  // Gummymon Line (Vaccine) — Multi-hit / Pierce
+  // ========================================
+
+  gummymon: [
+    { resultId: 'terriermon', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  terriermon: [
+    { resultId: 'galgomon', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  galgomon: [
+    { resultId: 'rapidmon', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  rapidmon: [
+    { resultId: 'saintgalgomon', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  // ========================================
+  // Chocomon Line (Free) — CC / Support
+  // ========================================
+
+  chocomon: [
+    { resultId: 'lopmon', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  lopmon: [
+    { resultId: 'turuiemon', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  turuiemon: [
+    { resultId: 'andiramon', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  andiramon: [
+    { resultId: 'cherubimon_virtue', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  // ========================================
+  // Pyocomon Line (Data) — Fire / Flying
+  // ========================================
+
+  pyocomon: [
+    { resultId: 'piyomon', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  piyomon: [
+    { resultId: 'birdramon_tower', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  birdramon_tower: [
+    { resultId: 'garudamon_tower', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  garudamon_tower: [
+    { resultId: 'hououmon', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  // ========================================
+  // Mochimon Line (Data) — Electric / Pierce
+  // ========================================
+
+  mochimon: [
+    { resultId: 'tentomon_tower', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  tentomon_tower: [
+    { resultId: 'kabuterimon_tower', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  kabuterimon_tower: [
+    { resultId: 'atlurkabuterimon', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  atlurkabuterimon: [
+    { resultId: 'heraklekabuterimon_tower', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  // ========================================
+  // Pukamon Line (Vaccine) — Ice / Tank Support
+  // ========================================
+
+  pukamon: [
+    { resultId: 'gomamon', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  gomamon: [
+    { resultId: 'ikkakumon', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  ikkakumon: [
+    { resultId: 'zudomon_tower', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  zudomon_tower: [
+    { resultId: 'plesiomon', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  // ========================================
+  // Dorimon Line (Data) — Pierce / Royal Knight
+  // ========================================
+
+  dorimon: [
+    { resultId: 'dorumon', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  dorumon: [
+    { resultId: 'dorugamon', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  dorugamon: [
+    { resultId: 'doruguremon', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  doruguremon: [
+    { resultId: 'alphamon', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  // ========================================
+  // Sunmon Line (Vaccine) — Fire / Burst
+  // ========================================
+
+  sunmon: [
+    { resultId: 'coronamon', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  coronamon: [
+    { resultId: 'firamon', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  firamon: [
+    { resultId: 'flaremon', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  flaremon: [
+    { resultId: 'apollomon', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  // ========================================
+  // Moonmon Line (Data) — Ice / CC
+  // ========================================
+
+  moonmon: [
+    { resultId: 'lunamon', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  lunamon: [
+    { resultId: 'lekismon', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  lekismon: [
+    { resultId: 'crescemon', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  crescemon: [
+    { resultId: 'dianamon', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  // ========================================
+  // Kyokyomon Line (Vaccine) — Pierce / Armor Break
+  // ========================================
+
+  kyokyomon: [
+    { resultId: 'ryudamon', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  ryudamon: [
+    { resultId: 'ginryumon', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  ginryumon: [
+    { resultId: 'hisyaryumon', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  hisyaryumon: [
+    { resultId: 'ouryumon', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  // ========================================
+  // Puroromon Line (Free) — Multi-hit / Speed
+  // ========================================
+
+  puroromon: [
+    { resultId: 'funbeemon', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  funbeemon: [
+    { resultId: 'waspmon', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  waspmon: [
+    { resultId: 'cannonbeemon', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  cannonbeemon: [
+    { resultId: 'tigervespamon', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  // ========================================
+  // Budmon Line (Data) — Poison / Support
+  // ========================================
+
+  budmon: [
+    { resultId: 'lalamon', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  lalamon: [
+    { resultId: 'sunflowmon', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  sunflowmon: [
+    { resultId: 'lilamon', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  lilamon: [
+    { resultId: 'lotusmon', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  // ========================================
+  // Caprimon Line (Vaccine) — Royal Knight
+  // ========================================
+
+  caprimon: [
+    { resultId: 'hackmon', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  hackmon: [
+    { resultId: 'reppamon', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  reppamon: [
+    { resultId: 'saviorhackmon', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  saviorhackmon: [
+    { resultId: 'jesmon', minDP: 0, maxDP: 999, isDefault: true },
   ],
 };
 

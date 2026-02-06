@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
-import { WAVE_DATA } from '@/data/WaveData';
+import { getWaveConfig } from '@/data/WaveData';
+import { DIGIMON_DATABASE } from '@/data/DigimonDatabase';
 import { WaveConfig, WaveEnemy } from '@/types';
 import { Enemy } from '@/entities/Enemy';
 import { EventBus, GameEvents } from '@/utils/EventBus';
@@ -44,6 +45,9 @@ export class WaveManager {
   constructor(scene: Phaser.Scene, enemyContainer: Phaser.GameObjects.Container) {
     this.scene = scene;
     this.enemyContainer = enemyContainer;
+
+    // Listen for splitter deaths to spawn child enemies
+    EventBus.on(GameEvents.SPLITTER_DIED, this.onSplitterDied, this);
   }
 
   // ------------------------------------------------------------------
@@ -55,7 +59,7 @@ export class WaveManager {
    * WAVE_DATA, then beginning the spawn cycle.
    */
   public startWave(waveNumber: number): void {
-    const waveConfig: WaveConfig | undefined = WAVE_DATA[waveNumber];
+    const waveConfig: WaveConfig | undefined = getWaveConfig(waveNumber);
 
     if (!waveConfig) {
       console.warn(`[WaveManager] No wave data for wave ${waveNumber}`);
@@ -64,8 +68,14 @@ export class WaveManager {
 
     this.currentWave = waveNumber;
 
-    // Within Phase 1 scaling: +5% HP per wave after wave 1
-    this.waveScaling = 1 + 0.05 * Math.max(0, waveNumber - 1);
+    // Scaling: +5% HP per wave for waves 1-100, exponential for endless (101+)
+    if (waveNumber <= 100) {
+      this.waveScaling = 1 + 0.05 * Math.max(0, waveNumber - 1);
+    } else {
+      // Endless: base scaling at wave 100 + exponential growth
+      const baseScaling = 1 + 0.05 * 99; // ~5.95x at wave 100
+      this.waveScaling = baseScaling * Math.pow(1.05, waveNumber - 100);
+    }
 
     // Build spawn queue from wave enemies
     this.spawnQueue = [];
@@ -144,6 +154,7 @@ export class WaveManager {
     this.currentWave = 0;
     this.spawnTimer = 0;
     this.waveScaling = 1;
+    EventBus.off(GameEvents.SPLITTER_DIED, this.onSplitterDied, this);
   }
 
   // ------------------------------------------------------------------
@@ -201,6 +212,61 @@ export class WaveManager {
     }
 
     return false;
+  }
+
+  /**
+   * Handle a splitter enemy dying: spawn split children at the parent's path position.
+   * Children have 50% of parent's max HP, same speed, and cannot further split.
+   */
+  private onSplitterDied(data: {
+    digimonId: string;
+    splitCount: number;
+    pathIndex: number;
+    pathProgress: number;
+    maxHp: number;
+    x: number;
+    y: number;
+  }): void {
+    if (!this.isActive) return;
+
+    const baseStats = DIGIMON_DATABASE.enemies[data.digimonId];
+    if (!baseStats) return;
+
+    // Calculate scaling so child HP = parent maxHp * 50%
+    const childHpTarget = data.maxHp * 0.5;
+    const childScaling = childHpTarget / baseStats.baseHP;
+
+    for (let i = 0; i < data.splitCount; i++) {
+      try {
+        const child = new Enemy(this.scene, data.digimonId, childScaling);
+        child.isSplitChild = true;
+
+        // Position child at parent's path progress with slight offset for visibility
+        child.pathIndex = data.pathIndex;
+        child.pathProgress = data.pathProgress;
+
+        // Apply a small random offset so children don't overlap exactly
+        const offsetX = (i - (data.splitCount - 1) / 2) * 12;
+        child.x = data.x + offsetX;
+        child.y = data.y;
+
+        this.enemyContainer.add(child);
+        this.activeEnemies.add(child);
+
+        child.once('destroy', () => {
+          this.activeEnemies.delete(child);
+          this.checkWaveComplete();
+        });
+
+        EventBus.emit(GameEvents.ENEMY_SPAWNED, {
+          enemyID: child.enemyID,
+          digimonId: data.digimonId,
+          wave: this.currentWave,
+        });
+      } catch {
+        // Skip if enemy creation fails
+      }
+    }
   }
 
   /**

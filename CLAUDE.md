@@ -48,7 +48,8 @@ digimerge-td/
 │   │   ├── GameScene.ts      # Main gameplay + HUD + grid
 │   │   ├── PauseScene.ts     # Simple pause overlay (click/ESC to resume)
 │   │   ├── SettingsScene.ts  # Volume, restart, main menu
-│   │   └── GameOverScene.ts
+│   │   ├── GameOverScene.ts
+│   │   └── EncyclopediaScene.ts  # Digimon browser/catalog
 │   ├── entities/
 │   │   ├── Tower.ts          # Digimon tower class
 │   │   ├── Enemy.ts          # Enemy class
@@ -71,9 +72,11 @@ digimerge-td/
 │   │   ├── TowerInfoPanel.ts      # Selected tower details
 │   │   ├── SpawnMenu.ts           # Spawn configuration + starter placement
 │   │   ├── EvolutionModal.ts      # Evolution selection
-│   │   └── MergeModal.ts          # Merge confirmation
+│   │   ├── MergeModal.ts          # Merge confirmation
+│   │   └── TutorialOverlay.ts     # 8-step new player tutorial
 │   ├── systems/
 │   │   ├── AttributeSystem.ts     # Damage multipliers
+│   │   ├── BossAbilitySystem.ts   # Boss ability logic (pure functions)
 │   │   ├── DPSystem.ts            # DP calculations
 │   │   ├── OriginSystem.ts        # Origin caps
 │   │   ├── LevelSystem.ts         # Level up costs/effects
@@ -141,7 +144,8 @@ A `/phaser` skill is available for Phaser 3 API questions, game development patt
 | `GAME_DESIGN_DOCUMENT.md` | Complete game mechanics, systems, UI/UX |
 | `ENEMY_SPAWN_DESIGN.md` | Wave compositions, enemy types, bosses |
 | `DIGIMON_STATS_DATABASE.md` | All Digimon stats, evolution paths |
-| `IMPLEMENTATION_PLAN.md` | Git setup, sprint planning, task breakdown |
+| `IMPLEMENTATION_PLAN.md` | Sprint planning, task breakdown (Sprints 0-15) |
+| `PROGRESS.md` | Current implementation status, completed sprints, test summary |
 
 ---
 
@@ -243,8 +247,8 @@ const ATTRIBUTE_MULTIPLIERS: Record<Attribute, Record<Attribute, number>> = {
 ### Scene Flow
 ```
 BootScene → PreloadScene → MainMenuScene → StarterSelectScene → GameScene
-                                                                  ↓    ↓
-                                                          PauseScene  SettingsScene
+                              ↓                                   ↓    ↓
+                        EncyclopediaScene                 PauseScene  SettingsScene
                                                                          ↓
                                                                    GameOverScene
 ```
@@ -291,6 +295,7 @@ export const GameEvents = {
   WAVE_STARTED: 'wave:started',
   WAVE_COMPLETED: 'wave:completed',
   BOSS_SPAWNED: 'boss:spawned',
+  BOSS_ABILITY_ACTIVATED: 'boss:abilityActivated',
   GAME_OVER: 'game:over',
   DIGIBYTES_CHANGED: 'currency:changed',
   LIVES_CHANGED: 'lives:changed',
@@ -457,6 +462,25 @@ cost = Math.ceil(3 * currentLevel * stageMultiplier);
 // Stage multipliers: In-Training ×1, Rookie ×1.5, Champion ×2, Ultimate ×3, Mega ×4, Ultra ×5
 ```
 
+### Boss Abilities
+```typescript
+// Trigger types: 'cooldown' (periodic), 'passive' (every frame), 'hp_threshold' (one-time)
+// Pure function system: tickBossAbility() returns BossAbilityAction[] descriptors
+// GameScene.executeBossAction() handles side effects (stun towers, shake camera, etc.)
+
+// 10 boss abilities:
+// W10 Greymon:       Nova Blast       — Stun nearest tower 2s (cooldown 8s)
+// W20 Greymon Evo:   Mega Flame       — Speed boost nearby enemies 30% for 3s (cooldown 10s)
+// W30 Devimon:       Death Claw       — Drain 5 DB/sec while alive (passive)
+// W40 Myotismon:     Crimson Lightning — Heal self 10% HP (cooldown 12s)
+// W50 SkullGreymon:  Ground Zero      — Destroy all projectiles at 50% HP (hp_threshold)
+// W60 VenomMyotismon:Venom Infuse     — Spawn 3 swarm minions (cooldown 15s)
+// W70 Machinedramon: Infinity Cannon  — Reduce all tower ranges 20% (passive aura)
+// W80 Omegamon:      Transcendent Sword — 50% damage shield 4s (cooldown 20s)
+// W90 Omegamon Zwart:Garuru Cannon    — Stun top 3 DPS towers 3s (cooldown 15s)
+// W100 Apocalymon:   Total Annihilation — Stun all towers 2s at 25% HP (hp_threshold)
+```
+
 ---
 
 ## MVP Scope
@@ -465,8 +489,8 @@ cost = Math.ceil(3 * currentLevel * stageMultiplier);
 | Feature | Status | Notes |
 |---------|--------|-------|
 | Core TD loop | ✅ | Spawn, place, attack, waves |
-| 8 starters + evolutions | ✅ | ~25-30 Digimon total |
-| Waves 1-20 | ✅ | Phase 1 with first boss |
+| 8 starters + evolutions | ✅ | ~40 tower Digimon, ~65 enemy Digimon |
+| 100 Waves + Endless | ✅ | 5 phases, 12 bosses, endless mode 101+ |
 | Level up system | ✅ | Pay DB to increase level |
 | Digivolve system | ✅ | At max level, choose path |
 | Merge system | ✅ | Same attribute + stage |
@@ -488,15 +512,20 @@ cost = Math.ceil(3 * currentLevel * stageMultiplier);
 | Floating damage numbers | ✅ | Color-coded by effectiveness, toggleable |
 | Health bar toggle | ✅ | All / Bosses Only / Off in Settings |
 | Wave preview | ✅ | Next wave composition in HUD |
+| 21 starter lines | ✅ | Tier 1+2 roster expansion (~105 tower Digimon) |
+| Boss abilities | ✅ | 10 unique abilities (stun, drain, heal, shield, spawn, etc.) |
+| Tutorial | ✅ | 8-step overlay with highlights, skip, localStorage persistence |
+| Encyclopedia | ✅ | Browsable Digimon catalog with filters, pagination, detail view |
+| Enhanced wave preview | ✅ | Enemy sprites, type tags, boss ability names |
 
 ### Remaining Work
 
 **Content:**
-- Phases 2-5 (waves 21-100), Endless mode (waves 101+)
-- Full Digimon roster (~150), DNA Digivolution, Encyclopedia
+- More Digimon roster expansion (~150+ target, currently ~105 tower Digimon)
+- DNA Digivolution system (Ultra tier)
 
 **UX & Polish:**
-- Drag-and-drop merge, visual merge effects, object pooling, tutorial, music
+- Drag-and-drop merge, visual merge effects, object pooling, background music
 
 ---
 

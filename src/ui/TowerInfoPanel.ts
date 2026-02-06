@@ -2,12 +2,12 @@ import Phaser from 'phaser';
 import { Tower } from '@/entities/Tower';
 import { EventBus, GameEvents } from '@/utils/EventBus';
 import { STAGE_NAMES, ATTRIBUTE_NAMES, TargetPriority } from '@/types';
-import { getLevelUpCost, getTotalLevelUpCost, canLevelUp, calculateMaxLevel } from '@/systems/LevelSystem';
+import { getLevelUpCost, getTotalLevelUpCost, canLevelUp, calculateMaxLevel, getMaxAffordableLevel } from '@/systems/LevelSystem';
 import { getEvolutions } from '@/data/EvolutionPaths';
 import { canMerge, MergeCandidate } from '@/systems/MergeSystem';
 import { GRID, GRID_OFFSET_X } from '@/config/Constants';
-import { STATUS_EFFECTS } from '@/data/StatusEffects';
-import { COLORS, ATTRIBUTE_COLORS_STR, TEXT_STYLES, ANIM } from './UITheme';
+import { STATUS_EFFECTS, STATUS_EFFECT_CONFIGS } from '@/data/StatusEffects';
+import { COLORS, ATTRIBUTE_COLORS_STR, TEXT_STYLES, FONTS, ANIM } from './UITheme';
 import { drawPanel, drawButton, drawSeparator, animateSlideIn, animateSlideOut, animateButtonHover, animateButtonPress } from './UIHelpers';
 
 /**
@@ -72,6 +72,31 @@ function getSkillDisplay(effectType?: string, effectChance?: number): { name: st
   }
 
   const chance = `${Math.round(effectChance * 100)}%`;
+
+  // Build a detailed description from runtime config
+  const parts0 = effectType.split('_');
+  const baseKey = parts0[0];
+  const config = STATUS_EFFECT_CONFIGS[baseKey];
+  if (config) {
+    const details: string[] = [];
+    if (baseKey === 'burn') {
+      details.push(`${Math.round(config.strength * 100)}% tower dmg/tick`);
+    } else if (baseKey === 'poison') {
+      details.push(`${Math.round(config.strength * 100)}% max HP/tick`);
+      if (config.maxStacks) details.push(`stacks ${config.maxStacks}x`);
+    } else if (baseKey === 'slow') {
+      details.push(`-${Math.round(config.strength * 100)}% speed`);
+    } else if (baseKey === 'freeze') {
+      details.push('Stun + slow after thaw');
+    } else if (baseKey === 'stun') {
+      details.push('Cannot move');
+    } else if (baseKey === 'armorBreak') {
+      details.push(`-${Math.round(config.strength * 100)}% armor`);
+    }
+    if (config.duration) details.push(`${config.duration}s`);
+    if (details.length > 0) description = details.join(', ');
+  }
+
   return { name, description, chance };
 }
 
@@ -142,6 +167,7 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
   private rangeText!: Phaser.GameObjects.Text;
   private skillNameText!: Phaser.GameObjects.Text;
   private skillChanceText!: Phaser.GameObjects.Text;
+  private skillDescText!: Phaser.GameObjects.Text;
 
   // Level up section
   private levelUpBtn!: Phaser.GameObjects.Container;
@@ -297,7 +323,17 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
       fontSize: '12px',
     }).setOrigin(1, 0);
     this.add(this.skillChanceText);
-    statsY += lineH;
+    statsY += lineH - 6;
+
+    // Skill description (below skill name row)
+    this.skillDescText = this.scene.add.text(statsX, statsY, '', {
+      ...TEXT_STYLES.PANEL_LABEL,
+      color: '#bbaa77',
+      fontSize: '10px',
+      wordWrap: { width: w - 30 },
+    });
+    this.add(this.skillDescText);
+    statsY += 18;
 
     // Third separator
     const separator3 = this.scene.add.graphics();
@@ -378,6 +414,7 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
 
     // Arrow indicators
     const leftArrow = this.scene.add.text(-60, 0, '<', {
+      fontFamily: FONTS.BODY,
       fontSize: '16px',
       color: COLORS.TEXT_LABEL,
       fontStyle: 'bold',
@@ -385,6 +422,7 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
     this.priorityBtn.add(leftArrow);
 
     const rightArrow = this.scene.add.text(60, 0, '>', {
+      fontFamily: FONTS.BODY,
       fontSize: '16px',
       color: COLORS.TEXT_LABEL,
       fontStyle: 'bold',
@@ -536,8 +574,9 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
     this.nameText.setText(tower.stats.name);
 
     // Update sprite
-    if (this.scene.textures.exists(tower.digimonId)) {
-      this.digimonSprite.setTexture(tower.digimonId);
+    const spriteKey = tower.stats.spriteKey ?? tower.digimonId;
+    if (this.scene.textures.exists(spriteKey)) {
+      this.digimonSprite.setTexture(spriteKey);
       this.digimonSprite.setVisible(true);
     } else {
       this.digimonSprite.setVisible(false);
@@ -569,11 +608,14 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
     if (skillInfo) {
       this.skillNameText.setText(skillInfo.name);
       this.skillChanceText.setText(skillInfo.chance);
+      this.skillDescText.setText(skillInfo.description);
       this.skillNameText.setVisible(true);
       this.skillChanceText.setVisible(true);
+      this.skillDescText.setVisible(true);
     } else {
       this.skillNameText.setVisible(false);
       this.skillChanceText.setVisible(false);
+      this.skillDescText.setVisible(false);
     }
 
     // Level Up buttons
@@ -692,38 +734,56 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
     this.levelUp5Btn.setVisible(true);
     this.levelUpMaxBtn.setVisible(true);
 
-    // +5 button
+    // +5 button - show affordable levels within +5 range
     const targetLv5 = Math.min(tower.level + 5, maxLevel);
     const cost5 = getTotalLevelUpCost(tower.level, targetLv5, tower.stage);
-    const levels5 = targetLv5 - tower.level;
-    const canAfford5 = this.getDigibytes() >= cost5;
+    const affordable5 = getMaxAffordableLevel(tower.level, targetLv5, this.getDigibytes(), tower.stage);
+    const canAffordAll5 = this.getDigibytes() >= cost5;
+    const canAffordSome5 = affordable5 > tower.level;
 
-    this.levelUp5BtnText.setText(`+${levels5} (${cost5})`);
-    if (canAfford5) {
+    if (canAffordAll5) {
+      const levels5 = targetLv5 - tower.level;
+      this.levelUp5BtnText.setText(`+${levels5} (${cost5})`);
+      drawButton(this.levelUp5BtnBg, 95, 30, COLORS.SUCCESS);
+      this.levelUp5BtnText.setColor('#ffffff');
+    } else if (canAffordSome5) {
+      const affordableLevels = affordable5 - tower.level;
+      const partialCost5 = getTotalLevelUpCost(tower.level, affordable5, tower.stage);
+      this.levelUp5BtnText.setText(`+${affordableLevels} (${partialCost5})`);
       drawButton(this.levelUp5BtnBg, 95, 30, COLORS.SUCCESS);
       this.levelUp5BtnText.setColor('#ffffff');
     } else {
+      const levels5 = targetLv5 - tower.level;
+      this.levelUp5BtnText.setText(`+${levels5} (${cost5})`);
       drawButton(this.levelUp5BtnBg, 95, 30, COLORS.DISABLED);
       this.levelUp5BtnText.setColor(COLORS.TEXT_LIVES);
     }
 
-    // Max button
+    // Max button - show affordable level and cost
+    const affordableMax = getMaxAffordableLevel(tower.level, maxLevel, this.getDigibytes(), tower.stage);
     const costMax = getTotalLevelUpCost(tower.level, maxLevel, tower.stage);
-    const levelsMax = maxLevel - tower.level;
-    const canAffordMax = this.getDigibytes() >= costMax;
+    const canAffordAll = this.getDigibytes() >= costMax;
+    const canAffordSome = affordableMax > tower.level;
 
-    this.levelUpMaxBtnText.setText(`MAX (${costMax})`);
-    if (canAffordMax) {
+    if (canAffordAll) {
+      this.levelUpMaxBtnText.setText(`MAX (${costMax})`);
+      drawButton(this.levelUpMaxBtnBg, 95, 30, COLORS.SPECIAL);
+      this.levelUpMaxBtnText.setColor('#ffffff');
+    } else if (canAffordSome) {
+      const partialCost = getTotalLevelUpCost(tower.level, affordableMax, tower.stage);
+      this.levelUpMaxBtnText.setText(`→${affordableMax} (${partialCost})`);
       drawButton(this.levelUpMaxBtnBg, 95, 30, COLORS.SPECIAL);
       this.levelUpMaxBtnText.setColor('#ffffff');
     } else {
+      this.levelUpMaxBtnText.setText(`MAX (${costMax})`);
       drawButton(this.levelUpMaxBtnBg, 95, 30, COLORS.DISABLED);
       this.levelUpMaxBtnText.setColor(COLORS.TEXT_LIVES);
     }
   }
 
   /**
-   * Level up multiple times. levels = -1 means level to max.
+   * Level up multiple times. levels = -1 means level to max affordable.
+   * For +5, levels up as many as affordable (up to 5).
    */
   private onLevelUpMulti(levels: number): void {
     const tower = this.currentTower;
@@ -732,14 +792,22 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
     const maxLevel = calculateMaxLevel(tower.stage, tower.dp, tower.originStage, tower.stage);
     if (!canLevelUp(tower.level, maxLevel)) return;
 
-    const targetLevel = levels === -1
+    // Determine the desired target, then cap to what we can actually afford
+    const desiredTarget = levels === -1
       ? maxLevel
       : Math.min(tower.level + levels, maxLevel);
 
-    const totalCost = getTotalLevelUpCost(tower.level, targetLevel, tower.stage);
+    const affordableLevel = getMaxAffordableLevel(
+      tower.level, desiredTarget, this.getDigibytes(), tower.stage,
+    );
+
+    // Nothing affordable
+    if (affordableLevel <= tower.level) return;
+
+    const totalCost = getTotalLevelUpCost(tower.level, affordableLevel, tower.stage);
     if (!this.spendDigibytes(totalCost)) return;
 
-    tower.setLevel(targetLevel);
+    tower.setLevel(affordableLevel);
 
     EventBus.emit(GameEvents.TOWER_LEVELED, {
       towerID: tower.towerID,

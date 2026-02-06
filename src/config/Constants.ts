@@ -49,7 +49,7 @@ export const ORIGIN_MAX_STAGE: Record<Stage, Stage> = {
 export const STARTING_LIVES = 20;
 export const MAX_LIVES = 20;
 export const STARTING_DIGIBYTES = 500;
-export const TOTAL_WAVES_MVP = 20;
+export const TOTAL_WAVES_MVP = 100;
 
 // Stage multipliers for level up cost
 export const STAGE_LEVEL_COST_MULTIPLIER: Record<Stage, number> = {
@@ -67,10 +67,14 @@ export function getLevelUpCost(currentLevel: number, stage?: Stage): number {
   return Math.ceil(3 * currentLevel * multiplier);
 }
 
-// All 8 starter Digimon IDs (In-Training stage)
+// All 21 starter Digimon IDs (In-Training stage)
 export const ALL_STARTER_IDS = [
   'koromon', 'tsunomon', 'tokomon', 'gigimon',
   'tanemon', 'demiveemon', 'pagumon', 'viximon',
+  'nyaromon', 'gummymon', 'chocomon', 'pyocomon',
+  'mochimon', 'pukamon', 'dorimon',
+  'sunmon', 'moonmon', 'kyokyomon', 'puroromon',
+  'budmon', 'caprimon',
 ] as const;
 
 // Game speed options

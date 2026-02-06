@@ -8,6 +8,7 @@ import { GameScene } from '@/scenes/GameScene';
 import { PauseScene } from '@/scenes/PauseScene';
 import { SettingsScene } from '@/scenes/SettingsScene';
 import { GameOverScene } from '@/scenes/GameOverScene';
+import { EncyclopediaScene } from '@/scenes/EncyclopediaScene';
 
 export const gameConfig: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
@@ -30,5 +31,6 @@ export const gameConfig: Phaser.Types.Core.GameConfig = {
     PauseScene,
     SettingsScene,
     GameOverScene,
+    EncyclopediaScene,
   ],
 };

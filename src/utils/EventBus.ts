@@ -16,6 +16,7 @@ export const GameEvents = {
   ENEMY_SPAWNED: 'enemy:spawned',
   ENEMY_DIED: 'enemy:died',
   ENEMY_REACHED_BASE: 'enemy:reachedBase',
+  SPLITTER_DIED: 'enemy:splitterDied',
 
   // Combat events
   DAMAGE_DEALT: 'combat:damageDealt',
@@ -41,4 +42,7 @@ export const GameEvents = {
   STARTER_SELECTED: 'ui:starterSelected',
   MERGE_INITIATED: 'ui:mergeInitiated',
   DIGIVOLVE_INITIATED: 'ui:digivolveInitiated',
+
+  // Boss ability events
+  BOSS_ABILITY_ACTIVATED: 'boss:abilityActivated',
 } as const;

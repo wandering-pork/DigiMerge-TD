@@ -67,3 +67,29 @@ export function getTotalLevelUpCost(fromLevel: number, toLevel: number, stage?: 
   }
   return total;
 }
+
+/**
+ * Find the highest level reachable from currentLevel given a budget of DigiBytes.
+ * Returns currentLevel if budget can't afford even one level up.
+ * Returns at most maxLevel.
+ */
+export function getMaxAffordableLevel(
+  currentLevel: number,
+  maxLevel: number,
+  budget: number,
+  stage?: Stage,
+): number {
+  if (currentLevel >= maxLevel || budget <= 0) return currentLevel;
+
+  let spent = 0;
+  let level = currentLevel;
+
+  while (level < maxLevel) {
+    const cost = getLevelUpCost(level, stage);
+    if (spent + cost > budget) break;
+    spent += cost;
+    level++;
+  }
+
+  return level;
+}

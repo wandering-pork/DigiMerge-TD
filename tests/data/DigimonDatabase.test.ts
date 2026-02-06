@@ -6,36 +6,56 @@ describe('DigimonDatabase', () => {
   describe('towers', () => {
     const towers = DIGIMON_DATABASE.towers;
 
-    it('should have all 8 starter Digimon', () => {
-      const starters = ['koromon', 'tsunomon', 'tokomon', 'gigimon', 'tanemon', 'demiveemon', 'pagumon', 'viximon'];
+    it('should have all 21 starter Digimon', () => {
+      const starters = [
+        'koromon', 'tsunomon', 'tokomon', 'gigimon', 'tanemon', 'demiveemon', 'pagumon', 'viximon',
+        'nyaromon', 'gummymon', 'chocomon', 'pyocomon', 'mochimon', 'pukamon', 'dorimon',
+        'sunmon', 'moonmon', 'kyokyomon', 'puroromon', 'budmon', 'caprimon',
+      ];
       for (const starter of starters) {
         expect(towers[starter], `Missing starter: ${starter}`).toBeDefined();
       }
     });
 
     it('should have Rookie evolutions for all starters', () => {
-      const rookies = ['agumon', 'gabumon', 'patamon', 'guilmon', 'palmon', 'veemon', 'demidevimon', 'renamon'];
+      const rookies = [
+        'agumon', 'gabumon', 'patamon', 'guilmon', 'palmon', 'veemon', 'demidevimon', 'renamon',
+        'plotmon', 'terriermon', 'lopmon', 'piyomon', 'tentomon_tower', 'gomamon', 'dorumon',
+        'coronamon', 'lunamon', 'ryudamon', 'funbeemon', 'lalamon', 'hackmon',
+      ];
       for (const rookie of rookies) {
         expect(towers[rookie], `Missing rookie: ${rookie}`).toBeDefined();
       }
     });
 
     it('should have Champion evolutions', () => {
-      const champions = ['greymon', 'garurumon', 'angemon', 'growlmon', 'togemon', 'exveemon', 'devimon', 'kyubimon'];
+      const champions = [
+        'greymon', 'garurumon', 'angemon', 'growlmon', 'togemon', 'exveemon', 'devimon', 'kyubimon',
+        'tailmon', 'galgomon', 'turuiemon', 'birdramon_tower', 'kabuterimon_tower', 'ikkakumon', 'dorugamon',
+        'firamon', 'lekismon', 'ginryumon', 'waspmon', 'sunflowmon', 'reppamon',
+      ];
       for (const champ of champions) {
         expect(towers[champ], `Missing champion: ${champ}`).toBeDefined();
       }
     });
 
     it('should have Ultimate evolutions', () => {
-      const ultimates = ['metalgreymon', 'weregarurumon', 'magnaangemon', 'wargrowlmon', 'lillymon', 'paildramon', 'myotismon', 'taomon'];
+      const ultimates = [
+        'metalgreymon', 'weregarurumon', 'magnaangemon', 'wargrowlmon', 'lillymon', 'paildramon', 'myotismon', 'taomon',
+        'angewomon', 'rapidmon', 'andiramon', 'garudamon_tower', 'atlurkabuterimon', 'zudomon_tower', 'doruguremon',
+        'flaremon', 'crescemon', 'hisyaryumon', 'cannonbeemon', 'lilamon', 'saviorhackmon',
+      ];
       for (const ult of ultimates) {
         expect(towers[ult], `Missing ultimate: ${ult}`).toBeDefined();
       }
     });
 
     it('should have Mega evolutions', () => {
-      const megas = ['wargreymon', 'metalgarurumon', 'seraphimon', 'gallantmon', 'rosemon', 'imperialdramon_fm', 'venommyotismon', 'sakuyamon'];
+      const megas = [
+        'wargreymon', 'metalgarurumon', 'seraphimon', 'gallantmon', 'rosemon', 'imperialdramon_fm', 'venommyotismon', 'sakuyamon',
+        'ophanimon', 'saintgalgomon', 'cherubimon_virtue', 'hououmon', 'heraklekabuterimon_tower', 'plesiomon', 'alphamon',
+        'apollomon', 'dianamon', 'ouryumon', 'tigervespamon', 'lotusmon', 'jesmon',
+      ];
       for (const mega of megas) {
         expect(towers[mega], `Missing mega: ${mega}`).toBeDefined();
       }
@@ -54,7 +74,11 @@ describe('DigimonDatabase', () => {
     });
 
     it('starter Digimon should be In-Training stage', () => {
-      const starters = ['koromon', 'tsunomon', 'tokomon', 'gigimon', 'tanemon', 'demiveemon', 'pagumon', 'viximon'];
+      const starters = [
+        'koromon', 'tsunomon', 'tokomon', 'gigimon', 'tanemon', 'demiveemon', 'pagumon', 'viximon',
+        'nyaromon', 'gummymon', 'chocomon', 'pyocomon', 'mochimon', 'pukamon', 'dorimon',
+        'sunmon', 'moonmon', 'kyokyomon', 'puroromon', 'budmon', 'caprimon',
+      ];
       for (const starter of starters) {
         expect(towers[starter].stageTier, `${starter} should be In-Training`).toBe(Stage.IN_TRAINING);
       }

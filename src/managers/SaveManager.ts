@@ -22,7 +22,7 @@ function defaultStatistics(): GameStatistics {
  */
 function defaultSettings(): GameSettings {
   return {
-    sfxVolume: 0.5,
+    sfxVolume: 0,
     musicVolume: 0.3,
     showGrid: true,
     showRanges: false,

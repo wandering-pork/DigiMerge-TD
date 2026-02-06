@@ -35,6 +35,20 @@ export interface DigimonStats {
   effectType?: string;
   effectChance?: number;
   priority?: TargetPriority;
+  spriteKey?: string;
+}
+
+export type BossAbilityTrigger = 'cooldown' | 'passive' | 'hp_threshold';
+
+export interface BossAbility {
+  id: string;
+  name: string;
+  description: string;
+  trigger: BossAbilityTrigger;
+  cooldown?: number;       // seconds (for 'cooldown' trigger)
+  hpThreshold?: number;    // 0-1 fraction (for 'hp_threshold' trigger)
+  duration?: number;        // seconds (for timed effects)
+  params: Record<string, number>; // ability-specific parameters
 }
 
 export interface EnemyStats {
@@ -47,6 +61,7 @@ export interface EnemyStats {
   armor: number;
   type: EnemyType;
   reward: number;
+  bossAbility?: BossAbility;
 }
 
 export type EnemyType = 'swarm' | 'standard' | 'tank' | 'speedster' | 'flying' | 'regen' | 'shielded' | 'splitter';

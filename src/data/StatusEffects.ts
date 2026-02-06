@@ -187,3 +187,35 @@ export function calculateDotDamage(
 
   return 0;
 }
+
+// ============================================================================
+// Regen Constants
+// ============================================================================
+
+/** Regen enemies recover this fraction of max HP per second. */
+export const REGEN_RATE = 0.02;
+
+/**
+ * Check whether an enemy with the given active effects should regenerate HP.
+ * Poison suppresses regeneration entirely.
+ */
+export function canRegenerate(effects: Map<string, ActiveEffect>): boolean {
+  const poisonEffect = effects.get('poison');
+  if (poisonEffect && poisonEffect.remainingDuration > 0) {
+    return false;
+  }
+  return true;
+}
+
+/**
+ * Calculate how much HP to regenerate this tick.
+ * Returns 0 if regen is suppressed (by poison).
+ */
+export function calculateRegenAmount(
+  maxHp: number,
+  deltaSec: number,
+  effects: Map<string, ActiveEffect>,
+): number {
+  if (!canRegenerate(effects)) return 0;
+  return maxHp * REGEN_RATE * deltaSec;
+}

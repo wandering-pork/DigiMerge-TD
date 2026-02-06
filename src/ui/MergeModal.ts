@@ -125,9 +125,11 @@ export class MergeModal extends Phaser.GameObjects.Container {
     const cardTopY = py + 60;
 
     this.towerALabel = this.scene.add.text(leftCenterX, cardTopY, 'KEEPS', {
+      fontFamily: FONTS.BODY,
       fontSize: '12px',
       color: COLORS.VACCINE_STR,
       fontStyle: 'bold',
+      letterSpacing: 2,
     }).setOrigin(0.5, 0);
     this.panelContainer.add(this.towerALabel);
 
@@ -145,12 +147,14 @@ export class MergeModal extends Phaser.GameObjects.Container {
     this.panelContainer.add(this.towerAName);
 
     this.towerAStage = this.scene.add.text(leftCenterX, cardTopY + 88, '', {
+      fontFamily: FONTS.BODY,
       fontSize: '11px',
       color: COLORS.TEXT_LABEL,
     }).setOrigin(0.5, 0);
     this.panelContainer.add(this.towerAStage);
 
     this.towerAAttribute = this.scene.add.text(leftCenterX, cardTopY + 104, '', {
+      fontFamily: FONTS.BODY,
       fontSize: '11px',
       color: '#ffffff',
     }).setOrigin(0.5, 0);
@@ -174,9 +178,11 @@ export class MergeModal extends Phaser.GameObjects.Container {
     // Center: Merge arrow with pulsing alpha
     // =====================================================================
     this.arrowText = this.scene.add.text(centerX, cardTopY + 60, '+', {
-      fontSize: '32px',
+      fontFamily: FONTS.DISPLAY,
+      fontSize: '36px',
       color: COLORS.TEXT_GOLD,
       fontStyle: 'bold',
+      shadow: { offsetX: 0, offsetY: 2, color: '#221100', blur: 6, fill: true },
     }).setOrigin(0.5, 0.5);
     this.panelContainer.add(this.arrowText);
 
@@ -196,9 +202,11 @@ export class MergeModal extends Phaser.GameObjects.Container {
     const rightCenterX = px + w - 110;
 
     this.towerBLabel = this.scene.add.text(rightCenterX, cardTopY, 'REMOVED', {
+      fontFamily: FONTS.BODY,
       fontSize: '12px',
       color: COLORS.TEXT_LIVES,
       fontStyle: 'bold',
+      letterSpacing: 2,
     }).setOrigin(0.5, 0);
     this.panelContainer.add(this.towerBLabel);
 
@@ -216,12 +224,14 @@ export class MergeModal extends Phaser.GameObjects.Container {
     this.panelContainer.add(this.towerBName);
 
     this.towerBStage = this.scene.add.text(rightCenterX, cardTopY + 88, '', {
+      fontFamily: FONTS.BODY,
       fontSize: '11px',
       color: COLORS.TEXT_LABEL,
     }).setOrigin(0.5, 0);
     this.panelContainer.add(this.towerBStage);
 
     this.towerBAttribute = this.scene.add.text(rightCenterX, cardTopY + 104, '', {
+      fontFamily: FONTS.BODY,
       fontSize: '11px',
       color: '#ffffff',
     }).setOrigin(0.5, 0);
@@ -424,8 +434,9 @@ export class MergeModal extends Phaser.GameObjects.Container {
     levelText: Phaser.GameObjects.Text,
     dpText: Phaser.GameObjects.Text,
   ): void {
-    if (this.scene.textures.exists(tower.digimonId)) {
-      sprite.setTexture(tower.digimonId);
+    const spriteKey = tower.stats.spriteKey ?? tower.digimonId;
+    if (this.scene.textures.exists(spriteKey)) {
+      sprite.setTexture(spriteKey);
       sprite.setVisible(true);
     } else {
       sprite.setVisible(false);

@@ -25,6 +25,10 @@ export class Tower extends Phaser.GameObjects.Container {
   public targetPriority: TargetPriority;
   public attackCooldown: number;
 
+  // Boss debuffs
+  public stunTimer: number = 0;
+  public rangeReductionPercent: number = 0;
+
   // Selection state
   public isSelected: boolean;
 
@@ -33,6 +37,7 @@ export class Tower extends Phaser.GameObjects.Container {
   private levelText: Phaser.GameObjects.Text;
   private selectionHighlight: Phaser.GameObjects.Graphics;
   private rangeCircle: Phaser.GameObjects.Graphics;
+  private stunIndicator: Phaser.GameObjects.Text | null = null;
 
   constructor(
     scene: Phaser.Scene,
@@ -93,7 +98,7 @@ export class Tower extends Phaser.GameObjects.Container {
     this.add(this.rangeCircle);
 
     // Digimon sprite (offset upward slightly to make room for level text)
-    this.sprite = scene.add.sprite(0, -8, digimonId);
+    this.sprite = scene.add.sprite(0, -8, dbStats.spriteKey ?? digimonId);
     this.sprite.setScale(this.getSpriteScale());
     this.add(this.sprite);
 
@@ -163,7 +168,7 @@ export class Tower extends Phaser.GameObjects.Container {
     this.targetPriority = dbStats.priority ?? this.targetPriority;
 
     // Update sprite texture and scale
-    this.sprite.setTexture(digimonId);
+    this.sprite.setTexture(dbStats.spriteKey ?? digimonId);
     this.sprite.setScale(this.getSpriteScale());
   }
 
@@ -174,9 +179,11 @@ export class Tower extends Phaser.GameObjects.Container {
   /**
    * Return the attack range in pixels.
    * Adds +1.0 cell base bonus so even In-Training towers can reach adjacent path cells comfortably.
+   * Applies any boss-inflicted range reduction.
    */
   public getRange(): number {
-    return (this.stats.range + 1.0) * GRID.CELL_SIZE;
+    const base = (this.stats.range + 1.0) * GRID.CELL_SIZE;
+    return base * (1 - this.rangeReductionPercent);
   }
 
   /**
@@ -203,10 +210,10 @@ export class Tower extends Phaser.GameObjects.Container {
   }
 
   /**
-   * Return true if the tower can fire (cooldown has expired).
+   * Return true if the tower can fire (cooldown has expired and not stunned).
    */
   public canAttack(): boolean {
-    return this.attackCooldown <= 0;
+    return this.attackCooldown <= 0 && this.stunTimer <= 0;
   }
 
   /**
@@ -222,12 +229,49 @@ export class Tower extends Phaser.GameObjects.Container {
   // ---------------------------------------------------------------------------
 
   /**
-   * Called each frame. Reduces attack cooldown by elapsed delta (ms).
+   * Called each frame. Reduces attack cooldown and stun timer by elapsed delta (ms).
    */
   public update(_time: number, delta: number): void {
     if (this.attackCooldown > 0) {
       this.attackCooldown -= delta;
     }
+    if (this.stunTimer > 0) {
+      this.stunTimer -= delta / 1000; // stunTimer is in seconds
+      if (this.stunTimer <= 0) {
+        this.stunTimer = 0;
+        this.clearStunVisual();
+      }
+    }
+  }
+
+  /**
+   * Apply a stun debuff to this tower for the given duration in seconds.
+   */
+  public applyStun(durationSec: number): void {
+    this.stunTimer = Math.max(this.stunTimer, durationSec);
+    this.showStunVisual();
+  }
+
+  private showStunVisual(): void {
+    if (!this.stunIndicator) {
+      this.stunIndicator = this.scene.add.text(0, -30, '!', {
+        fontSize: '18px',
+        color: '#ff4444',
+        fontStyle: 'bold',
+        stroke: '#000000',
+        strokeThickness: 3,
+      }).setOrigin(0.5);
+      this.add(this.stunIndicator);
+    }
+    this.stunIndicator.setVisible(true);
+    this.sprite.setTint(0xff6666);
+  }
+
+  private clearStunVisual(): void {
+    if (this.stunIndicator) {
+      this.stunIndicator.setVisible(false);
+    }
+    this.sprite.clearTint();
   }
 
   // ---------------------------------------------------------------------------

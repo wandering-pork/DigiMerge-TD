@@ -1,12 +1,11 @@
 # DigiMerge TD - Implementation Plan
 
-## Overall Status: MVP + Gameplay Enhancements
+## Overall Status: Full Game + Roster Expansion
 
-**368 tests passing | 15 test files | TypeScript compiles clean | Vite build succeeds**
+**453 tests passing | 18 test files | TypeScript compiles clean | Vite build succeeds**
 
-All 8 sprints complete + gameplay enhancements. Core game logic fully implemented and tested.
-Post-MVP enhancements: stage-based level costs, status effects, damage numbers, wave preview, health bar/damage toggles, tower skills display.
-Remaining items are content expansion and polish (waves 21-100, drag-drop, object pooling, tutorial).
+All 8 sprints + gameplay enhancements + QoL + full 100-wave content + endless mode + roster expansion (Tier 1+2) + boss abilities + tutorial/encyclopedia complete.
+~105 tower Digimon (21 lines), ~65 enemy Digimon, 12 bosses (with unique abilities) across 5 phases. Regen, shielded, splitter mechanics. Endless mode with exponential scaling.
 
 ### Implementation Summary
 
@@ -21,26 +20,36 @@ Remaining items are content expansion and polish (waves 21-100, drag-drop, objec
 | 6 | Merge System | **Done** | Modal-based merge with merge mode (highlight candidates) |
 | 7 | UI Polish | **Partially Done** | No HUD.ts, UIManager, or reusable components |
 | 8 | Content & Polish | **Done** | Boss health bar + announcement, auto-save, Continue button |
+| 9 | QoL + Waves 21-100 + Endless | **Done** | Enemy mechanics, 5 phases, endless mode |
+| 10 | Boss Abilities | **Done** | 10 unique boss abilities, stun/aura/shield/spawn, 26 tests |
+| 11 | Tutorial + Encyclopedia + Wave Preview | **Done** | 8-step tutorial, encyclopedia browser, sprite wave preview, 10 tests |
+| 12 | Audio + Sprites + Save Export | Planned | Background music, sprite sheets, save export/import |
+| 13 | Polish & Cleanup | Planned | Drag-drop merge, HUD refactor, UI components, object pooling, new enemies, DNA digivolution |
+| 14 | Map Expansion | Planned | Larger/alternative maps, new path layouts |
+| 15 | Public Release Prep | Planned | Credits, disclaimer, branding, final polish |
 
-### Test Inventory (368 tests, 15 files)
+### Test Inventory (453 tests, 18 files)
 
 | Test File | Tests |
 |-----------|-------|
 | AttributeSystem | 20 |
 | TargetingSystem | 13 |
 | DPSystem | 19 |
-| LevelSystem | 40 |
+| LevelSystem | 49 |
 | MergeSystem | 17 |
 | OriginSystem | 34 |
-| StatusEffects | 56 |
+| StatusEffects | 73 |
+| BossAbilitySystem | 26 |
 | GridUtils | 16 |
 | Constants | 31 |
 | DigimonDatabase | 15 |
-| EvolutionPaths | 12 |
-| WaveData | 10 |
+| EvolutionPaths | 22 |
+| WaveData | 22 |
 | GameStateManager | 52 |
 | SaveManager | 16 |
-| SpawnMenu | 17 |
+| SpawnMenu | 18 |
+| TutorialOverlay | 4 |
+| EncyclopediaScene | 6 |
 
 ---
 
@@ -128,7 +137,7 @@ git push -u origin main
 
 - [x] TDD methodology followed for all pure logic systems
 - [x] Vitest configured and running
-- [x] 15 test files, 368 tests total
+- [x] 18 test files, 453 tests total
 
 ### Actual Test File Structure
 ```
@@ -136,21 +145,25 @@ tests/
 ├── setup.ts                       # Phaser mocks
 ├── systems/
 │   ├── AttributeSystem.test.ts    # 20 tests
+│   ├── BossAbilitySystem.test.ts  # 26 tests
 │   ├── DPSystem.test.ts           # 19 tests
-│   ├── LevelSystem.test.ts        # 40 tests
+│   ├── LevelSystem.test.ts        # 49 tests
 │   ├── MergeSystem.test.ts        # 17 tests
 │   ├── OriginSystem.test.ts       # 34 tests
-│   ├── StatusEffects.test.ts      # 56 tests
+│   ├── StatusEffects.test.ts      # 73 tests
 │   └── TargetingSystem.test.ts    # 13 tests
 ├── data/
 │   ├── DigimonDatabase.test.ts    # 15 tests
-│   ├── WaveData.test.ts           # 10 tests
-│   └── EvolutionPaths.test.ts     # 12 tests
+│   ├── WaveData.test.ts           # 22 tests
+│   └── EvolutionPaths.test.ts     # 22 tests
 ├── managers/
 │   ├── GameStateManager.test.ts   # 52 tests
 │   └── SaveManager.test.ts        # 16 tests
+├── scenes/
+│   └── EncyclopediaScene.test.ts  # 6 tests
 ├── ui/
-│   └── SpawnMenu.test.ts          # 17 tests
+│   ├── SpawnMenu.test.ts          # 18 tests
+│   └── TutorialOverlay.test.ts    # 4 tests
 └── utils/
     ├── Constants.test.ts          # 31 tests
     └── GridUtils.test.ts          # 16 tests
@@ -607,7 +620,7 @@ which enters merge mode (highlights valid candidates), then clicking a candidate
 - [x] BOSS_SPAWNED event emitted + boss_spawn.wav SFX
 - [x] Boss health bar (top of grid, red fill on dark background, name label)
 - [x] Boss spawn announcement text (animated with Back.easeOut tween, auto-fades)
-- [ ] **NOT DONE** - Special boss abilities
+- [x] Special boss abilities — implemented in Sprint 10 (BossAbilitySystem.ts)
 
 > **Deviation:** Bosses are Enemy instances with "boss_" prefix IDs and scaled stats.
 > No separate Boss.ts class. Boss UX (health bar, announcement) handled in GameScene.
@@ -686,25 +699,25 @@ which enters merge mode (highlights valid candidates), then clicking a candidate
 
 ## Remaining Work Summary
 
-### High Priority (Next Up)
+### High Priority — COMPLETED
 
 | Item | Section | Status |
 |------|---------|--------|
-| Settings should NOT pause game | 9.1 | Not done |
-| Lower default SFX volume | 9.2 | Not done |
-| Lv MAX should level up to affordable level | 9.3 | Not done |
-| Regen enemy mechanic | 9.4 | Not done |
-| Shielded enemy mechanic | 9.5 | Not done |
-| Splitter enemy mechanic | 9.6 | Not done |
+| Settings should NOT pause game | 9.1 | **Done** |
+| Lower default SFX volume | 9.2 | **Done** |
+| Lv MAX should level up to affordable level | 9.3 | **Done** |
+| Regen enemy mechanic | 9.4 | **Done** |
+| Shielded enemy mechanic | 9.5 | **Done** |
+| Splitter enemy mechanic | 9.6 | **Done** |
 
-### Content Expansion
+### Content Expansion — COMPLETED
 
 | Item | Section | Status |
 |------|---------|--------|
-| Phase 2: Waves 21-40 (Champion) | 9.7 | Not done |
-| Phase 3: Waves 41-60 (Ultimate) | 9.8 | Not done |
-| Phase 4: Waves 61-80 (Mega) | 9.9 | Not done |
-| Phase 5: Waves 81-100 + Endless | 9.10 | Not done |
+| Phase 2: Waves 21-40 (Champion) | 9.7 | **Done** |
+| Phase 3: Waves 41-60 (Ultimate) | 9.8 | **Done** |
+| Phase 4: Waves 61-80 (Mega) | 9.9 | **Done** |
+| Phase 5: Waves 81-100 + Endless | 9.10 | **Done** |
 
 ### Nice-to-Have Improvements
 
@@ -843,31 +856,34 @@ A sprint is complete when:
 
 ### Priority 3: Content Expansion (Phases 2-5)
 
-#### 9.7 Phase 2 — Waves 21-40 (Champion tier)
-- [ ] Add Champion-tier enemies to DigimonDatabase (Centarumon, Togemon, Monochromon, Andromon, etc.)
-- [ ] Define wave compositions for waves 21-40 in WaveData.ts
-- [ ] Boss waves at 30 and 40
-- [ ] Introduce Regen enemies (Wave 32) and Shielded enemies (Wave 33)
-- [ ] Scale HP multipliers for Phase 2 difficulty curve
+#### 9.7 Phase 2 — Waves 21-40 (Champion tier) ✅
+- [x] Added 18 Champion-tier enemies to DigimonDatabase (Guardromon for shielded, skip Centarumon/Wizardmon — no sprites)
+- [x] Defined wave compositions for waves 21-40 in WaveData.ts
+- [x] Boss waves: Devimon (wave 30), Myotismon (wave 40)
+- [x] Regen enemies in wave 32 (Togemon), Shielded enemies in wave 33 (Guardromon, Monochromon)
+- [x] HP scaling via waveScaling multiplier
 
-#### 9.8 Phase 3 — Waves 41-60 (Ultimate tier)
-- [ ] Add Ultimate-tier enemies to DigimonDatabase
-- [ ] Define wave compositions for waves 41-60
-- [ ] Boss waves at 50 and 60
-- [ ] Introduce Splitter enemies (Wave 46)
-- [ ] Mamemon splits into 2, MetalMamemon is shielded splitter
+#### 9.8 Phase 3 — Waves 41-60 (Ultimate tier) ✅
+- [x] Added 13 Ultimate-tier enemies (standard, tank, speedster, flying, regen)
+- [x] Defined wave compositions for waves 41-60
+- [x] Boss waves: SkullGreymon (wave 50), VenomMyotismon (wave 60)
+- [x] Splitter wave at wave 46 (Mamemon x13), MetalMamemon in later waves
+- [x] MegaKabuterimon uses Japanese sprite name AtlurKabuterimon_Blue.png
 
-#### 9.9 Phase 4 — Waves 61-80 (Mega tier)
-- [ ] Add Mega-tier enemies to DigimonDatabase
-- [ ] Define wave compositions for waves 61-80
-- [ ] Boss waves at 70 and 80
-- [ ] Diaboromon splits into 4
+#### 9.9 Phase 4 — Waves 61-80 (Mega tier) ✅
+- [x] Added 16 Mega-tier enemies (3 standard, 6 tank, 3 speedster, 3 flying) + 5 Ultra preview enemies
+- [x] Defined wave compositions for waves 61-80
+- [x] Boss waves: Machinedramon (wave 70), Omegamon (wave 80)
+- [x] Diaboromon splitter wave at wave 66 (splits into 4)
+- [x] Japanese sprite names: Piemon, Pinochimon, Mugendramon, Hououmon, HerakleKabuterimon, Armagemon, Millenniumon
 
-#### 9.10 Phase 5 — Waves 81-100 (Mega/Ultra tier) + Endless
-- [ ] Define wave compositions for waves 81-100
-- [ ] Boss waves at 90 and 100 (final boss: VenomMyotismon with regen + special abilities)
-- [ ] Endless mode (101+): scaling HP/speed/armor multipliers per wave
-- [ ] Victory screen update for Wave 100 clear
+#### 9.10 Phase 5 — Waves 81-100 (Mega/Ultra tier) + Endless ✅
+- [x] Defined wave compositions for waves 81-100 using Ultra enemies
+- [x] Boss waves: Omegamon Zwart (wave 90), Apocalymon (wave 100, final boss with 200k HP)
+- [x] Endless mode: generateEndlessWave() + getWaveConfig() for dynamic wave generation
+- [x] Endless scaling: 1.05^(wave-100) HP multiplier, spawn interval min 300ms, enemy count caps at 100
+- [x] Boss every 10 waves in endless (rotating pool of 5 bosses)
+- [x] WaveManager updated to use getWaveConfig(), separate scaling logic for endless
 
 ### Implementation Order
 
@@ -886,16 +902,545 @@ A sprint is complete when:
 
 ---
 
+---
+
+## Sprint 10: Boss Abilities
+
+**Goal:** Give each boss unique abilities that make them distinct threats beyond being stat-sticks.
+
+### Tasks
+
+#### 10.1 Boss Ability System
+- [x] Add `bossAbility?: BossAbility` field to `EnemyStats` interface
+- [x] Define `BossAbility` type with ability ID, cooldown, parameters
+- [x] Create `src/systems/BossAbilitySystem.ts` for ability execution logic
+- [x] Integrate ability tick into `Enemy.update()` for boss entities
+- [x] Visual indicators when boss activates ability (flash, text popup)
+- **Files:** `DigimonTypes.ts`, `Enemy.ts`, `BossAbilitySystem.ts`, `DigimonDatabase.ts`
+
+#### 10.2 Boss Ability Definitions
+- [x] **Greymon (Wave 10)**: *Nova Blast* — AoE fire burst that temporarily disables (stuns) the nearest tower for 2s. Cooldown: 8s
+- [x] **Greymon Evolved (Wave 20)**: *Mega Flame* — Speeds up all nearby enemies by 30% for 3s. Cooldown: 10s
+- [x] **Devimon (Wave 30)**: *Death Claw* — Drains 5 DigiBytes per second while alive (aura). Passive
+- [x] **Myotismon (Wave 40)**: *Crimson Lightning* — Heals self for 10% max HP every 12s. Cooldown: 12s
+- [x] **SkullGreymon (Wave 50)**: *Ground Zero* — At 50% HP, destroys all active projectiles on screen. One-time trigger
+- [x] **VenomMyotismon (Wave 60)**: *Venom Infuse* — Spawns 3 swarm minions every 15s. Cooldown: 15s
+- [x] **Machinedramon (Wave 70)**: *Infinity Cannon* — Reduces all tower ranges by 20% while alive. Passive aura
+- [x] **Omegamon (Wave 80)**: *Transcendent Sword* — Grants self 50% damage reduction shield for 4s every 20s. Cooldown: 20s
+- [x] **Omegamon Zwart (Wave 90)**: *Garuru Cannon* — Freezes the 3 highest-DPS towers for 3s every 15s. Cooldown: 15s
+- [x] **Apocalymon (Wave 100)**: *Total Annihilation* — At 25% HP, resets all tower attack cooldowns and stuns all towers for 2s. One-time trigger
+- **Files:** `DigimonDatabase.ts` (boss entries), `BossAbilitySystem.ts`
+
+#### 10.3 Boss Ability UI
+- [x] Show boss ability name + description in boss health bar area
+- [x] Ability cooldown indicator (circular progress or timer text)
+- [x] Screen flash/shake on powerful abilities (Apocalymon, SkullGreymon)
+- [x] Affected towers show visual feedback when stunned/debuffed (red tint, "!" icon)
+- **Files:** `GameScene.ts` (boss HUD), `Tower.ts` (debuff visuals)
+
+#### 10.4 Boss Ability Tests
+- [x] Unit tests for ability cooldowns and triggers
+- [x] Tests for passive aura effects (range reduction, DB drain)
+- [x] Tests for one-time triggers (HP threshold checks)
+- [x] Tests for minion spawning (VenomMyotismon)
+- **Files:** `tests/systems/BossAbilitySystem.test.ts` (26 tests)
+
+### Sprint 10 Acceptance Criteria
+- [x] Each of the 10 bosses has a unique ability
+- [x] Abilities activate on correct timers/triggers
+- [x] Visual feedback clearly communicates what the boss is doing
+- [x] Tower debuffs (stun, range reduction) work correctly and expire
+- [x] All unit tests pass
+- [x] Bosses feel like meaningful threats, not just HP sponges
+
+---
+
+## Sprint 11: Tutorial, Encyclopedia & Wave Preview Enhancement
+
+**Goal:** Improve new player onboarding, add a Digimon reference browser, and enhance the wave preview with visual enemy information.
+
+### Tasks
+
+#### 11.1 Tutorial System
+- [x] Create `src/ui/TutorialOverlay.ts` — step-based tutorial overlay
+- [x] Tutorial triggers on first game start (check LocalStorage flag `digimerge_td_tutorial_complete`)
+- [x] Step-based progression with highlight zones and instruction text
+- [x] Tutorial steps:
+  1. "Welcome to DigiMerge TD! Enemies follow the path — defend your base!"
+  2. "Tap a green slot to place your starter Digimon" (highlight empty slots)
+  3. "Enemies are coming! Your Digimon attacks automatically" (start wave 1)
+  4. "Earn DigiBytes by defeating enemies. Use them to level up!" (highlight tower info panel)
+  5. "Open the Spawn Menu to deploy more Digimon" (highlight spawn button)
+  6. "Merge same-attribute Digimon to gain DP for Digivolution!" (show merge button)
+  7. "At max level, Digivolve to evolve into a stronger form!" (show digivolve concept)
+  8. "Good luck, Tamer! The Digital World is counting on you!"
+- [x] Skip button available at all times
+- [x] Dim/darken areas outside the highlight zone
+- [x] Arrow/pointer indicators toward highlighted elements
+- **Files:** `TutorialOverlay.ts`, `GameScene.ts` (tutorial launch)
+
+#### 11.2 Encyclopedia / Digimon Browser
+- [x] Create `src/scenes/EncyclopediaScene.ts` — browsable Digimon catalog
+- [x] Accessible from MainMenuScene (new "Encyclopedia" button)
+- [x] Grid display of all Digimon sprites (towers + enemies)
+- [x] Filter tabs: By Type (All/Towers/Enemies) and By Stage (All/In-Training → Ultra)
+- [x] Detail panel on selection:
+  - Sprite (large, 4x scaled)
+  - Name, Stage, Attribute
+  - Stats (tower: damage/speed/range, enemy: HP/speed/armor)
+  - Boss ability info (if applicable)
+- [x] Back button to return to MainMenuScene
+- [x] Pagination (6x4 grid, 24 items per page)
+- **Files:** `EncyclopediaScene.ts`, `MainMenuScene.ts` (button), `GameConfig.ts` (scene registration)
+
+#### 11.3 Wave Preview Enhancement
+- [x] Replace text-only wave preview with visual enemy list
+- [x] Each enemy entry shows: small sprite (1.5x scale) + name + count + type icon
+- [x] Enemy type indicators: colored tags for swarm/tank/speedster/flying/regen/shielded/splitter
+- [x] Boss entries highlighted with boss ability name shown
+- **Files:** `GameScene.ts` (wave preview section)
+
+#### 11.4 Tests
+- [x] Tutorial step progression tests (completion flag, reset, step count)
+- [x] Encyclopedia data validation tests (tower/enemy counts, required fields, boss abilities, filtering)
+- **Files:** `tests/ui/TutorialOverlay.test.ts` (4 tests), `tests/scenes/EncyclopediaScene.test.ts` (6 tests)
+
+### Sprint 11 Acceptance Criteria
+- [x] First-time players see tutorial overlay guiding them through basics
+- [x] Tutorial can be skipped and doesn't replay after completion
+- [x] Encyclopedia shows all Digimon with filtering and detail view
+- [x] Wave preview shows enemy sprites alongside names and special abilities
+- [x] All unit tests pass
+
+---
+
+## Sprint 12: Audio, Sprite Sheets & Save Export
+
+**Goal:** Add background music, optimize sprite rendering with sprite sheets, and allow save file export/import.
+
+### Tasks
+
+#### 12.1 Background Music
+- [ ] Source or create looping background tracks:
+  - Main Menu theme (calm, digital ambient)
+  - Gameplay theme (upbeat, action)
+  - Boss theme (intense, dramatic — plays during boss waves)
+  - Game Over theme (somber, short)
+  - Victory theme (triumphant, short)
+- [ ] Add music files to `public/assets/music/`
+- [ ] Extend `AudioManager.ts` with music playback (separate volume from SFX)
+- [ ] Music volume slider in SettingsScene (independent from SFX volume)
+- [ ] Music mute toggle
+- [ ] Smooth crossfade between tracks (e.g., gameplay → boss theme)
+- [ ] Music persists across scene transitions (don't restart on scene change)
+- [ ] Save music volume/mute preference in SaveManager
+- **Files:** `AudioManager.ts`, `SettingsScene.ts`, `GameScene.ts`, `MainMenuScene.ts`, `GameOverScene.ts`, `SaveManager.ts`
+
+#### 12.2 Sprite Sheet Implementation
+- [ ] Create texture atlases from individual sprite PNGs for performance
+  - Group by category: tower sprites, enemy sprites, UI elements
+  - Use Phaser's multi-atlas or spritesheet format
+- [ ] Build script or Phaser atlas packer to generate atlas JSON + PNG
+- [ ] Update `PreloadScene.ts` to load atlases instead of individual images
+- [ ] Update all sprite references (Tower.ts, Enemy.ts, TowerInfoPanel.ts, etc.) to use atlas frames
+- [ ] Verify all ~149 sprites render correctly from atlases
+- [ ] Measure performance improvement (draw call reduction)
+- **Files:** `PreloadScene.ts`, `Tower.ts`, `Enemy.ts`, build scripts, atlas configs
+
+#### 12.3 Save File Export/Import
+- [ ] Add "Export Save" button in SettingsScene
+  - Serializes current save data to JSON
+  - Triggers browser file download (`DigiMerge_TD_save.json`)
+- [ ] Add "Import Save" button in SettingsScene
+  - Opens file picker for JSON files
+  - Validates save data structure and version
+  - Confirmation dialog before overwriting current save
+  - Reloads game state from imported data
+- [ ] Export/import uses same format as LocalStorage save
+- [ ] Error handling for invalid/corrupted import files
+- [ ] Add save file version migration support (for future compatibility)
+- **Files:** `SaveManager.ts` (export/import methods), `SettingsScene.ts` (buttons), `MainMenuScene.ts` (import option)
+
+#### 12.4 Tests
+- [ ] Music playback state tests (play, pause, crossfade, volume)
+- [ ] Atlas frame lookup tests (verify sprite names resolve correctly)
+- [ ] Save export serialization tests
+- [ ] Save import validation tests (valid, corrupted, wrong version)
+- **Files:** `tests/managers/AudioManager.test.ts`, `tests/managers/SaveManager.test.ts` (extended)
+
+### Sprint 12 Acceptance Criteria
+- [ ] Background music plays during menu, gameplay, boss, and game over
+- [ ] Music and SFX volumes are independently controllable
+- [ ] Sprite sheets load correctly and all sprites render from atlases
+- [ ] Save files can be exported as JSON and re-imported successfully
+- [ ] Invalid imports are rejected with user-friendly error messages
+- [ ] All unit tests pass
+
+---
+
+## Sprint 13: Remaining Polish & Cleanup
+
+**Goal:** Address all remaining deferred items, refactoring, and polish.
+
+### Tasks
+
+#### 13.1 Drag-and-Drop Merge (Alternative UX)
+- [ ] Enable dragging a tower onto another tower to initiate merge
+- [ ] Visual drag indicator (tower follows pointer with transparency)
+- [ ] Valid drop targets highlight (same attribute + stage)
+- [ ] Invalid drop shows red X feedback
+- [ ] Drop on valid target opens MergeModal (same as button-based flow)
+- [ ] Cancel drag on right-click or ESC
+- **Files:** `Tower.ts` (drag events), `TowerManager.ts`, `GameScene.ts`
+
+#### 13.2 Visual Merge Effect
+- [ ] Particle burst on successful merge (attribute-colored particles)
+- [ ] Surviving tower glow/pulse animation after merge
+- [ ] Sacrificed tower fade + shrink tween toward survivor
+- **Files:** `GameScene.ts`, `TowerManager.ts`
+
+#### 13.3 Placement Confirmation & Cancel
+- [ ] After selecting a Digimon to spawn, enter placement mode
+- [ ] Ghost preview follows pointer (already exists)
+- [ ] Left-click confirms placement
+- [ ] Right-click or ESC cancels placement (refunds cost)
+- [ ] Visual feedback for cancel (red flash on ghost)
+- **Files:** `GameScene.ts`, `SpawnMenu.ts`
+
+#### 13.4 HUD Refactor
+- [ ] Extract HUD creation from `GameScene.createHUD()` into `src/ui/HUD.ts`
+- [ ] HUD class manages: lives, DigiBytes, wave counter, speed buttons, pause/settings buttons
+- [ ] HUD exposes update methods called from GameScene
+- [ ] Reduce GameScene line count
+- **Files:** `HUD.ts` (new), `GameScene.ts` (delegate to HUD)
+
+#### 13.5 Reusable UI Components
+- [ ] `src/ui/components/Button.ts` — configurable button (label, colors, callbacks, hover/press states)
+- [ ] `src/ui/components/Panel.ts` — background panel with border, title, close button
+- [ ] `src/ui/components/ProgressBar.ts` — configurable bar (health, loading, XP)
+- [ ] `src/ui/components/Tooltip.ts` — hover tooltip with arrow positioning
+- [ ] Refactor existing panels to use shared components where practical
+- **Files:** `src/ui/components/*.ts`, existing UI files
+
+#### 13.6 UIManager
+- [ ] Create `src/managers/UIManager.ts`
+- [ ] Centralized panel visibility coordination (only one modal open at a time)
+- [ ] UI state machine: idle, tower_selected, merge_mode, modal_open, placement_mode
+- [ ] Route UI events through UIManager instead of direct EventBus
+- **Files:** `UIManager.ts`, `GameScene.ts`, existing UI files
+
+#### 13.7 Panel Animations
+- [ ] Smooth slide-in/fade-in for TowerInfoPanel, SpawnMenu
+- [ ] Modal scale-up entrance for EvolutionModal, MergeModal
+- [ ] Panel slide-out on close
+- **Files:** `TowerInfoPanel.ts`, `SpawnMenu.ts`, `EvolutionModal.ts`, `MergeModal.ts`
+
+#### 13.8 Object Pooling
+- [ ] Implement object pool for Projectiles (reuse instead of create/destroy)
+- [ ] Implement object pool for Enemies (reuse instead of create/destroy)
+- [ ] Pool manager with `get()`, `release()`, `preload()` methods
+- [ ] Measure performance improvement on high-enemy waves (50+)
+- **Files:** `src/utils/ObjectPool.ts` (new), `CombatManager.ts`, `WaveManager.ts`, `GameScene.ts`
+
+#### 13.9 New Enemies (Phase 10 Remaining)
+- [ ] Add ~60 new enemy Digimon to `DigimonDatabase.ts` (see Phase 10 enemy lists)
+  - 12 Rookie enemies
+  - 12 Champion enemies
+  - 15 Ultimate enemies
+  - 14 Mega enemies
+  - 7 Ultra enemies
+- [ ] Load new enemy sprites in `PreloadScene.ts`
+- [ ] Integrate into wave rotations (`WaveData.ts` updates)
+- [ ] Update wave generation for endless mode variety
+- **Files:** `DigimonDatabase.ts`, `PreloadScene.ts`, `WaveData.ts`
+
+#### 13.10 DNA Digivolution System
+- [ ] Add DNA Digivolution as Ultra-tier evolution option
+- [ ] Requires two specific Mega towers on the field simultaneously
+- [ ] New UI for selecting DNA partners
+- [ ] 8 DNA fusion targets (Omegamon, Imperialdramon PM, Gallantmon CM, etc.)
+- [ ] Add DNA result entries to `DigimonDatabase.ts`
+- [ ] Add DNA paths to `EvolutionPaths.ts`
+- **Files:** `DigimonDatabase.ts`, `EvolutionPaths.ts`, `OriginSystem.ts`, `EvolutionModal.ts`, `PreloadScene.ts`
+
+#### 13.11 Miscellaneous
+- [ ] Debug grid lines toggle (dev mode)
+- [ ] Mute/unmute toggle button in HUD (quick access)
+- [ ] Comprehensive bug fix pass / playtesting
+- **Files:** Various
+
+### Sprint 13 Acceptance Criteria
+- [ ] Drag-and-drop merge works alongside button-based merge
+- [ ] Visual effects for merge and panel transitions
+- [ ] HUD extracted into reusable class
+- [ ] UI components reduce code duplication
+- [ ] Object pooling improves performance on heavy waves
+- [ ] New enemies add variety to all wave phases
+- [ ] DNA Digivolution provides endgame evolution targets
+- [ ] All unit tests pass
+- [ ] Full playtesting pass completed
+
+---
+
+## Sprint 14: Map Expansion
+
+**Goal:** Expand beyond the single 8x18 map with larger grids, new path layouts, and map selection.
+
+### Tasks
+
+#### 14.1 Map Data Architecture
+- [ ] Create `src/data/MapData.ts` — defines multiple map configurations
+- [ ] Map interface: `{ id, name, description, columns, rows, cellSize, pathWaypoints, spawn, base, towerSlots, difficulty }`
+- [ ] Extract current map (8x18 serpentine) as "Classic" map
+- [ ] Decouple grid constants from `Constants.ts` — make dynamic per map
+- [ ] Update `GRID`, `PATH_WAYPOINTS`, `PATH_CELLS`, `isPathCell`, `isValidTowerSlot` to load from selected map
+- **Files:** `MapData.ts` (new), `Constants.ts` (refactor to dynamic), `GridUtils.ts`
+
+#### 14.2 New Maps
+- [ ] **Map 2: "Wide Valley"** — 12x14 grid, wider with multiple branching paths, more tower slots (~120), shorter path but more enemies per wave
+- [ ] **Map 3: "Gauntlet"** — 6x24 grid, narrow and tall, single long winding path (~80 waypoints), fewer tower slots (~60) but long kill corridor
+- [ ] **Map 4: "Crossroads"** — 10x16 grid, two enemy spawn points converging to one base, requires split defense strategy
+- [ ] Each map has its own difficulty rating (affects wave scaling)
+- [ ] Each map has custom decoration placement
+- **Files:** `MapData.ts`
+
+#### 14.3 Map Select Scene
+- [ ] Create `src/scenes/MapSelectScene.ts` — shown after StarterSelectScene
+- [ ] Display map thumbnails with name, difficulty rating, grid size, tower slot count
+- [ ] Preview shows miniature path layout
+- [ ] Selected map stored in registry for GameScene to read
+- [ ] Back button to StarterSelectScene
+- **Files:** `MapSelectScene.ts` (new), `StarterSelectScene.ts` (transition), `GameConfig.ts` (register scene)
+
+#### 14.4 GameScene Map Integration
+- [ ] GameScene reads selected map from registry on create
+- [ ] Dynamic grid rendering based on map dimensions
+- [ ] Dynamic camera/viewport scaling for larger grids (zoom to fit or scrollable)
+- [ ] Path rendering adapts to map waypoints
+- [ ] Tower placement uses map-specific valid slots
+- [ ] Enemy spawning uses map-specific spawn point(s)
+- [ ] HUD repositions based on available screen space
+- **Files:** `GameScene.ts`, `WaveManager.ts`, `CombatManager.ts`
+
+#### 14.5 Multi-Spawn Support (Map 4)
+- [ ] WaveManager supports multiple spawn points
+- [ ] Enemies split between spawn points (alternating or configurable split ratio)
+- [ ] Each spawn point has its own path to the base
+- [ ] Base can receive enemies from multiple paths
+- **Files:** `WaveManager.ts`, `Enemy.ts`, `MapData.ts`
+
+#### 14.6 Save/Load Map Support
+- [ ] Save data includes selected map ID
+- [ ] Loading a save restores the correct map
+- [ ] Map-specific high scores / statistics
+- **Files:** `SaveManager.ts`, `GameTypes.ts`
+
+#### 14.7 Tests
+- [ ] Map data validation tests (all maps have valid paths, spawn, base)
+- [ ] Dynamic grid utility tests for different map sizes
+- [ ] Multi-spawn path tests
+- [ ] Save/load with map ID tests
+- **Files:** `tests/data/MapData.test.ts`, `tests/utils/GridUtils.test.ts` (extended)
+
+### Sprint 14 Acceptance Criteria
+- [ ] At least 3 playable maps with distinct layouts
+- [ ] Map selection screen shows all maps with previews
+- [ ] Game renders correctly on all map sizes
+- [ ] Multi-spawn map works with enemies from multiple entry points
+- [ ] Save/load preserves map selection
+- [ ] All unit tests pass
+
+---
+
+## Sprint 15: Public Release Preparation
+
+**Goal:** Prepare the game for public sharing with proper credits, legal disclaimers, and final presentation polish.
+
+### Tasks
+
+#### 15.1 Credits Scene
+- [ ] Create `src/scenes/CreditsScene.ts` — scrollable credits display
+- [ ] Accessible from MainMenuScene ("Credits" button)
+- [ ] Credits content:
+  - **Game**: "DigiMerge TD" title and version number
+  - **Developer**: Your name/handle
+  - **Framework**: "Built with Phaser 3" + link
+  - **Sprites**: "Digimon sprite art from [source/artist credit]"
+  - **Tiles**: "Sprout Lands asset pack by Cup Nooble" (or appropriate credit)
+  - **Sound Effects**: Credit SFX source(s)
+  - **Music**: Credit music source(s) (added in Sprint 12)
+  - **Special Thanks**: Any contributors, testers, community
+  - **Tools**: TypeScript, Vite, Vitest, Claude Code
+- [ ] Auto-scrolling text with manual scroll support
+- [ ] Back button to MainMenuScene
+- **Files:** `CreditsScene.ts` (new), `MainMenuScene.ts` (button), `GameConfig.ts` (register scene)
+
+#### 15.2 Disclaimer / Legal Notice
+- [ ] Add disclaimer overlay or section (accessible from MainMenuScene or Credits)
+- [ ] Disclaimer text:
+  - "DigiMerge TD is a fan-made, non-commercial project"
+  - "Digimon is a registered trademark of Bandai Namco Entertainment / Toei Animation"
+  - "This game is not affiliated with, endorsed by, or connected to Bandai, Toei, or any official Digimon entity"
+  - "All Digimon names, characters, and related elements are the property of their respective owners"
+  - "This project is created for educational and entertainment purposes only"
+  - "No copyright infringement is intended"
+- [ ] Disclaimer shown on first launch (with "I Understand" button)
+- [ ] Accessible later from Credits or MainMenu
+- **Files:** `CreditsScene.ts` or `DisclaimerScene.ts`, `MainMenuScene.ts`
+
+#### 15.3 Version & Branding
+- [ ] Add version number display on MainMenuScene (e.g., "v1.0.0")
+- [ ] Version sourced from `package.json` or a `VERSION` constant
+- [ ] Finalize game title styling on MainMenuScene
+- [ ] Add favicon if not already present
+- [ ] Update `index.html` title and meta tags
+- [ ] Update `README.md` with:
+  - Game description and screenshots
+  - How to play (controls, mechanics overview)
+  - How to run locally (`npm install && npm run dev`)
+  - Credits and acknowledgments
+  - License information
+- **Files:** `MainMenuScene.ts`, `index.html`, `README.md`, `package.json`
+
+#### 15.4 Final Polish Pass
+- [ ] Comprehensive playtesting across all 100 waves + endless
+- [ ] Fix any visual glitches, overlapping UI, or broken interactions
+- [ ] Verify all 21 starter lines evolve correctly through all stages
+- [ ] Verify save/load works across all scenarios
+- [ ] Test on Chrome, Firefox, Edge
+- [ ] Test at different window sizes / responsive behavior
+- [ ] Performance check on wave 80+ (high enemy counts)
+- [ ] Ensure no console errors during normal gameplay
+
+#### 15.5 Deployment Finalization
+- [ ] Verify GitHub Pages deployment works correctly
+- [ ] Confirm live URL loads and plays without issues
+- [ ] Add Open Graph meta tags for link previews (title, description, image)
+- [ ] Consider adding a simple analytics ping (optional, privacy-respecting)
+- [ ] Create a release tag in git (v1.0.0)
+- **Files:** `index.html`, `.github/workflows/deploy.yml`, git tags
+
+### Sprint 15 Acceptance Criteria
+- [ ] Credits scene lists all contributors and asset sources
+- [ ] Disclaimer clearly states fan-made, non-commercial nature
+- [ ] Version number visible on main menu
+- [ ] README provides clear instructions for players and developers
+- [ ] Game passes full playtesting with no critical bugs
+- [ ] Live deployment works and is shareable
+- [ ] The game is ready to share publicly with confidence
+
+---
+
 ## Future Roadmap
 
-### Polish & Features (post-content)
-- Tutorial system
-- Encyclopedia/Digimon browser
-- Drag-and-drop merge (alternative UX)
-- Background music
-- Advanced visual effects / particles
-- Object pooling (performance)
+### Post-Sprint 15 (if desired)
 - Achievements / Leaderboards
+- Advanced visual effects / particles
+- Mobile touch optimization
+- Difficulty modes (Easy / Normal / Hard)
+- Challenge modes (limited towers, no merge, speed run)
+- Community features (shared save codes)
+- Localization (multi-language support)
+
+---
+
+## Phase 10: Roster Expansion
+
+**Goal:** Expand the Digimon roster from ~105 to ~228 with new tower lines, enemies, and DNA Digivolution.
+
+**Reference:** See `ROSTER_EXPANSION_PLAN.md` for full sprite availability analysis and name mappings.
+
+### Tier 1 — High Priority Tower Lines (7 complete chains)
+
+| # | Line | Attribute | Specialty | Stages |
+|---|------|-----------|-----------|--------|
+| 9 | Nyaromon → Plotmon → Tailmon → Angewomon → Ophanimon | Vaccine | Holy / Heal | Nyaromon.png → Plotmon.png → Tailmon.png → Angewomon.png → Ophanimon.png |
+| 10 | Gummymon → Terriermon → Galgomon → Rapidmon → SaintGalgomon | Vaccine | Multi-hit / Pierce | Gummymon.png → Terriermon.png → Galgomon.png → Rapidmon.png → SaintGalgomon.png |
+| 11 | Chocomon → Lopmon → Turuiemon → Andiramon → Cherubimon Virtue | Free | CC / Support | Chocomon.png → Lopmon.png → Turuiemon.png → Andiramon_Data.png → Cherubimon_Virtue.png |
+| 12 | Pyocomon → Piyomon → Birdramon → Garudamon → Hououmon | Data | Fire / Flying | Pyocomon.png → Piyomon.png → Birdramon.png → Garudamon.png → Hououmon.png |
+| 13 | Mochimon → Tentomon → Kabuterimon → AtlurKabuterimon → HerakleKabuterimon | Data | Electric / Pierce | Mochimon.png → Tentomon.png → Kabuterimon.png → AtlurKabuterimon_Blue.png → HerakleKabuterimon.png |
+| 14 | Pukamon → Gomamon → Ikkakumon → Zudomon → Plesiomon | Vaccine | Ice / Tank | Pukamon.png → Gomamon.png → Ikkakumon.png → Zudomon.png → Plesiomon.png |
+| 15 | Dorimon → DORUmon → DORUgamon → DORUguremon → Alphamon | Data | Pierce / Royal Knight | Dorimon.png → DORUmon.png → DORUgamon.png → DORUguremon.png → Alphamon.png |
+
+### Tier 2 — Medium Priority Tower Lines (6 complete chains)
+
+| # | Line | Attribute | Specialty | Stages |
+|---|------|-----------|-----------|--------|
+| 16 | Sunmon → Coronamon → Firamon → Flaremon → Apollomon | Vaccine | Fire / Burst | Sunmon.png → Coronamon.png → Firamon.png → Flaremon.png → Apollomon.png |
+| 17 | Moonmon → Lunamon → Lekismon → Crescemon → Dianamon | Data | Ice / CC | Moonmon.png → Lunamon.png → Lekismon.png → Crescemon.png → Dianamon.png |
+| 18 | Kyokyomon → Ryudamon → Ginryumon → Hisyaryumon → Ouryumon | Vaccine | Pierce / Armor Break | Kyokyomon.png → Ryudamon.png → Ginryumon.png → Hisyaryumon.png → Ouryumon.png |
+| 19 | Puroromon → Funbeemon → Waspmon → Cannonbeemon → TigerVespamon | Free | Multi-hit / Speed | Puroromon.png → Funbeemon.png → Waspmon.png → Cannonbeemon.png → TigerVespamon.png |
+| 20 | Budmon → Lalamon → Sunflowmon → Lilamon → Lotusmon | Data | Poison / Support | Budmon.png → Lalamon.png → Sunflowmon.png → Lilamon.png → Lotusmon.png |
+| 21 | Caprimon → Hackmon → (sub TBD) → SaviorHackmon → Jesmon | Vaccine | Royal Knight | Caprimon.png → Hackmon.png → ? → SaviorHackmon.png → Jesmon.png |
+
+### New Enemy Additions by Tier
+
+**Rookie enemies** (12): Gomamon, Lopmon, Coronamon, Lunamon, Terriermon, Wormmon, Bearmon, Hagurumon, Armadimon, Keramon, Commandramon, Lucemon
+
+**Champion enemies** (12): Tailmon, Wizarmon, Dobermon, Ikkakumon, Gekomon, Starmon, Tankmon, Soulmon, Shellmon, Dokugumon, V-dramon, GeoGreymon
+
+**Ultimate enemies** (15): Etemon, Digitamamon, Knightmon, Phantomon, Pumpmon, Chimairamon, Cyberdramon, Triceramon, Monzaemon, MetalTyranomon, Dagomon, Mermaimon, Lucemon Falldown, Whamon, Orochimon
+
+**Mega enemies** (14): Darkdramon, Craniummon, Titamon, Lilithmon, Barbamon, Duftmon, GrandisKuwagamon, KingEtemon, MetalEtemon, Ebemon, HiAndromon, Gankoomon, RustTyrannomon, Dinorexmon
+
+**Ultra enemies** (7): Susanoomon, Lucemon Satan, Ogudomon, Chaosmon, Ordinemon, DarknessBagramon, Examon
+
+### DNA Digivolution Targets
+
+| Partner A | Partner B | Result | Sprite |
+|-----------|-----------|--------|--------|
+| WarGreymon | MetalGarurumon | Omegamon | Omegamon.png |
+| Imperialdramon FM | — (high DP) | Imperialdramon PM | Imperialdramon_Paladin.png |
+| Gallantmon | ChaosGallantmon | Gallantmon CM | Dukemon_X.png |
+| Ophanimon | LadyDevimon | Mastemon | Mastemon.png |
+| Alphamon | Ouryumon | Alphamon Ouryuken | Alphamon_Ouryuken.png |
+| Seraphimon | Ophanimon | Susanoomon | Susanoomon.png |
+| Rosemon | Lotusmon | Rafflesimon | Rafflesimon.png |
+| Beelzemon | — (high DP) | Beelzemon BM | Beelzebumon_Blast.png |
+
+### Implementation Order
+
+1. **Tier 1 tower lines** (7 lines, ~35 new tower Digimon)
+2. **Tier 2 tower lines** (6 lines, ~30 new tower Digimon)
+3. **New enemies** (~60 new enemy Digimon across all tiers)
+4. **DNA Digivolution system** (8 fusion targets)
+
+### Per-Line Task Checklist
+
+For each new tower line:
+- [ ] Add all Digimon entries to `DigimonDatabase.ts` (towers section)
+- [ ] Add evolution paths to `EvolutionPaths.ts`
+- [ ] Add sprite loading to `PreloadScene.ts`
+- [ ] Add to `SpawnMenu.ts` starter selection (if In-Training starter)
+- [ ] Update `WaveData.ts` if enemies from the line exist
+- [ ] Add tests for new database entries and evolution paths
+
+### Missing Sprite Sheets
+
+The following in-game Digimon have no sprite sheets available and may need substitutes:
+
+| Digimon | Stage | Role | Notes |
+|---------|-------|------|-------|
+| Betamon | Rookie | Enemy | No sprite sheet |
+| DarkTyrannomon | Champion | Enemy | Only _X variant |
+| Goblimon | Rookie | Enemy | No sprite sheet |
+| Unimon | Champion | Tower alt | No sprite sheet |
+| Shakkoumon | Ultimate | Tower alt | No sprite sheet |
+
+---
+
+## Phase 11: Sprite Flipping
+
+**Goal:** Flip enemy sprites horizontally based on movement direction for visual polish.
+
+### Task
+
+- [x] Enemy sprites flip based on horizontal movement direction
+- Default sprite orientation faces **left**
+- Moving right (dx > 0): `flipX = true`
+- Moving left (dx < 0): `flipX = false`
+- Vertical only (dx = 0): keep previous facing
+- **File:** `src/entities/Enemy.ts` (update method, after position interpolation)
 
 ---
 
@@ -921,7 +1466,7 @@ Several Digimon use Japanese romanization for sprite filenames:
 | Database ID | Sprite Filename |
 |-------------|----------------|
 | demiveemon | Chibimon.png |
-| viximon | Kyaromon.png |
+| viximon | Pokomon.png |
 | veemon | V-mon.png |
 | demidevimon | PicoDevimon.png |
 | growlmon | Growmon.png |

@@ -6,6 +6,7 @@ import {
   getScaledDamage,
   getScaledSpeed,
   getTotalLevelUpCost,
+  getMaxAffordableLevel,
 } from '@/systems/LevelSystem';
 import { Stage } from '@/types';
 
@@ -207,6 +208,54 @@ describe('LevelSystem', () => {
     it('stage multiplier applies to total cost', () => {
       // Champion Lv1 -> Lv5: ceil(3*1*2) + ceil(3*2*2) + ceil(3*3*2) + ceil(3*4*2) = 6+12+18+24 = 60
       expect(getTotalLevelUpCost(1, 5, Stage.CHAMPION)).toBe(60);
+    });
+  });
+
+  describe('getMaxAffordableLevel', () => {
+    it('returns currentLevel when budget is 0', () => {
+      expect(getMaxAffordableLevel(1, 10, 0)).toBe(1);
+    });
+
+    it('returns currentLevel when budget is less than cost for one level', () => {
+      // Lv1 -> Lv2 costs 3
+      expect(getMaxAffordableLevel(1, 10, 2)).toBe(1);
+    });
+
+    it('returns currentLevel + 1 when budget is exactly the cost for one level', () => {
+      // Lv1 -> Lv2 costs 3
+      expect(getMaxAffordableLevel(1, 10, 3)).toBe(2);
+    });
+
+    it('returns the highest affordable level within budget', () => {
+      // Lv1 -> Lv5 costs 30 (3+6+9+12)
+      // Lv1 -> Lv4 costs 18 (3+6+9)
+      expect(getMaxAffordableLevel(1, 10, 25)).toBe(4);
+    });
+
+    it('returns maxLevel when budget can afford all levels', () => {
+      // Lv1 -> Lv10 costs 135
+      expect(getMaxAffordableLevel(1, 10, 999)).toBe(10);
+    });
+
+    it('respects maxLevel cap even with excess budget', () => {
+      expect(getMaxAffordableLevel(5, 8, 99999)).toBe(8);
+    });
+
+    it('returns currentLevel when already at maxLevel', () => {
+      expect(getMaxAffordableLevel(10, 10, 999)).toBe(10);
+    });
+
+    it('works with stage multiplier', () => {
+      // Champion Lv1 -> Lv2: ceil(3*1*2) = 6
+      // Champion Lv1 -> Lv3: 6 + ceil(3*2*2) = 6 + 12 = 18
+      // Budget of 15 can afford Lv2 (cost 6) but not Lv3 (cost 18)
+      expect(getMaxAffordableLevel(1, 10, 15, Stage.CHAMPION)).toBe(2);
+    });
+
+    it('handles mid-range levels correctly', () => {
+      // Lv10 -> Lv11: 30, Lv11 -> Lv12: 33, Lv12 -> Lv13: 36
+      // Budget 65 can afford Lv10 -> Lv12 (30+33=63) but not Lv13 (63+36=99)
+      expect(getMaxAffordableLevel(10, 20, 65)).toBe(12);
     });
   });
 });

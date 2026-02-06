@@ -84,8 +84,8 @@ export class EvolutionModal extends Phaser.GameObjects.Container {
 
     // Cost text
     this.costText = this.scene.add.text(GAME_WIDTH / 2, py + 55, '', {
-      fontFamily: FONTS.DISPLAY,
-      fontSize: '16px',
+      fontFamily: FONTS.BODY,
+      fontSize: '15px',
       color: COLORS.TEXT_LABEL,
     }).setOrigin(0.5, 0);
     this.panelContainer.add(this.costText);
@@ -173,6 +173,7 @@ export class EvolutionModal extends Phaser.GameObjects.Container {
 
     if (evolutions.length === 0) {
       const noEvolutions = this.scene.add.text(GAME_WIDTH / 2, py + 120, 'No evolution paths available\nat current DP level', {
+        fontFamily: FONTS.BODY,
         fontSize: '16px',
         color: COLORS.TEXT_DIM,
         align: 'center',
@@ -207,8 +208,9 @@ export class EvolutionModal extends Phaser.GameObjects.Container {
       optionCont.add(stripe);
 
       // Sprite
-      if (this.scene.textures.exists(evo.resultId)) {
-        const sprite = this.scene.add.image(px + 55, optionY + 34, evo.resultId);
+      const evoSpriteKey = stats.spriteKey ?? evo.resultId;
+      if (this.scene.textures.exists(evoSpriteKey)) {
+        const sprite = this.scene.add.image(px + 55, optionY + 34, evoSpriteKey);
         sprite.setScale(3);
         optionCont.add(sprite);
       }
@@ -227,6 +229,7 @@ export class EvolutionModal extends Phaser.GameObjects.Container {
       const attrName = ATTRIBUTE_NAMES[stats.attribute];
       const attrStrColor = ATTRIBUTE_COLORS_STR[stats.attribute] || COLORS.TEXT_DIM;
       const infoText = this.scene.add.text(px + 90, optionY + 30, `${stageName} | ${attrName} | DMG: ${stats.baseDamage} | SPD: ${stats.baseSpeed}`, {
+        fontFamily: FONTS.BODY,
         fontSize: '11px',
         color: COLORS.TEXT_DIM,
       });
@@ -234,6 +237,7 @@ export class EvolutionModal extends Phaser.GameObjects.Container {
 
       // DP requirement
       const dpText = this.scene.add.text(px + 90, optionY + 48, `DP: ${evo.minDP}-${evo.maxDP}${evo.isDefault ? ' (Default)' : ' (Alternate)'}`, {
+        fontFamily: FONTS.MONO,
         fontSize: '11px',
         color: evo.isDefault ? COLORS.VACCINE_STR : COLORS.FREE_STR,
       });
@@ -241,11 +245,11 @@ export class EvolutionModal extends Phaser.GameObjects.Container {
 
       // Evolve button (Container + Graphics)
       if (canAfford) {
-        const evoBtnW = 80;
-        const evoBtnH = 30;
-        const evoBtn = this.scene.add.container(px + w - 60, optionY + 34);
+        const evoBtnW = 84;
+        const evoBtnH = 32;
+        const evoBtn = this.scene.add.container(px + w - 62, optionY + 34);
         const evoBtnBg = this.scene.add.graphics();
-        drawButton(evoBtnBg, evoBtnW, evoBtnH, COLORS.SUCCESS);
+        drawButton(evoBtnBg, evoBtnW, evoBtnH, COLORS.SPECIAL);
         evoBtn.add(evoBtnBg);
 
         const evoBtnText = this.scene.add.text(0, 0, 'Evolve', TEXT_STYLES.BUTTON_SM).setOrigin(0.5);
@@ -259,16 +263,17 @@ export class EvolutionModal extends Phaser.GameObjects.Container {
           this.doEvolve(evo.resultId, cost);
         });
         evoBtn.on('pointerover', () => {
-          drawButton(evoBtnBg, evoBtnW, evoBtnH, COLORS.SUCCESS_HOVER, { glowRing: true });
+          drawButton(evoBtnBg, evoBtnW, evoBtnH, COLORS.SPECIAL_HOVER, { glowRing: true });
           animateButtonHover(this.scene, evoBtn, true);
         });
         evoBtn.on('pointerout', () => {
-          drawButton(evoBtnBg, evoBtnW, evoBtnH, COLORS.SUCCESS);
+          drawButton(evoBtnBg, evoBtnW, evoBtnH, COLORS.SPECIAL);
           animateButtonHover(this.scene, evoBtn, false);
         });
         optionCont.add(evoBtn);
       } else {
-        const cantAffordText = this.scene.add.text(px + w - 60, optionY + 34, 'Need DB', {
+        const cantAffordText = this.scene.add.text(px + w - 62, optionY + 34, 'Need DB', {
+          fontFamily: FONTS.BODY,
           fontSize: '12px',
           color: COLORS.TEXT_LIVES,
         }).setOrigin(0.5);

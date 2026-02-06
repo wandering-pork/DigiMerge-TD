@@ -1,10 +1,11 @@
 import Phaser from 'phaser';
 import { COLORS, TEXT_STYLES, FONTS } from '@/ui/UITheme';
-import { drawPanel, drawButton, animateButtonHover, animateButtonPress } from '@/ui/UIHelpers';
+import { drawPanel, drawButton, drawSeparator, animateButtonHover, animateButtonPress, animateModalIn } from '@/ui/UIHelpers';
 import { AudioManager } from '@/managers/AudioManager';
 
 /**
  * Settings overlay scene with volume, mute, restart, and main menu options.
+ * Enhanced with glass-panel design and cleaner control layout.
  */
 export class SettingsScene extends Phaser.Scene {
   constructor() {
@@ -26,49 +27,62 @@ export class SettingsScene extends Phaser.Scene {
     );
 
     // Panel background
-    const panelWidth = 320;
-    const panelHeight = 530;
+    const panelWidth = 340;
+    const panelHeight = 520;
     const panelX = (width - panelWidth) / 2;
     const panelY = (height - panelHeight) / 2;
 
-    const panel = this.add.graphics();
-    drawPanel(panel, panelX, panelY, panelWidth, panelHeight);
+    const panelContainer = this.add.container(0, 0);
 
-    // Title with gear icon
-    this.add.text(width / 2, panelY + 40, 'Settings', {
+    const panel = this.add.graphics();
+    drawPanel(panel, panelX, panelY, panelWidth, panelHeight, { borderColor: COLORS.CYAN_DIM });
+    panelContainer.add(panel);
+
+    // Title
+    const titleText = this.add.text(width / 2, panelY + 35, 'Settings', {
       ...TEXT_STYLES.SCENE_TITLE,
-      fontSize: '32px',
+      fontSize: '30px',
     }).setOrigin(0.5);
+    panelContainer.add(titleText);
+
+    // Separator under title
+    const titleSep = this.add.graphics();
+    drawSeparator(titleSep, panelX + 20, panelY + 60, panelX + panelWidth - 20);
+    panelContainer.add(titleSep);
 
     // ---- Volume Control ----
     const audioManager: AudioManager | undefined = this.registry.get('audioManager');
-    const sliderY = panelY + 90;
-    const sliderX = panelX + 50;
-    const sliderWidth = 160;
+    const controlX = panelX + 30;
+    let controlY = panelY + 80;
+    const sliderWidth = 180;
     const sliderHeight = 8;
 
-    this.add.text(panelX + 30, sliderY, 'Volume', {
-      fontFamily: FONTS.DISPLAY,
-      fontSize: '14px',
-      color: COLORS.TEXT_LABEL,
+    this.add.text(controlX, controlY, 'VOLUME', {
+      fontFamily: FONTS.BODY,
+      fontSize: '11px',
+      color: '#7788aa',
+      letterSpacing: 2,
     });
 
-    const currentVolume = audioManager ? audioManager.getVolume() : 0.15;
+    controlY += 20;
+
+    const currentVolume = audioManager ? audioManager.getVolume() : 0.05;
     const isMuted = audioManager ? !audioManager.isEnabled() : false;
 
     // Slider track
     const sliderTrack = this.add.graphics();
-    sliderTrack.fillStyle(COLORS.BG_PANEL_LIGHT, 1);
-    sliderTrack.fillRoundedRect(sliderX, sliderY + 22, sliderWidth, sliderHeight, 4);
-    sliderTrack.lineStyle(1, COLORS.CYAN_DIM, 0.5);
-    sliderTrack.strokeRoundedRect(sliderX, sliderY + 22, sliderWidth, sliderHeight, 4);
+    sliderTrack.fillStyle(COLORS.BG_DEEPEST, 1);
+    sliderTrack.fillRoundedRect(controlX, controlY, sliderWidth, sliderHeight, 4);
+    sliderTrack.lineStyle(1, COLORS.CYAN_DIM, 0.3);
+    sliderTrack.strokeRoundedRect(controlX, controlY, sliderWidth, sliderHeight, 4);
 
     // Slider fill
     const sliderFill = this.add.graphics();
     const drawSliderFill = (vol: number) => {
       sliderFill.clear();
-      sliderFill.fillStyle(COLORS.CYAN, 0.8);
-      sliderFill.fillRoundedRect(sliderX, sliderY + 22, sliderWidth * vol, sliderHeight, 4);
+      sliderFill.fillStyle(COLORS.CYAN, 0.7);
+      const fillW = Math.max(4, sliderWidth * vol);
+      sliderFill.fillRoundedRect(controlX, controlY, fillW, sliderHeight, 4);
     };
     drawSliderFill(isMuted ? 0 : currentVolume);
 
@@ -79,30 +93,37 @@ export class SettingsScene extends Phaser.Scene {
 
     const drawHandle = (vol: number) => {
       handle.clear();
-      const hx = sliderX + sliderWidth * vol - handleSize / 2;
-      const hy = sliderY + 22 + sliderHeight / 2 - handleSize / 2;
+      const hx = controlX + sliderWidth * vol - handleSize / 2;
+      const hy = controlY + sliderHeight / 2 - handleSize / 2;
+      // Shadow
+      handle.fillStyle(0x000000, 0.3);
+      handle.fillRoundedRect(hx + 1, hy + 1, handleSize, handleSize, 5);
+      // Handle body
       handle.fillStyle(0xffffff, 1);
-      handle.fillRoundedRect(hx, hy, handleSize, handleSize, 4);
-      handle.lineStyle(2, COLORS.CYAN, 0.8);
-      handle.strokeRoundedRect(hx, hy, handleSize, handleSize, 4);
+      handle.fillRoundedRect(hx, hy, handleSize, handleSize, 5);
+      // Inner highlight
+      handle.fillStyle(COLORS.CYAN, 0.2);
+      handle.fillRoundedRect(hx + 2, hy + 2, handleSize - 4, handleSize / 2 - 2, 3);
+      handle.lineStyle(1.5, COLORS.CYAN, 0.6);
+      handle.strokeRoundedRect(hx, hy, handleSize, handleSize, 5);
     };
     drawHandle(isMuted ? 0 : volume);
 
     // Volume percentage text
-    const volPercText = this.add.text(sliderX + sliderWidth + 15, sliderY + 18, `${Math.round((isMuted ? 0 : volume) * 100)}%`, {
+    const volPercText = this.add.text(controlX + sliderWidth + 15, controlY - 2, `${Math.round((isMuted ? 0 : volume) * 100)}%`, {
       fontFamily: FONTS.MONO,
       fontSize: '14px',
       color: COLORS.TEXT_WHITE,
     });
 
     // Draggable zone over slider
-    const sliderZone = this.add.zone(sliderX + sliderWidth / 2, sliderY + 26, sliderWidth + handleSize, 30)
+    const sliderZone = this.add.zone(controlX + sliderWidth / 2, controlY + 4, sliderWidth + handleSize, 30)
       .setInteractive({ useHandCursor: true });
 
     let isDragging = false;
 
     const updateVolume = (pointerX: number) => {
-      const localX = pointerX - sliderX;
+      const localX = pointerX - controlX;
       volume = Phaser.Math.Clamp(localX / sliderWidth, 0, 1);
       drawSliderFill(volume);
       drawHandle(volume);
@@ -124,16 +145,18 @@ export class SettingsScene extends Phaser.Scene {
 
     this.input.on('pointerup', () => { isDragging = false; });
 
+    controlY += 30;
+
     // Mute toggle button
-    const muteBtnW = 80;
-    const muteBtnH = 28;
-    const muteContainer = this.add.container(sliderX + sliderWidth / 2, sliderY + 58);
+    const muteBtnW = 90;
+    const muteBtnH = 30;
+    const muteContainer = this.add.container(controlX + sliderWidth / 2, controlY);
     const muteBtnBg = this.add.graphics();
     drawButton(muteBtnBg, muteBtnW, muteBtnH, isMuted ? COLORS.DANGER : COLORS.PRIMARY);
     muteContainer.add(muteBtnBg);
 
     const muteText = this.add.text(0, 0, isMuted ? 'Unmute' : 'Mute', {
-      fontFamily: FONTS.DISPLAY,
+      fontFamily: FONTS.BODY,
       fontSize: '13px',
       color: '#ffffff',
       fontStyle: 'bold',
@@ -162,75 +185,94 @@ export class SettingsScene extends Phaser.Scene {
       }
     });
 
-    // ---- Damage Numbers Toggle ----
-    const dmgToggleY = sliderY + 90;
-    const showDmgNumbers = this.registry.get('showDamageNumbers') !== false; // default ON
+    controlY += 30;
 
-    this.add.text(panelX + 30, dmgToggleY, 'Damage Numbers', {
-      fontFamily: FONTS.DISPLAY,
-      fontSize: '14px',
-      color: COLORS.TEXT_LABEL,
+    // Separator
+    const optionsSep = this.add.graphics();
+    drawSeparator(optionsSep, panelX + 20, controlY, panelX + panelWidth - 20);
+    controlY += 15;
+
+    // ---- Display Options Row ----
+    this.add.text(controlX, controlY, 'DISPLAY', {
+      fontFamily: FONTS.BODY,
+      fontSize: '11px',
+      color: '#7788aa',
+      letterSpacing: 2,
     });
+    controlY += 22;
 
-    const dmgBtnW = 80;
-    const dmgBtnH = 28;
-    const dmgContainer = this.add.container(sliderX + sliderWidth / 2, dmgToggleY + 24);
+    // Damage Numbers Toggle
+    const showDmgNumbers = this.registry.get('showDamageNumbers') !== false;
+
+    const dmgRow = this.add.container(0, controlY);
+    dmgRow.add(this.add.text(controlX, 0, 'Damage Numbers', {
+      fontFamily: FONTS.BODY,
+      fontSize: '13px',
+      color: '#aabbcc',
+    }));
+
+    const dmgBtnW = 60;
+    const dmgBtnH = 26;
+    const dmgBtnContainer = this.add.container(panelX + panelWidth - 50, 0);
     const dmgBtnBg = this.add.graphics();
-    drawButton(dmgBtnBg, dmgBtnW, dmgBtnH, showDmgNumbers ? COLORS.PRIMARY : COLORS.DANGER);
-    dmgContainer.add(dmgBtnBg);
+    drawButton(dmgBtnBg, dmgBtnW, dmgBtnH, showDmgNumbers ? COLORS.CYAN_DIM : COLORS.BG_PANEL_LIGHT);
+    dmgBtnContainer.add(dmgBtnBg);
 
     const dmgText = this.add.text(0, 0, showDmgNumbers ? 'ON' : 'OFF', {
-      fontFamily: FONTS.DISPLAY,
-      fontSize: '13px',
+      fontFamily: FONTS.BODY,
+      fontSize: '12px',
       color: '#ffffff',
       fontStyle: 'bold',
     }).setOrigin(0.5);
-    dmgContainer.add(dmgText);
+    dmgBtnContainer.add(dmgText);
 
     const dmgHitArea = new Phaser.Geom.Rectangle(-dmgBtnW / 2, -dmgBtnH / 2, dmgBtnW, dmgBtnH);
-    dmgContainer.setInteractive(dmgHitArea, Phaser.Geom.Rectangle.Contains);
-    dmgContainer.input!.cursor = 'pointer';
+    dmgBtnContainer.setInteractive(dmgHitArea, Phaser.Geom.Rectangle.Contains);
+    dmgBtnContainer.input!.cursor = 'pointer';
 
-    dmgContainer.on('pointerdown', () => {
+    dmgBtnContainer.on('pointerdown', () => {
       const current = this.registry.get('showDamageNumbers') !== false;
       const newValue = !current;
       this.registry.set('showDamageNumbers', newValue);
       dmgText.setText(newValue ? 'ON' : 'OFF');
-      drawButton(dmgBtnBg, dmgBtnW, dmgBtnH, newValue ? COLORS.PRIMARY : COLORS.DANGER);
+      drawButton(dmgBtnBg, dmgBtnW, dmgBtnH, newValue ? COLORS.CYAN_DIM : COLORS.BG_PANEL_LIGHT);
     });
 
-    // ---- Health Bar Mode Toggle ----
-    const hpToggleY = dmgToggleY + 56;
+    dmgRow.add(dmgBtnContainer);
+    controlY += 36;
+
+    // Health Bar Mode Toggle
     const HEALTH_MODES: Array<'all' | 'bosses' | 'off'> = ['all', 'bosses', 'off'];
     const HEALTH_MODE_LABELS: Record<string, string> = { all: 'All', bosses: 'Bosses', off: 'Off' };
     let currentHpMode: string = this.registry.get('healthBarMode') ?? 'all';
 
-    this.add.text(panelX + 30, hpToggleY, 'Health Bars', {
-      fontFamily: FONTS.DISPLAY,
-      fontSize: '14px',
-      color: COLORS.TEXT_LABEL,
-    });
+    const hpRow = this.add.container(0, controlY);
+    hpRow.add(this.add.text(controlX, 0, 'Health Bars', {
+      fontFamily: FONTS.BODY,
+      fontSize: '13px',
+      color: '#aabbcc',
+    }));
 
-    const hpBtnW = 100;
-    const hpBtnH = 28;
-    const hpContainer = this.add.container(sliderX + sliderWidth / 2, hpToggleY + 24);
+    const hpBtnW = 80;
+    const hpBtnH = 26;
+    const hpBtnContainer = this.add.container(panelX + panelWidth - 60, 0);
     const hpBtnBg = this.add.graphics();
-    drawButton(hpBtnBg, hpBtnW, hpBtnH, COLORS.PRIMARY);
-    hpContainer.add(hpBtnBg);
+    drawButton(hpBtnBg, hpBtnW, hpBtnH, COLORS.CYAN_DIM);
+    hpBtnContainer.add(hpBtnBg);
 
     const hpText = this.add.text(0, 0, HEALTH_MODE_LABELS[currentHpMode], {
-      fontFamily: FONTS.DISPLAY,
-      fontSize: '13px',
+      fontFamily: FONTS.BODY,
+      fontSize: '12px',
       color: '#ffffff',
       fontStyle: 'bold',
     }).setOrigin(0.5);
-    hpContainer.add(hpText);
+    hpBtnContainer.add(hpText);
 
     const hpHitArea = new Phaser.Geom.Rectangle(-hpBtnW / 2, -hpBtnH / 2, hpBtnW, hpBtnH);
-    hpContainer.setInteractive(hpHitArea, Phaser.Geom.Rectangle.Contains);
-    hpContainer.input!.cursor = 'pointer';
+    hpBtnContainer.setInteractive(hpHitArea, Phaser.Geom.Rectangle.Contains);
+    hpBtnContainer.input!.cursor = 'pointer';
 
-    hpContainer.on('pointerdown', () => {
+    hpBtnContainer.on('pointerdown', () => {
       const idx = HEALTH_MODES.indexOf(currentHpMode as 'all' | 'bosses' | 'off');
       const nextIdx = (idx + 1) % HEALTH_MODES.length;
       currentHpMode = HEALTH_MODES[nextIdx];
@@ -238,34 +280,45 @@ export class SettingsScene extends Phaser.Scene {
       hpText.setText(HEALTH_MODE_LABELS[currentHpMode]);
     });
 
+    hpRow.add(hpBtnContainer);
+    controlY += 40;
+
+    // Separator before action buttons
+    const actionSep = this.add.graphics();
+    drawSeparator(actionSep, panelX + 20, controlY, panelX + panelWidth - 20);
+    controlY += 20;
+
     // ---- Action Buttons ----
-    const btnW = 200;
-    const btnH = 44;
+    const btnW = 220;
+    const btnH = 42;
     const btnCenterX = width / 2;
 
-    // Resume button
-    this.createActionButton(btnCenterX, panelY + 330, btnW, btnH, 'Resume', COLORS.PRIMARY, COLORS.PRIMARY_HOVER, () => {
-      this.scene.resume('GameScene');
+    // Close button
+    this.createActionButton(btnCenterX, controlY, btnW, btnH, 'Close', COLORS.PRIMARY, COLORS.PRIMARY_HOVER, () => {
       this.scene.stop();
     });
+    controlY += 52;
 
     // Restart button
-    this.createActionButton(btnCenterX, panelY + 390, btnW, btnH, 'Restart', COLORS.SPECIAL, COLORS.SPECIAL_HOVER, () => {
+    this.createActionButton(btnCenterX, controlY, btnW, btnH, 'Restart', COLORS.SPECIAL, COLORS.SPECIAL_HOVER, () => {
       this.scene.stop('GameScene');
       this.scene.stop();
       this.scene.start('GameScene');
     });
+    controlY += 52;
 
     // Main Menu button
-    this.createActionButton(btnCenterX, panelY + 450, btnW, btnH, 'Main Menu', COLORS.DANGER, COLORS.DANGER_HOVER, () => {
+    this.createActionButton(btnCenterX, controlY, btnW, btnH, 'Main Menu', COLORS.DANGER, COLORS.DANGER_HOVER, () => {
       this.scene.stop('GameScene');
       this.scene.stop();
       this.scene.start('MainMenuScene');
     });
 
+    // Panel entrance animation
+    animateModalIn(this, panelContainer);
+
     // ESC to close
     this.input.keyboard!.on('keydown-ESC', () => {
-      this.scene.resume('GameScene');
       this.scene.stop();
     });
   }
@@ -280,10 +333,11 @@ export class SettingsScene extends Phaser.Scene {
     container.add(bg);
 
     const text = this.add.text(0, 0, label, {
-      fontFamily: FONTS.DISPLAY,
-      fontSize: '18px',
+      fontFamily: FONTS.BODY,
+      fontSize: '16px',
       color: '#ffffff',
       fontStyle: 'bold',
+      shadow: { offsetX: 0, offsetY: 1, color: '#000000', blur: 2, fill: true },
     }).setOrigin(0.5);
     container.add(text);
 

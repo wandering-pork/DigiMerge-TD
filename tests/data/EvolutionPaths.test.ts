@@ -3,7 +3,11 @@ import { EVOLUTION_PATHS, getEvolutions } from '@/data/EvolutionPaths';
 import { DIGIMON_DATABASE } from '@/data/DigimonDatabase';
 
 describe('EvolutionPaths', () => {
-  const starters = ['koromon', 'tsunomon', 'tokomon', 'gigimon', 'tanemon', 'demiveemon', 'pagumon', 'viximon'];
+  const starters = [
+    'koromon', 'tsunomon', 'tokomon', 'gigimon', 'tanemon', 'demiveemon', 'pagumon', 'viximon',
+    'nyaromon', 'gummymon', 'chocomon', 'pyocomon', 'mochimon', 'pukamon', 'dorimon',
+    'sunmon', 'moonmon', 'kyokyomon', 'puroromon', 'budmon', 'caprimon',
+  ];
 
   it('all starters should have evolution paths', () => {
     for (const starter of starters) {
@@ -100,6 +104,76 @@ describe('EvolutionPaths', () => {
       expect(EVOLUTION_PATHS['veemon'].some(p => p.resultId === 'exveemon')).toBe(true);
       expect(EVOLUTION_PATHS['exveemon'].some(p => p.resultId === 'paildramon')).toBe(true);
       expect(EVOLUTION_PATHS['paildramon'].some(p => p.resultId === 'imperialdramon_fm')).toBe(true);
+    });
+
+    it('Nyaromon line reaches Mega (Ophanimon)', () => {
+      expect(EVOLUTION_PATHS['nyaromon'].some(p => p.resultId === 'plotmon')).toBe(true);
+      expect(EVOLUTION_PATHS['plotmon'].some(p => p.resultId === 'tailmon')).toBe(true);
+      expect(EVOLUTION_PATHS['tailmon'].some(p => p.resultId === 'angewomon')).toBe(true);
+      expect(EVOLUTION_PATHS['angewomon'].some(p => p.resultId === 'ophanimon')).toBe(true);
+    });
+
+    it('Gummymon line reaches Mega (SaintGalgomon)', () => {
+      expect(EVOLUTION_PATHS['gummymon'].some(p => p.resultId === 'terriermon')).toBe(true);
+      expect(EVOLUTION_PATHS['terriermon'].some(p => p.resultId === 'galgomon')).toBe(true);
+      expect(EVOLUTION_PATHS['galgomon'].some(p => p.resultId === 'rapidmon')).toBe(true);
+      expect(EVOLUTION_PATHS['rapidmon'].some(p => p.resultId === 'saintgalgomon')).toBe(true);
+    });
+
+    it('Dorimon line reaches Mega (Alphamon)', () => {
+      expect(EVOLUTION_PATHS['dorimon'].some(p => p.resultId === 'dorumon')).toBe(true);
+      expect(EVOLUTION_PATHS['dorumon'].some(p => p.resultId === 'dorugamon')).toBe(true);
+      expect(EVOLUTION_PATHS['dorugamon'].some(p => p.resultId === 'doruguremon')).toBe(true);
+      expect(EVOLUTION_PATHS['doruguremon'].some(p => p.resultId === 'alphamon')).toBe(true);
+    });
+
+    it('Pukamon line reaches Mega (Plesiomon)', () => {
+      expect(EVOLUTION_PATHS['pukamon'].some(p => p.resultId === 'gomamon')).toBe(true);
+      expect(EVOLUTION_PATHS['gomamon'].some(p => p.resultId === 'ikkakumon')).toBe(true);
+      expect(EVOLUTION_PATHS['ikkakumon'].some(p => p.resultId === 'zudomon_tower')).toBe(true);
+      expect(EVOLUTION_PATHS['zudomon_tower'].some(p => p.resultId === 'plesiomon')).toBe(true);
+    });
+
+    it('Sunmon line reaches Mega (Apollomon)', () => {
+      expect(EVOLUTION_PATHS['sunmon'].some(p => p.resultId === 'coronamon')).toBe(true);
+      expect(EVOLUTION_PATHS['coronamon'].some(p => p.resultId === 'firamon')).toBe(true);
+      expect(EVOLUTION_PATHS['firamon'].some(p => p.resultId === 'flaremon')).toBe(true);
+      expect(EVOLUTION_PATHS['flaremon'].some(p => p.resultId === 'apollomon')).toBe(true);
+    });
+
+    it('Moonmon line reaches Mega (Dianamon)', () => {
+      expect(EVOLUTION_PATHS['moonmon'].some(p => p.resultId === 'lunamon')).toBe(true);
+      expect(EVOLUTION_PATHS['lunamon'].some(p => p.resultId === 'lekismon')).toBe(true);
+      expect(EVOLUTION_PATHS['lekismon'].some(p => p.resultId === 'crescemon')).toBe(true);
+      expect(EVOLUTION_PATHS['crescemon'].some(p => p.resultId === 'dianamon')).toBe(true);
+    });
+
+    it('Kyokyomon line reaches Mega (Ouryumon)', () => {
+      expect(EVOLUTION_PATHS['kyokyomon'].some(p => p.resultId === 'ryudamon')).toBe(true);
+      expect(EVOLUTION_PATHS['ryudamon'].some(p => p.resultId === 'ginryumon')).toBe(true);
+      expect(EVOLUTION_PATHS['ginryumon'].some(p => p.resultId === 'hisyaryumon')).toBe(true);
+      expect(EVOLUTION_PATHS['hisyaryumon'].some(p => p.resultId === 'ouryumon')).toBe(true);
+    });
+
+    it('Puroromon line reaches Mega (TigerVespamon)', () => {
+      expect(EVOLUTION_PATHS['puroromon'].some(p => p.resultId === 'funbeemon')).toBe(true);
+      expect(EVOLUTION_PATHS['funbeemon'].some(p => p.resultId === 'waspmon')).toBe(true);
+      expect(EVOLUTION_PATHS['waspmon'].some(p => p.resultId === 'cannonbeemon')).toBe(true);
+      expect(EVOLUTION_PATHS['cannonbeemon'].some(p => p.resultId === 'tigervespamon')).toBe(true);
+    });
+
+    it('Budmon line reaches Mega (Lotusmon)', () => {
+      expect(EVOLUTION_PATHS['budmon'].some(p => p.resultId === 'lalamon')).toBe(true);
+      expect(EVOLUTION_PATHS['lalamon'].some(p => p.resultId === 'sunflowmon')).toBe(true);
+      expect(EVOLUTION_PATHS['sunflowmon'].some(p => p.resultId === 'lilamon')).toBe(true);
+      expect(EVOLUTION_PATHS['lilamon'].some(p => p.resultId === 'lotusmon')).toBe(true);
+    });
+
+    it('Caprimon line reaches Mega (Jesmon)', () => {
+      expect(EVOLUTION_PATHS['caprimon'].some(p => p.resultId === 'hackmon')).toBe(true);
+      expect(EVOLUTION_PATHS['hackmon'].some(p => p.resultId === 'reppamon')).toBe(true);
+      expect(EVOLUTION_PATHS['reppamon'].some(p => p.resultId === 'saviorhackmon')).toBe(true);
+      expect(EVOLUTION_PATHS['saviorhackmon'].some(p => p.resultId === 'jesmon')).toBe(true);
     });
   });
 });

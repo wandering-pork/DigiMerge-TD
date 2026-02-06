@@ -11,7 +11,15 @@ import {
   getEffectiveSpeedMultiplier,
   getEffectiveArmorMultiplier,
   calculateDotDamage,
+  calculateRegenAmount,
 } from '@/data/StatusEffects';
+import {
+  BossAbilityState,
+  createBossAbilityState,
+  tickBossAbility,
+  getDamageReduction,
+  BossAbilityAction,
+} from '@/systems/BossAbilitySystem';
 
 let enemyCounter = 0;
 
@@ -38,9 +46,14 @@ export class Enemy extends Phaser.GameObjects.Container {
   // State
   public isAlive: boolean = true;
   public readonly isBoss: boolean;
+  public isSplitChild: boolean = false;
 
   // Status effects
   public activeEffects: Map<string, ActiveEffect> = new Map();
+
+  // Boss ability
+  public bossAbilityState: BossAbilityState | null = null;
+  public pendingBossActions: BossAbilityAction[] = [];
 
   // Visual elements
   private sprite: Phaser.GameObjects.Sprite;
@@ -102,6 +115,11 @@ export class Enemy extends Phaser.GameObjects.Container {
 
     this.add(this.sprite);
 
+    // Visual indicator for shielded enemies: blue tint
+    if (this.enemyType === 'shielded') {
+      this.sprite.setTint(0x88aaff);
+    }
+
     // Create health bar background
     this.healthBarBg = scene.add.graphics();
     this.add(this.healthBarBg);
@@ -118,6 +136,11 @@ export class Enemy extends Phaser.GameObjects.Container {
     this.applyHealthBarVisibility();
     this.drawHealthBarBackground();
     this.updateHealthBar();
+
+    // Initialize boss ability state if applicable
+    if (this.isBoss && dbStats.bossAbility) {
+      this.bossAbilityState = createBossAbilityState(dbStats.bossAbility);
+    }
 
     // Set container size for hit detection
     this.setSize(targetSize, targetSize);
@@ -197,7 +220,16 @@ export class Enemy extends Phaser.GameObjects.Container {
     if (!this.isAlive) return;
 
     const effectiveArmor = this.getEffectiveArmor();
-    const actualDamage = amount * (1 - effectiveArmor);
+    let actualDamage = amount * (1 - effectiveArmor);
+
+    // Boss damage shield (e.g. Transcendent Sword)
+    if (this.bossAbilityState) {
+      const reduction = getDamageReduction(this.bossAbilityState);
+      if (reduction > 0) {
+        actualDamage *= (1 - reduction);
+      }
+    }
+
     this.hp -= actualDamage;
 
     this.updateHealthBar();
@@ -236,6 +268,7 @@ export class Enemy extends Phaser.GameObjects.Container {
 
   /**
    * Handle enemy death: emit event with reward, play death animation, then destroy.
+   * Splitter enemies also emit SPLITTER_DIED so WaveManager can spawn children.
    */
   public die(): void {
     if (!this.isAlive) return;
@@ -249,6 +282,20 @@ export class Enemy extends Phaser.GameObjects.Container {
       x: this.x,
       y: this.y,
     });
+
+    // Splitter enemies spawn copies on death (split children don't further split)
+    if (this.enemyType === 'splitter' && !this.isSplitChild) {
+      const splitCount = this.digimonId === 'enemy_diaboromon' ? 4 : 2;
+      EventBus.emit(GameEvents.SPLITTER_DIED, {
+        digimonId: this.digimonId,
+        splitCount,
+        pathIndex: this.pathIndex,
+        pathProgress: this.pathProgress,
+        maxHp: this.maxHp,
+        x: this.x,
+        y: this.y,
+      });
+    }
 
     // Death animation: fade out and shrink
     this.scene.tweens.add({
@@ -447,6 +494,23 @@ export class Enemy extends Phaser.GameObjects.Container {
     // Enemy may have died from DoT damage
     if (!this.isAlive) return;
 
+    // Tick boss ability (actions are collected in pendingBossActions for GameScene to execute)
+    if (this.bossAbilityState) {
+      const hpPercent = this.getHpPercent();
+      const actions = tickBossAbility(this.bossAbilityState, deltaSec, hpPercent, this.maxHp);
+      if (actions.length > 0) {
+        this.pendingBossActions.push(...actions);
+      }
+    }
+
+    // Regen enemies passively heal (2% max HP/sec), suppressed by poison
+    if (this.enemyType === 'regen' && this.hp < this.maxHp) {
+      const regenAmount = calculateRegenAmount(this.maxHp, deltaSec, this.activeEffects);
+      if (regenAmount > 0) {
+        this.heal(regenAmount);
+      }
+    }
+
     // If we've reached or passed the last waypoint, enemy reaches the base
     if (this.pathIndex >= this.pathPositions.length - 1) {
       this.reachBase();
@@ -510,5 +574,15 @@ export class Enemy extends Phaser.GameObjects.Container {
 
     this.x = interpCurrent.x + (interpNext.x - interpCurrent.x) * this.pathProgress;
     this.y = interpCurrent.y + (interpNext.y - interpCurrent.y) * this.pathProgress;
+
+    // Flip sprite based on horizontal movement direction
+    // Default sprite faces left; flip when moving right
+    const moveDx = interpNext.x - interpCurrent.x;
+    if (moveDx > 0) {
+      this.sprite.flipX = true;
+    } else if (moveDx < 0) {
+      this.sprite.flipX = false;
+    }
+    // When moveDx === 0 (vertical), keep current facing
   }
 }

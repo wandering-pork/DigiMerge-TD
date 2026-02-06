@@ -12,45 +12,82 @@ export class PreloadScene extends Phaser.Scene {
     const { width, height } = this.cameras.main;
 
     // Background
-    this.cameras.main.setBackgroundColor('#0a0a18');
+    this.cameras.main.setBackgroundColor('#060614');
     const gridGfx = this.add.graphics();
-    drawDigitalGrid(gridGfx, width, height);
+    drawDigitalGrid(gridGfx, width, height, 50, COLORS.CYAN, 0.02);
 
     const barWidth = 400;
-    const barHeight = 32;
+    const barHeight = 10;
     const barX = (width - barWidth) / 2;
     const barY = height / 2;
 
-    // Background bar (dark)
+    // Background bar (dark with subtle border)
     const barBg = this.add.graphics();
-    barBg.fillStyle(COLORS.BG_PANEL, 1);
-    barBg.fillRoundedRect(barX, barY, barWidth, barHeight, 6);
-    barBg.lineStyle(1, COLORS.CYAN, 0.3);
-    barBg.strokeRoundedRect(barX, barY, barWidth, barHeight, 6);
+    barBg.fillStyle(COLORS.BG_DEEPEST, 1);
+    barBg.fillRoundedRect(barX, barY, barWidth, barHeight, 5);
+    barBg.lineStyle(1, COLORS.CYAN_DIM, 0.3);
+    barBg.strokeRoundedRect(barX, barY, barWidth, barHeight, 5);
 
     // Fill bar (grows with progress)
     const barFill = this.add.graphics();
 
+    // Glow effect behind bar
+    const barGlow = this.add.graphics();
+
     // Loading text
-    this.add.text(width / 2, barY - 40, 'Connecting to Digital World...', TEXT_STYLES.SCENE_SUBTITLE).setOrigin(0.5);
+    const loadingText = this.add.text(width / 2, barY - 40, 'Connecting to Digital World...', {
+      fontFamily: FONTS.DISPLAY,
+      fontSize: '18px',
+      color: '#8899bb',
+      shadow: { offsetX: 0, offsetY: 1, color: '#000000', blur: 4, fill: true },
+    }).setOrigin(0.5);
+
+    // Pulsing dots animation on loading text
+    let dotCount = 0;
+    const dotTimer = this.time.addEvent({
+      delay: 500,
+      loop: true,
+      callback: () => {
+        dotCount = (dotCount + 1) % 4;
+        const dots = '.'.repeat(dotCount);
+        loadingText.setText(`Connecting to Digital World${dots}`);
+      },
+    });
 
     // Percentage text
-    const percentText = this.add.text(width / 2, barY + barHeight + 20, '0%', {
+    const percentText = this.add.text(width / 2, barY + 30, '0%', {
       fontFamily: FONTS.MONO,
-      fontSize: '18px',
-      color: COLORS.TEXT_LABEL,
+      fontSize: '16px',
+      color: '#7788aa',
     }).setOrigin(0.5);
 
     // Update loading bar on progress
     this.load.on('progress', (value: number) => {
       barFill.clear();
-      barFill.fillStyle(COLORS.CYAN, 1);
-      barFill.fillRoundedRect(barX + 4, barY + 4, (barWidth - 8) * value, barHeight - 8, 4);
+      barFill.fillStyle(COLORS.CYAN, 0.85);
+      const fillW = Math.max(4, (barWidth - 4) * value);
+      barFill.fillRoundedRect(barX + 2, barY + 2, fillW, barHeight - 4, 3);
+
+      // Bright leading edge
+      if (value > 0.01 && value < 1) {
+        barFill.fillStyle(COLORS.CYAN_BRIGHT, 0.6);
+        barFill.fillRect(barX + 2 + fillW - 8, barY + 2, 8, barHeight - 4);
+      }
+
+      // Glow behind the progress
+      barGlow.clear();
+      barGlow.fillStyle(COLORS.CYAN, 0.06);
+      barGlow.fillRoundedRect(barX - 4, barY - 4, fillW + 8, barHeight + 8, 8);
+
       percentText.setText(`${Math.round(value * 100)}%`);
     });
 
     this.load.on('complete', () => {
-      // Text already shown as subtitle, just leave it
+      dotTimer.destroy();
+      loadingText.setText('Connected!');
+      loadingText.setColor('#33ee77');
+      percentText.setText('100%');
+      percentText.setColor('#33ee77');
     });
 
     // -- Load Digimon sprites --
@@ -65,7 +102,7 @@ export class PreloadScene extends Phaser.Scene {
       tanemon: 'Tanemon.png',
       demiveemon: 'Chibimon.png',
       pagumon: 'Pagumon.png',
-      viximon: 'Kyaromon.png',
+      viximon: 'Pokomon.png',
 
       // Rookie
       agumon: 'Agumon.png',
@@ -123,6 +160,64 @@ export class PreloadScene extends Phaser.Scene {
       neodevimon: 'NeoDevimon.png',
       beelzemon: 'Beelzebumon.png',
 
+      // New Tower Lines (Tier 1 Expansion)
+      nyaromon: 'Nyaromon.png',
+      plotmon: 'Plotmon.png',
+      tailmon: 'Tailmon.png',
+      ophanimon: 'Ophanimon.png',
+      gummymon: 'Gummymon.png',
+      terriermon: 'Terriermon.png',
+      galgomon: 'Galgomon.png',
+      rapidmon: 'Rapidmon.png',
+      saintgalgomon: 'SaintGalgomon.png',
+      chocomon: 'Chocomon.png',
+      lopmon: 'Lopmon.png',
+      turuiemon: 'Turuiemon.png',
+      andiramon: 'Andiramon_Data.png',
+      cherubimon_virtue: 'Cherubimon_Virtue.png',
+      pyocomon: 'Pyocomon.png',
+      mochimon: 'Mochimon.png',
+      pukamon: 'Pukamon.png',
+      gomamon: 'Gomamon.png',
+      ikkakumon: 'Ikkakumon.png',
+      plesiomon: 'Plesiomon.png',
+      dorimon: 'Dorimon.png',
+      dorumon: 'DORUmon.png',
+      dorugamon: 'DORUgamon.png',
+      doruguremon: 'DORUguremon.png',
+      alphamon: 'Alphamon.png',
+
+      // Tier 2 Expansion
+      sunmon: 'Sunmon.png',
+      coronamon: 'Coronamon.png',
+      firamon: 'Firamon.png',
+      flaremon: 'Flaremon.png',
+      apollomon: 'Apollomon.png',
+      moonmon: 'Moonmon.png',
+      lunamon: 'Lunamon.png',
+      lekismon: 'Lekismon.png',
+      crescemon: 'Crescemon.png',
+      dianamon: 'Dianamon.png',
+      kyokyomon: 'Kyokyomon.png',
+      ryudamon: 'Ryudamon.png',
+      ginryumon: 'Ginryumon.png',
+      hisyaryumon: 'Hisyaryumon.png',
+      ouryumon: 'Ouryumon.png',
+      puroromon: 'Puroromon.png',
+      funbeemon: 'Funbeemon.png',
+      waspmon: 'Waspmon.png',
+      cannonbeemon: 'Cannonbeemon.png',
+      tigervespamon: 'TigerVespamon.png',
+      budmon: 'Budmon.png',
+      lalamon: 'Lalamon.png',
+      lilamon: 'Lilamon.png',
+      lotusmon: 'Lotusmon.png',
+      caprimon: 'Caprimon.png',
+      hackmon: 'Hackmon.png',
+      reppamon: 'Reppamon.png',
+      saviorhackmon: 'SaviorHackmon.png',
+      jesmon: 'Jesmon.png',
+
       // Enemy-only sprites
       goblimon: 'Goblimon.png',
       gazimon: 'Gazimon.png',
@@ -135,6 +230,53 @@ export class PreloadScene extends Phaser.Scene {
       betamon: 'Betamon.png',
       floramon: 'Floramon.png',
       ogremon: 'Ogremon.png',
+      guardromon: 'Guardromon.png',
+      andromon: 'Andromon.png',
+      mamemon: 'Mamemon.png',
+      metalmamemon: 'MetalMamemon.png',
+      diaboromon: 'Diablomon.png',
+      // Phase 2 Champion enemies
+      leomon: 'Leomon.png',
+      seadramon: 'Seadramon.png',
+      birdramon: 'Birdramon.png',
+      meramon: 'Meramon.png',
+      kuwagamon: 'Kuwagamon.png',
+      numemon: 'Numemon.png',
+      monochromon: 'Monochromon.png',
+      airdramon: 'Airdramon.png',
+      darktyrannomon: 'DarkTyrannomon.png',
+      kabuterimon: 'Kabuterimon.png',
+      // Phase 3 Ultimate enemies
+      megaseadramon: 'MegaSeadramon.png',
+      zudomon: 'Zudomon.png',
+      gigadramon: 'Gigadramon.png',
+      warumonzaemon: 'WaruMonzaemon.png',
+      ladydevimon: 'LadyDevimon.png',
+      bluemeramon: 'BlueMeramon.png',
+      megakabuterimon: 'AtlurKabuterimon_Blue.png',
+      garudamon: 'Garudamon.png',
+      megadramon: 'Megadramon.png',
+      angewomon: 'Angewomon.png',
+      // Phase 4 Mega enemies
+      piedmon: 'Piemon.png',
+      machinedramon: 'Mugendramon.png',
+      daemon: 'Daemon.png',
+      blackwargreymon: 'BlackWarGreymon.png',
+      leviamon: 'Leviamon.png',
+      boltmon: 'Boltmon.png',
+      cherubimon: 'Cherubimon_Vice.png',
+      saberleomon: 'SaberLeomon.png',
+      puppetmon: 'Pinochimon.png',
+      phoenixmon: 'Hououmon.png',
+      herculeskabuterimon: 'HerakleKabuterimon.png',
+      metalseadramon: 'MetalSeadramon.png',
+      // Phase 5 Ultra enemies
+      omegamon: 'Omegamon.png',
+      omegamon_zwart: 'Omegamon_Zwart.png',
+      imperialdramon_dm: 'Imperialdramon.png',
+      armageddemon: 'Armagemon.png',
+      millenniummon: 'Millenniumon.png',
+      apocalymon: 'Apocalymon.png',
     };
 
     for (const [key, filename] of Object.entries(sprites)) {

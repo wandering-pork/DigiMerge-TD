@@ -295,6 +295,7 @@ export class SpawnMenu extends Phaser.GameObjects.Container {
     const allAvailable = getAllDigimonAtStage(this.selectedStage);
     if (allAvailable.length === 0) {
       const noDigimon = this.scene.add.text(SpawnMenu.PANEL_WIDTH / 2, startY + 20, 'No Digimon available', {
+        fontFamily: FONTS.BODY,
         fontSize: '13px',
         color: COLORS.TEXT_DIM,
       }).setOrigin(0.5, 0);
@@ -376,6 +377,7 @@ export class SpawnMenu extends Phaser.GameObjects.Container {
     // Icon based on option type
     if (id === '__random__') {
       const questionMark = this.scene.add.text(24, 24, '?', {
+        fontFamily: FONTS.DISPLAY,
         fontSize: '24px',
         color: COLORS.TEXT_GOLD,
         fontStyle: 'bold',
@@ -385,6 +387,7 @@ export class SpawnMenu extends Phaser.GameObjects.Container {
       // Attribute symbol
       const symbol = id === '__attr_vaccine__' ? 'V' : id === '__attr_data__' ? 'D' : 'X';
       const symbolText = this.scene.add.text(24, 24, symbol, {
+        fontFamily: FONTS.DISPLAY,
         fontSize: '22px',
         color: labelColor || COLORS.TEXT_WHITE,
         fontStyle: 'bold',
@@ -398,6 +401,7 @@ export class SpawnMenu extends Phaser.GameObjects.Container {
 
     // Name
     const nameText = this.scene.add.text(50, 8, label, {
+      fontFamily: FONTS.BODY,
       fontSize: '14px',
       color: labelColor || COLORS.TEXT_WHITE,
     });
@@ -406,12 +410,14 @@ export class SpawnMenu extends Phaser.GameObjects.Container {
     // Sub-label
     if (subLabel) {
       const subText = this.scene.add.text(50, 26, subLabel, {
+        fontFamily: FONTS.MONO,
         fontSize: '11px',
         color: '#44ff44',
       });
       itemContainer.add(subText);
     } else if (id === '__random__') {
       const costInfo = this.scene.add.text(50, 26, 'Any Digimon (cheapest)', {
+        fontFamily: FONTS.BODY,
         fontSize: '11px',
         color: COLORS.TEXT_DIM,
       });
@@ -424,6 +430,7 @@ export class SpawnMenu extends Phaser.GameObjects.Container {
         : getDigimonAtStageByAttribute(this.selectedStage, Attribute.VIRUS);
       const poolNames = attrPool.map(pid => DIGIMON_DATABASE.towers[pid]?.name || pid).join(', ');
       const subText = this.scene.add.text(50, 26, poolNames, {
+        fontFamily: FONTS.BODY,
         fontSize: '10px',
         color: COLORS.TEXT_DIM,
         wordWrap: { width: SpawnMenu.PANEL_WIDTH - 90 },

@@ -129,7 +129,7 @@ describe('SaveManager', () => {
   describe('settings', () => {
     it('returns default settings when no save exists', () => {
       const settings = SaveManager.loadSettings();
-      expect(settings.sfxVolume).toBe(0.5);
+      expect(settings.sfxVolume).toBe(0);
       expect(settings.showGrid).toBe(true);
     });
 

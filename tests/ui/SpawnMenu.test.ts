@@ -47,9 +47,9 @@ describe('getAvailableDigimonAtStage', () => {
 });
 
 describe('getAllDigimonAtStage', () => {
-  it('returns all 8 In-Training starters', () => {
+  it('returns all 21 In-Training starters', () => {
     const result = getAllDigimonAtStage(Stage.IN_TRAINING);
-    expect(result).toHaveLength(8);
+    expect(result).toHaveLength(21);
     expect(result).toContain('koromon');
     expect(result).toContain('tsunomon');
     expect(result).toContain('tokomon');
@@ -58,11 +58,24 @@ describe('getAllDigimonAtStage', () => {
     expect(result).toContain('demiveemon');
     expect(result).toContain('pagumon');
     expect(result).toContain('viximon');
+    expect(result).toContain('nyaromon');
+    expect(result).toContain('gummymon');
+    expect(result).toContain('chocomon');
+    expect(result).toContain('pyocomon');
+    expect(result).toContain('mochimon');
+    expect(result).toContain('pukamon');
+    expect(result).toContain('dorimon');
+    expect(result).toContain('sunmon');
+    expect(result).toContain('moonmon');
+    expect(result).toContain('kyokyomon');
+    expect(result).toContain('puroromon');
+    expect(result).toContain('budmon');
+    expect(result).toContain('caprimon');
   });
 
-  it('returns all 8 Rookie evolutions', () => {
+  it('returns all 21 Rookie evolutions', () => {
     const result = getAllDigimonAtStage(Stage.ROOKIE);
-    expect(result).toHaveLength(8);
+    expect(result).toHaveLength(21);
     expect(result).toContain('agumon');
     expect(result).toContain('gabumon');
     expect(result).toContain('patamon');
@@ -71,11 +84,24 @@ describe('getAllDigimonAtStage', () => {
     expect(result).toContain('veemon');
     expect(result).toContain('demidevimon');
     expect(result).toContain('renamon');
+    expect(result).toContain('plotmon');
+    expect(result).toContain('terriermon');
+    expect(result).toContain('lopmon');
+    expect(result).toContain('piyomon');
+    expect(result).toContain('tentomon_tower');
+    expect(result).toContain('gomamon');
+    expect(result).toContain('dorumon');
+    expect(result).toContain('coronamon');
+    expect(result).toContain('lunamon');
+    expect(result).toContain('ryudamon');
+    expect(result).toContain('funbeemon');
+    expect(result).toContain('lalamon');
+    expect(result).toContain('hackmon');
   });
 
-  it('returns all 8 Champion evolutions (default path)', () => {
+  it('returns all 21 Champion evolutions (default path)', () => {
     const result = getAllDigimonAtStage(Stage.CHAMPION);
-    expect(result).toHaveLength(8);
+    expect(result).toHaveLength(21);
   });
 });
 
@@ -84,6 +110,12 @@ describe('getDigimonAtStageByAttribute', () => {
     const result = getDigimonAtStageByAttribute(Stage.IN_TRAINING, Attribute.VACCINE);
     expect(result).toContain('koromon');
     expect(result).toContain('tokomon');
+    expect(result).toContain('nyaromon');
+    expect(result).toContain('gummymon');
+    expect(result).toContain('pukamon');
+    expect(result).toContain('sunmon');
+    expect(result).toContain('kyokyomon');
+    expect(result).toContain('caprimon');
     expect(result).not.toContain('tsunomon'); // Data
     expect(result).not.toContain('gigimon');  // Virus
   });
@@ -93,12 +125,24 @@ describe('getDigimonAtStageByAttribute', () => {
     expect(result).toContain('tsunomon');
     expect(result).toContain('tanemon');
     expect(result).toContain('viximon');
+    expect(result).toContain('pyocomon');
+    expect(result).toContain('mochimon');
+    expect(result).toContain('dorimon');
+    expect(result).toContain('moonmon');
+    expect(result).toContain('budmon');
   });
 
   it('returns Virus In-Training starters', () => {
     const result = getDigimonAtStageByAttribute(Stage.IN_TRAINING, Attribute.VIRUS);
     expect(result).toContain('gigimon');
     expect(result).toContain('pagumon');
+  });
+
+  it('returns Free In-Training starters', () => {
+    const result = getDigimonAtStageByAttribute(Stage.IN_TRAINING, Attribute.FREE);
+    expect(result).toContain('demiveemon');
+    expect(result).toContain('chocomon');
+    expect(result).toContain('puroromon');
   });
 
   it('Free attribute Digimon are excluded from Vaccine/Data/Virus filters', () => {
