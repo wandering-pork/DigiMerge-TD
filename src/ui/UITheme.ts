@@ -120,18 +120,21 @@ export const TEXT_STYLES = {
     stroke: '#002233',
     strokeThickness: 5,
     shadow: { offsetX: 0, offsetY: 3, color: '#001122', blur: 8, fill: true },
+    resolution: 2,
   } as Phaser.Types.GameObjects.Text.TextStyle,
   SCENE_SUBTITLE: {
     fontFamily: FONTS.BODY,
     fontSize: '17px',
     color: '#8899bb',
     shadow: { offsetX: 0, offsetY: 1, color: '#000000', blur: 4, fill: true },
+    resolution: 2,
   } as Phaser.Types.GameObjects.Text.TextStyle,
   HUD_LABEL: {
     fontFamily: FONTS.BODY,
     fontSize: '12px',
     color: '#7788aa',
     letterSpacing: 2,
+    resolution: 2,
   } as Phaser.Types.GameObjects.Text.TextStyle,
   HUD_VALUE: {
     fontFamily: FONTS.MONO,
@@ -139,22 +142,26 @@ export const TEXT_STYLES = {
     color: '#ffffff',
     fontStyle: 'bold',
     shadow: { offsetX: 0, offsetY: 1, color: '#000000', blur: 3, fill: true },
+    resolution: 2,
   } as Phaser.Types.GameObjects.Text.TextStyle,
   PANEL_TITLE: {
     fontFamily: FONTS.DISPLAY,
     fontSize: '17px',
     color: '#00ddff',
     fontStyle: 'bold',
+    resolution: 2,
   } as Phaser.Types.GameObjects.Text.TextStyle,
   PANEL_LABEL: {
     fontFamily: FONTS.BODY,
     fontSize: '12px',
     color: '#8899bb',
+    resolution: 2,
   } as Phaser.Types.GameObjects.Text.TextStyle,
   PANEL_VALUE: {
     fontFamily: FONTS.MONO,
     fontSize: '13px',
     color: '#ffffff',
+    resolution: 2,
   } as Phaser.Types.GameObjects.Text.TextStyle,
   BUTTON: {
     fontFamily: FONTS.BODY,
@@ -162,12 +169,14 @@ export const TEXT_STYLES = {
     color: '#ffffff',
     fontStyle: 'bold',
     shadow: { offsetX: 0, offsetY: 1, color: '#000000', blur: 2, fill: true },
+    resolution: 2,
   } as Phaser.Types.GameObjects.Text.TextStyle,
   BUTTON_SM: {
     fontFamily: FONTS.BODY,
     fontSize: '13px',
     color: '#ffffff',
     fontStyle: 'bold',
+    resolution: 2,
   } as Phaser.Types.GameObjects.Text.TextStyle,
   MODAL_TITLE: {
     fontFamily: FONTS.DISPLAY,
@@ -177,11 +186,13 @@ export const TEXT_STYLES = {
     stroke: '#332200',
     strokeThickness: 3,
     shadow: { offsetX: 0, offsetY: 2, color: '#221100', blur: 6, fill: true },
+    resolution: 2,
   } as Phaser.Types.GameObjects.Text.TextStyle,
   VERSION: {
     fontFamily: FONTS.MONO,
     fontSize: '11px',
     color: '#445566',
+    resolution: 2,
   } as Phaser.Types.GameObjects.Text.TextStyle,
 };
 

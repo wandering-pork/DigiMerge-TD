@@ -5,7 +5,6 @@ import { AudioManager } from '@/managers/AudioManager';
 
 /**
  * Settings overlay scene with volume, mute, restart, and main menu options.
- * Enhanced with glass-panel design and cleaner control layout.
  */
 export class SettingsScene extends Phaser.Scene {
   constructor() {
@@ -20,15 +19,14 @@ export class SettingsScene extends Phaser.Scene {
     overlay.fillStyle(COLORS.OVERLAY_BLACK, 0.7);
     overlay.fillRect(0, 0, width, height);
 
-    // Make overlay block clicks from passing through
     overlay.setInteractive(
       new Phaser.Geom.Rectangle(0, 0, width, height),
       Phaser.Geom.Rectangle.Contains,
     );
 
-    // Panel background
-    const panelWidth = 340;
-    const panelHeight = 520;
+    // Panel
+    const panelWidth = 310;
+    const panelHeight = 380;
     const panelX = (width - panelWidth) / 2;
     const panelY = (height - panelHeight) / 2;
 
@@ -39,55 +37,57 @@ export class SettingsScene extends Phaser.Scene {
     panelContainer.add(panel);
 
     // Title
-    const titleText = this.add.text(width / 2, panelY + 35, 'Settings', {
+    const titleText = this.add.text(width / 2, panelY + 28, 'Settings', {
       ...TEXT_STYLES.SCENE_TITLE,
-      fontSize: '30px',
+      fontSize: '26px',
     }).setOrigin(0.5);
     panelContainer.add(titleText);
 
     // Separator under title
     const titleSep = this.add.graphics();
-    drawSeparator(titleSep, panelX + 20, panelY + 60, panelX + panelWidth - 20);
+    drawSeparator(titleSep, panelX + 20, panelY + 50, panelX + panelWidth - 20);
     panelContainer.add(titleSep);
 
     // ---- Volume Control ----
     const audioManager: AudioManager | undefined = this.registry.get('audioManager');
-    const controlX = panelX + 30;
-    let controlY = panelY + 80;
-    const sliderWidth = 180;
-    const sliderHeight = 8;
+    const controlX = panelX + 24;
+    const contentWidth = panelWidth - 48;
+    let controlY = panelY + 62;
 
     this.add.text(controlX, controlY, 'VOLUME', {
       fontFamily: FONTS.BODY,
       fontSize: '11px',
       color: '#7788aa',
       letterSpacing: 2,
+      resolution: 2,
     });
 
-    controlY += 20;
+    controlY += 18;
 
     const currentVolume = audioManager ? audioManager.getVolume() : 0.05;
     const isMuted = audioManager ? !audioManager.isEnabled() : false;
 
     // Slider track
+    const sliderWidth = contentWidth - 80; // room for percentage + mute
+    const sliderHeight = 6;
     const sliderTrack = this.add.graphics();
     sliderTrack.fillStyle(COLORS.BG_DEEPEST, 1);
-    sliderTrack.fillRoundedRect(controlX, controlY, sliderWidth, sliderHeight, 4);
+    sliderTrack.fillRoundedRect(controlX, controlY, sliderWidth, sliderHeight, 3);
     sliderTrack.lineStyle(1, COLORS.CYAN_DIM, 0.3);
-    sliderTrack.strokeRoundedRect(controlX, controlY, sliderWidth, sliderHeight, 4);
+    sliderTrack.strokeRoundedRect(controlX, controlY, sliderWidth, sliderHeight, 3);
 
     // Slider fill
     const sliderFill = this.add.graphics();
     const drawSliderFill = (vol: number) => {
       sliderFill.clear();
       sliderFill.fillStyle(COLORS.CYAN, 0.7);
-      const fillW = Math.max(4, sliderWidth * vol);
-      sliderFill.fillRoundedRect(controlX, controlY, fillW, sliderHeight, 4);
+      const fillW = Math.max(3, sliderWidth * vol);
+      sliderFill.fillRoundedRect(controlX, controlY, fillW, sliderHeight, 3);
     };
     drawSliderFill(isMuted ? 0 : currentVolume);
 
     // Slider handle
-    const handleSize = 18;
+    const handleSize = 14;
     const handle = this.add.graphics();
     let volume = currentVolume;
 
@@ -95,29 +95,25 @@ export class SettingsScene extends Phaser.Scene {
       handle.clear();
       const hx = controlX + sliderWidth * vol - handleSize / 2;
       const hy = controlY + sliderHeight / 2 - handleSize / 2;
-      // Shadow
       handle.fillStyle(0x000000, 0.3);
-      handle.fillRoundedRect(hx + 1, hy + 1, handleSize, handleSize, 5);
-      // Handle body
+      handle.fillRoundedRect(hx + 1, hy + 1, handleSize, handleSize, 4);
       handle.fillStyle(0xffffff, 1);
-      handle.fillRoundedRect(hx, hy, handleSize, handleSize, 5);
-      // Inner highlight
-      handle.fillStyle(COLORS.CYAN, 0.2);
-      handle.fillRoundedRect(hx + 2, hy + 2, handleSize - 4, handleSize / 2 - 2, 3);
+      handle.fillRoundedRect(hx, hy, handleSize, handleSize, 4);
       handle.lineStyle(1.5, COLORS.CYAN, 0.6);
-      handle.strokeRoundedRect(hx, hy, handleSize, handleSize, 5);
+      handle.strokeRoundedRect(hx, hy, handleSize, handleSize, 4);
     };
     drawHandle(isMuted ? 0 : volume);
 
-    // Volume percentage text
-    const volPercText = this.add.text(controlX + sliderWidth + 15, controlY - 2, `${Math.round((isMuted ? 0 : volume) * 100)}%`, {
+    // Volume percentage text (inline right of slider)
+    const volPercText = this.add.text(controlX + sliderWidth + 8, controlY - 3, `${Math.round((isMuted ? 0 : volume) * 100)}%`, {
       fontFamily: FONTS.MONO,
-      fontSize: '14px',
+      fontSize: '12px',
       color: COLORS.TEXT_WHITE,
+      resolution: 2,
     });
 
     // Draggable zone over slider
-    const sliderZone = this.add.zone(controlX + sliderWidth / 2, controlY + 4, sliderWidth + handleSize, 30)
+    const sliderZone = this.add.zone(controlX + sliderWidth / 2, controlY + 3, sliderWidth + handleSize, 24)
       .setInteractive({ useHandCursor: true });
 
     let isDragging = false;
@@ -132,6 +128,8 @@ export class SettingsScene extends Phaser.Scene {
         audioManager.setVolume(volume);
         if (volume > 0) audioManager.setEnabled(true);
       }
+      // Update mute button state
+      updateMuteVisual();
     };
 
     sliderZone.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
@@ -145,23 +143,28 @@ export class SettingsScene extends Phaser.Scene {
 
     this.input.on('pointerup', () => { isDragging = false; });
 
-    controlY += 30;
-
-    // Mute toggle button
-    const muteBtnW = 90;
-    const muteBtnH = 30;
-    const muteContainer = this.add.container(controlX + sliderWidth / 2, controlY);
+    // Mute toggle (small icon button inline, far right)
+    const muteBtnW = 26;
+    const muteBtnH = 22;
+    const muteBtnX = panelX + panelWidth - 34;
+    const muteContainer = this.add.container(muteBtnX, controlY + 1);
     const muteBtnBg = this.add.graphics();
-    drawButton(muteBtnBg, muteBtnW, muteBtnH, isMuted ? COLORS.DANGER : COLORS.PRIMARY);
-    muteContainer.add(muteBtnBg);
-
-    const muteText = this.add.text(0, 0, isMuted ? 'Unmute' : 'Mute', {
+    const muteIcon = this.add.text(0, 0, '', {
       fontFamily: FONTS.BODY,
-      fontSize: '13px',
+      fontSize: '14px',
       color: '#ffffff',
-      fontStyle: 'bold',
+      resolution: 2,
     }).setOrigin(0.5);
-    muteContainer.add(muteText);
+
+    const updateMuteVisual = () => {
+      const muted = audioManager ? !audioManager.isEnabled() : false;
+      drawButton(muteBtnBg, muteBtnW, muteBtnH, muted ? COLORS.DANGER : COLORS.BG_PANEL_LIGHT);
+      muteIcon.setText(muted ? '\u2716' : '\u266A');
+    };
+
+    muteContainer.add(muteBtnBg);
+    muteContainer.add(muteIcon);
+    updateMuteVisual();
 
     const muteHitArea = new Phaser.Geom.Rectangle(-muteBtnW / 2, -muteBtnH / 2, muteBtnW, muteBtnH);
     muteContainer.setInteractive(muteHitArea, Phaser.Geom.Rectangle.Contains);
@@ -171,8 +174,6 @@ export class SettingsScene extends Phaser.Scene {
       if (audioManager) {
         const nowEnabled = audioManager.isEnabled();
         audioManager.setEnabled(!nowEnabled);
-        muteText.setText(nowEnabled ? 'Unmute' : 'Mute');
-        drawButton(muteBtnBg, muteBtnW, muteBtnH, nowEnabled ? COLORS.DANGER : COLORS.PRIMARY);
         if (nowEnabled) {
           drawSliderFill(0);
           drawHandle(0);
@@ -182,24 +183,26 @@ export class SettingsScene extends Phaser.Scene {
           drawHandle(volume);
           volPercText.setText(`${Math.round(volume * 100)}%`);
         }
+        updateMuteVisual();
       }
     });
 
-    controlY += 30;
+    controlY += 24;
 
     // Separator
     const optionsSep = this.add.graphics();
     drawSeparator(optionsSep, panelX + 20, controlY, panelX + panelWidth - 20);
-    controlY += 15;
+    controlY += 14;
 
-    // ---- Display Options Row ----
+    // ---- Display Options ----
     this.add.text(controlX, controlY, 'DISPLAY', {
       fontFamily: FONTS.BODY,
       fontSize: '11px',
       color: '#7788aa',
       letterSpacing: 2,
+      resolution: 2,
     });
-    controlY += 22;
+    controlY += 20;
 
     // Damage Numbers Toggle
     const showDmgNumbers = this.registry.get('showDamageNumbers') !== false;
@@ -209,20 +212,22 @@ export class SettingsScene extends Phaser.Scene {
       fontFamily: FONTS.BODY,
       fontSize: '13px',
       color: '#aabbcc',
+      resolution: 2,
     }));
 
-    const dmgBtnW = 60;
-    const dmgBtnH = 26;
-    const dmgBtnContainer = this.add.container(panelX + panelWidth - 50, 0);
+    const dmgBtnW = 50;
+    const dmgBtnH = 22;
+    const dmgBtnContainer = this.add.container(panelX + panelWidth - 44, 0);
     const dmgBtnBg = this.add.graphics();
     drawButton(dmgBtnBg, dmgBtnW, dmgBtnH, showDmgNumbers ? COLORS.CYAN_DIM : COLORS.BG_PANEL_LIGHT);
     dmgBtnContainer.add(dmgBtnBg);
 
     const dmgText = this.add.text(0, 0, showDmgNumbers ? 'ON' : 'OFF', {
       fontFamily: FONTS.BODY,
-      fontSize: '12px',
+      fontSize: '11px',
       color: '#ffffff',
       fontStyle: 'bold',
+      resolution: 2,
     }).setOrigin(0.5);
     dmgBtnContainer.add(dmgText);
 
@@ -239,7 +244,7 @@ export class SettingsScene extends Phaser.Scene {
     });
 
     dmgRow.add(dmgBtnContainer);
-    controlY += 36;
+    controlY += 30;
 
     // Health Bar Mode Toggle
     const HEALTH_MODES: Array<'all' | 'bosses' | 'off'> = ['all', 'bosses', 'off'];
@@ -251,20 +256,22 @@ export class SettingsScene extends Phaser.Scene {
       fontFamily: FONTS.BODY,
       fontSize: '13px',
       color: '#aabbcc',
+      resolution: 2,
     }));
 
-    const hpBtnW = 80;
-    const hpBtnH = 26;
-    const hpBtnContainer = this.add.container(panelX + panelWidth - 60, 0);
+    const hpBtnW = 62;
+    const hpBtnH = 22;
+    const hpBtnContainer = this.add.container(panelX + panelWidth - 50, 0);
     const hpBtnBg = this.add.graphics();
     drawButton(hpBtnBg, hpBtnW, hpBtnH, COLORS.CYAN_DIM);
     hpBtnContainer.add(hpBtnBg);
 
     const hpText = this.add.text(0, 0, HEALTH_MODE_LABELS[currentHpMode], {
       fontFamily: FONTS.BODY,
-      fontSize: '12px',
+      fontSize: '11px',
       color: '#ffffff',
       fontStyle: 'bold',
+      resolution: 2,
     }).setOrigin(0.5);
     hpBtnContainer.add(hpText);
 
@@ -281,23 +288,23 @@ export class SettingsScene extends Phaser.Scene {
     });
 
     hpRow.add(hpBtnContainer);
-    controlY += 40;
+    controlY += 30;
 
     // Separator before action buttons
     const actionSep = this.add.graphics();
     drawSeparator(actionSep, panelX + 20, controlY, panelX + panelWidth - 20);
-    controlY += 20;
+    controlY += 18;
 
     // ---- Action Buttons ----
-    const btnW = 220;
-    const btnH = 42;
+    const btnW = 180;
+    const btnH = 34;
     const btnCenterX = width / 2;
 
     // Close button
     this.createActionButton(btnCenterX, controlY, btnW, btnH, 'Close', COLORS.PRIMARY, COLORS.PRIMARY_HOVER, () => {
       this.scene.stop();
     });
-    controlY += 52;
+    controlY += 42;
 
     // Restart button
     this.createActionButton(btnCenterX, controlY, btnW, btnH, 'Restart', COLORS.SPECIAL, COLORS.SPECIAL_HOVER, () => {
@@ -305,7 +312,7 @@ export class SettingsScene extends Phaser.Scene {
       this.scene.stop();
       this.scene.start('GameScene');
     });
-    controlY += 52;
+    controlY += 42;
 
     // Main Menu button
     this.createActionButton(btnCenterX, controlY, btnW, btnH, 'Main Menu', COLORS.DANGER, COLORS.DANGER_HOVER, () => {
@@ -334,10 +341,11 @@ export class SettingsScene extends Phaser.Scene {
 
     const text = this.add.text(0, 0, label, {
       fontFamily: FONTS.BODY,
-      fontSize: '16px',
+      fontSize: '14px',
       color: '#ffffff',
       fontStyle: 'bold',
       shadow: { offsetX: 0, offsetY: 1, color: '#000000', blur: 2, fill: true },
+      resolution: 2,
     }).setOrigin(0.5);
     container.add(text);
 

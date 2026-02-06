@@ -428,12 +428,15 @@ export class SpawnMenu extends Phaser.GameObjects.Container {
         : id === '__attr_data__'
         ? getDigimonAtStageByAttribute(this.selectedStage, Attribute.DATA)
         : getDigimonAtStageByAttribute(this.selectedStage, Attribute.VIRUS);
-      const poolNames = attrPool.map(pid => DIGIMON_DATABASE.towers[pid]?.name || pid).join(', ');
-      const subText = this.scene.add.text(50, 26, poolNames, {
+      const allNames = attrPool.map(pid => DIGIMON_DATABASE.towers[pid]?.name || pid);
+      const maxShow = 3;
+      const displayText = allNames.length <= maxShow
+        ? allNames.join(', ')
+        : allNames.slice(0, maxShow).join(', ') + ` & ${allNames.length - maxShow} more`;
+      const subText = this.scene.add.text(50, 26, displayText, {
         fontFamily: FONTS.BODY,
         fontSize: '10px',
         color: COLORS.TEXT_DIM,
-        wordWrap: { width: SpawnMenu.PANEL_WIDTH - 90 },
       });
       itemContainer.add(subText);
     }

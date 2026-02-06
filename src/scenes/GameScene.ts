@@ -89,6 +89,7 @@ export class GameScene extends Phaser.Scene {
   private bossAnnounceText: Phaser.GameObjects.Text | null = null;
   private bossAbilityText: Phaser.GameObjects.Text | null = null;
   private bossShieldIndicator: Phaser.GameObjects.Graphics | null = null;
+  private bossHudObjects: Phaser.GameObjects.GameObject[] = [];
 
   // Game speed
   private gameSpeed: number = 1;
@@ -738,37 +739,46 @@ export class GameScene extends Phaser.Scene {
 
     // Create boss health bar at the top of the game area
     const barWidth = GRID.COLUMNS * GRID.CELL_SIZE - 20;
-    const barHeight = 16;
+    const barHeight = 14;
     const barX = GRID_OFFSET_X + 10;
-    const barY = GRID_OFFSET_Y - 45;
+    const barY = 6;
 
+    // Dark background panel for the boss bar area
     this.bossBarBg = this.add.graphics();
-    this.bossBarBg.fillStyle(0x222222, 0.9);
-    this.bossBarBg.fillRoundedRect(barX, barY, barWidth, barHeight, 4);
-    this.bossBarBg.lineStyle(1, 0xff4444, 0.6);
-    this.bossBarBg.strokeRoundedRect(barX, barY, barWidth, barHeight, 4);
+    this.bossBarBg.fillStyle(0x0a0a1e, 0.9);
+    this.bossBarBg.fillRoundedRect(barX - 6, barY - 18, barWidth + 12, barHeight + 22, 6);
+    this.bossBarBg.lineStyle(1, 0xff4444, 0.4);
+    this.bossBarBg.strokeRoundedRect(barX - 6, barY - 18, barWidth + 12, barHeight + 22, 6);
+    // Health bar track
+    this.bossBarBg.fillStyle(0x111111, 1);
+    this.bossBarBg.fillRoundedRect(barX, barY, barWidth, barHeight, 3);
+    this.bossBarBg.lineStyle(1, 0xff4444, 0.5);
+    this.bossBarBg.strokeRoundedRect(barX, barY, barWidth, barHeight, 3);
     this.bossBarBg.setDepth(15);
 
     this.bossBarFill = this.add.graphics();
     this.bossBarFill.setDepth(15);
 
-    this.bossNameText = this.add.text(barX + barWidth / 2, barY - 2, bossName, {
-      fontSize: '12px',
+    // Boss name (left) and ability name (right) in the header area
+    this.bossNameText = this.add.text(barX + 2, barY - 14, bossName, {
+      fontSize: '11px',
       color: '#ff6666',
       fontStyle: 'bold',
-    }).setOrigin(0.5, 1).setDepth(15);
+      resolution: 2,
+    }).setOrigin(0, 0).setDepth(15);
 
-    // Show boss ability name below the health bar (larger, bold, with stroke for visibility)
     if (bossStats?.bossAbility) {
-      this.bossAbilityText = this.add.text(barX + barWidth / 2, barY + barHeight + 4,
-        `${bossStats.bossAbility.name}`, {
-          fontSize: '13px',
+      this.bossAbilityText = this.add.text(barX + barWidth - 2, barY - 14,
+        bossStats.bossAbility.name, {
+          fontSize: '11px',
           color: '#ffcc66',
           fontStyle: 'bold',
-          stroke: '#000000',
-          strokeThickness: 2,
-        }).setOrigin(0.5, 0).setDepth(15);
+          resolution: 2,
+        }).setOrigin(1, 0).setDepth(15);
     }
+
+    // Show boss ability info in the HUD panel
+    this.showBossHudInfo(bossName, bossStats);
 
     // Track boss death to clean up bar
     const bossRef = this.bossEnemy;
@@ -786,15 +796,15 @@ export class GameScene extends Phaser.Scene {
     }
 
     const barWidth = GRID.COLUMNS * GRID.CELL_SIZE - 20;
-    const barHeight = 16;
+    const barHeight = 14;
     const barX = GRID_OFFSET_X + 10;
-    const barY = GRID_OFFSET_Y - 45;
+    const barY = 6;
     const hpPercent = Math.max(0, this.bossEnemy.hp / this.bossEnemy.maxHp);
 
     this.bossBarFill.clear();
     const fillColor = hpPercent > 0.6 ? 0xff4444 : hpPercent > 0.3 ? 0xff8844 : 0xff2222;
     this.bossBarFill.fillStyle(fillColor, 1);
-    this.bossBarFill.fillRoundedRect(barX + 2, barY + 2, (barWidth - 4) * hpPercent, barHeight - 4, 3);
+    this.bossBarFill.fillRoundedRect(barX + 2, barY + 2, (barWidth - 4) * hpPercent, barHeight - 4, 2);
   }
 
   private cleanupBossBar(): void {
@@ -804,6 +814,8 @@ export class GameScene extends Phaser.Scene {
     if (this.bossNameText) { this.bossNameText.destroy(); this.bossNameText = null; }
     if (this.bossAbilityText) { this.bossAbilityText.destroy(); this.bossAbilityText = null; }
     if (this.bossShieldIndicator) { this.bossShieldIndicator.destroy(); this.bossShieldIndicator = null; }
+    for (const obj of this.bossHudObjects) obj.destroy();
+    this.bossHudObjects = [];
   }
 
   // ============================================================
@@ -995,26 +1007,101 @@ export class GameScene extends Phaser.Scene {
 
   private showBossAbilityPopup(text: string): void {
     const popupX = GRID_OFFSET_X + (GRID.COLUMNS * GRID.CELL_SIZE) / 2;
-    const popupY = GRID_OFFSET_Y + 40;
+    const popupY = GRID_OFFSET_Y + 50;
+
+    // Dark background strip for visibility
+    const bgStrip = this.add.graphics();
+    bgStrip.fillStyle(0x000000, 0.6);
+    bgStrip.fillRoundedRect(popupX - 120, popupY - 16, 240, 32, 6);
+    bgStrip.setDepth(54);
 
     const popup = this.add.text(popupX, popupY, text, {
-      fontSize: '20px',
+      fontSize: '22px',
       color: '#ffaa00',
       fontStyle: 'bold',
       stroke: '#000000',
-      strokeThickness: 3,
+      strokeThickness: 4,
+      resolution: 2,
     }).setOrigin(0.5).setDepth(55);
 
     this.tweens.add({
-      targets: popup,
-      y: popup.y - 30,
+      targets: [popup, bgStrip],
+      y: `-=30`,
       alpha: { from: 1, to: 0 },
-      duration: 1200,
+      duration: 1500,
       ease: 'Cubic.easeOut',
-      onComplete: () => popup.destroy(),
+      onComplete: () => { popup.destroy(); bgStrip.destroy(); },
     });
 
     EventBus.emit(GameEvents.BOSS_ABILITY_ACTIVATED, { abilityName: text });
+  }
+
+  private showBossHudInfo(bossName: string, bossStats: any): void {
+    // Clean up any existing boss HUD objects
+    for (const obj of this.bossHudObjects) obj.destroy();
+    this.bossHudObjects = [];
+
+    const rightPanelX = GRID_OFFSET_X + GRID.COLUMNS * GRID.CELL_SIZE + 30;
+    const panelW = 270;
+    const hudY = 10;
+    // Position below the speed controls
+    const bossInfoY = hudY + 390;
+
+    // Separator
+    const sep = this.add.graphics().setDepth(10);
+    drawSeparator(sep, rightPanelX - 10, bossInfoY, rightPanelX + panelW - 30);
+    this.bossHudObjects.push(sep);
+
+    // "BOSS" label
+    const label = this.add.text(rightPanelX, bossInfoY + 8, 'ACTIVE BOSS', {
+      ...TEXT_STYLES.HUD_LABEL,
+      color: '#ff6666',
+    }).setDepth(10);
+    this.bossHudObjects.push(label);
+
+    // Boss name
+    const nameText = this.add.text(rightPanelX, bossInfoY + 24, bossName, {
+      fontFamily: FONTS.MONO,
+      fontSize: '14px',
+      color: '#ff8844',
+      fontStyle: 'bold',
+      resolution: 2,
+    }).setDepth(10);
+    this.bossHudObjects.push(nameText);
+
+    // Ability info
+    if (bossStats?.bossAbility) {
+      const abilityLabel = this.add.text(rightPanelX, bossInfoY + 44, 'Ability:', {
+        fontFamily: FONTS.BODY,
+        fontSize: '10px',
+        color: '#7788aa',
+        resolution: 2,
+      }).setDepth(10);
+      this.bossHudObjects.push(abilityLabel);
+
+      const abilityName = this.add.text(rightPanelX + 42, bossInfoY + 44, bossStats.bossAbility.name, {
+        fontFamily: FONTS.MONO,
+        fontSize: '11px',
+        color: '#ffcc66',
+        fontStyle: 'bold',
+        resolution: 2,
+      }).setDepth(10);
+      this.bossHudObjects.push(abilityName);
+
+      // Trigger type
+      const triggerType = bossStats.bossAbility.triggerType;
+      const triggerLabel = triggerType === 'cooldown' ? `Every ${bossStats.bossAbility.cooldown}s`
+        : triggerType === 'passive' ? 'Passive'
+        : triggerType === 'hp_threshold' ? `At ${(bossStats.bossAbility.hpThreshold ?? 0) * 100}% HP`
+        : triggerType;
+      const triggerText = this.add.text(rightPanelX, bossInfoY + 58, triggerLabel, {
+        fontFamily: FONTS.MONO,
+        fontSize: '10px',
+        color: '#667799',
+        resolution: 2,
+      }).setDepth(10);
+      this.bossHudObjects.push(triggerText);
+    }
   }
 
   private showBossShieldIndicator(): void {
@@ -1024,10 +1111,10 @@ export class GameScene extends Phaser.Scene {
     // Golden glow around the boss bar area
     const barWidth = GRID.COLUMNS * GRID.CELL_SIZE - 20;
     const barX = GRID_OFFSET_X + 10;
-    const barY = GRID_OFFSET_Y - 45;
+    const barY = 6;
     this.bossShieldIndicator = this.add.graphics();
     this.bossShieldIndicator.lineStyle(2, 0xffdd44, 0.8);
-    this.bossShieldIndicator.strokeRoundedRect(barX - 2, barY - 2, barWidth + 4, 20, 5);
+    this.bossShieldIndicator.strokeRoundedRect(barX - 2, barY - 2, barWidth + 4, 18, 5);
     this.bossShieldIndicator.setDepth(16);
 
     // Auto-remove after shield duration (read from boss ability state)

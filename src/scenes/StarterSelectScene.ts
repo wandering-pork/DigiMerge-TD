@@ -42,7 +42,6 @@ export class StarterSelectScene extends Phaser.Scene {
   private startBtnBg!: Phaser.GameObjects.Graphics;
   private startBtnText!: Phaser.GameObjects.Text;
   private selectionCountText!: Phaser.GameObjects.Text;
-  private selectionDots: Phaser.GameObjects.Graphics[] = [];
 
   constructor() {
     super({ key: 'StarterSelectScene' });
@@ -55,7 +54,6 @@ export class StarterSelectScene extends Phaser.Scene {
     this.starterContainers.clear();
     this.cardHighlights.clear();
     this.cardBgs.clear();
-    this.selectionDots = [];
 
     // Background
     this.cameras.main.setBackgroundColor('#060614');
@@ -77,21 +75,12 @@ export class StarterSelectScene extends Phaser.Scene {
       fontSize: '15px',
     }).setOrigin(0.5);
 
-    // Selection indicator dot (single)
-    for (let i = 0; i < 1; i++) {
-      const dot = this.add.graphics();
-      const dx = width / 2;
-      dot.lineStyle(1.5, COLORS.CYAN_DIM, 0.5);
-      dot.strokeCircle(dx, 100, 6);
-      this.selectionDots.push(dot);
-    }
-
     // Starter grid: 7 columns x 3 rows
     const cols = 7;
     const cellWidth = 115;
     const cellHeight = 145;
     const gridStartX = (width - cols * cellWidth) / 2 + cellWidth / 2;
-    const gridStartY = 135;
+    const gridStartY = 165;
 
     this.starters.forEach((starter, index) => {
       const col = index % cols;
@@ -356,22 +345,6 @@ export class StarterSelectScene extends Phaser.Scene {
       const starter = this.starters.find(s => s.key === selectedKey);
       this.selectionCountText.setText(`Selected: ${starter ? starter.name : '1 Starter'}`);
     }
-
-    // Update selection indicator dot (single)
-    this.selectionDots.forEach((dot, i) => {
-      const { width } = this.cameras.main;
-      const dx = width / 2;
-      dot.clear();
-      if (i < count) {
-        dot.fillStyle(COLORS.CYAN, 0.9);
-        dot.fillCircle(dx, 100, 6);
-        dot.lineStyle(1, COLORS.CYAN_BRIGHT, 0.5);
-        dot.strokeCircle(dx, 100, 6);
-      } else {
-        dot.lineStyle(1.5, COLORS.CYAN_DIM, 0.3);
-        dot.strokeCircle(dx, 100, 6);
-      }
-    });
 
     if (count >= 1) {
       drawButton(this.startBtnBg, 220, 50, COLORS.SUCCESS);
