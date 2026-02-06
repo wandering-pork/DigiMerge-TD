@@ -42,7 +42,7 @@ export class SaveManager {
    * Save the current game state to LocalStorage.
    */
   public static save(
-    gameState: { digibytes: number; lives: number; currentWave: number; gameMode: 'normal' | 'endless' },
+    gameState: { digibytes: number; lives: number; currentWave: number; gameMode: 'normal' | 'endless'; hasUsedFreeSpawn?: boolean },
     towers: TowerSaveData[],
     statistics?: Partial<GameStatistics>,
     settings?: Partial<GameSettings>,

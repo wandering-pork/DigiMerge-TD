@@ -6,6 +6,8 @@ import { getLevelUpCost, canLevelUp, calculateMaxLevel } from '@/systems/LevelSy
 import { getEvolutions } from '@/data/EvolutionPaths';
 import { canMerge, MergeCandidate } from '@/systems/MergeSystem';
 import { GRID, GRID_OFFSET_X } from '@/config/Constants';
+import { COLORS, ATTRIBUTE_COLORS_STR, TEXT_STYLES, ANIM } from './UITheme';
+import { drawPanel, drawButton, drawSeparator, animateSlideIn, animateSlideOut, animateButtonHover, animateButtonPress } from './UIHelpers';
 
 /**
  * Ordered list of target priorities for cycling through with the selector.
@@ -34,16 +36,6 @@ const TARGET_PRIORITY_LABELS: Record<TargetPriority, string> = {
 };
 
 /**
- * Attribute color map for visual distinction.
- */
-const ATTRIBUTE_COLORS: Record<number, string> = {
-  0: '#44dd44', // Vaccine - green
-  1: '#4488ff', // Data - blue
-  2: '#dd44dd', // Virus - purple
-  3: '#cccccc', // Free - grey
-};
-
-/**
  * TowerInfoPanel - A right-side panel that displays selected tower information
  * and provides controls for level up, target priority, and selling.
  *
@@ -62,6 +54,9 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
   // Panel dimensions
   private static readonly PANEL_WIDTH = 260;
   private static readonly PANEL_HEIGHT = 580;
+
+  // Panel position X (saved for animations)
+  private panelBaseX: number;
 
   // Panel background
   private panelBg!: Phaser.GameObjects.Graphics;
@@ -118,6 +113,7 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
     const panelX = GRID_OFFSET_X + GRID.COLUMNS * GRID.CELL_SIZE + 20;
     super(scene, panelX, 100);
 
+    this.panelBaseX = panelX;
     this.getDigibytes = getDigibytes;
     this.spendDigibytes = spendDigibytes;
     this.addDigibytes = addDigibytes;
@@ -147,19 +143,15 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
     const w = TowerInfoPanel.PANEL_WIDTH;
     const h = TowerInfoPanel.PANEL_HEIGHT;
 
-    // Background
+    // Background — themed 4-layer panel
     this.panelBg = this.scene.add.graphics();
-    this.panelBg.fillStyle(0x1a1a33, 0.95);
-    this.panelBg.fillRoundedRect(0, 0, w, h, 8);
-    this.panelBg.lineStyle(2, 0x4444aa, 1);
-    this.panelBg.strokeRoundedRect(0, 0, w, h, 8);
+    drawPanel(this.panelBg, 0, 0, w, h);
     this.add(this.panelBg);
 
     // Close button (top right)
     this.closeBtn = this.scene.add.text(w - 15, 8, 'X', {
-      fontSize: '18px',
-      color: '#ff6666',
-      fontStyle: 'bold',
+      ...TEXT_STYLES.PANEL_TITLE,
+      color: COLORS.TEXT_LIVES,
     }).setOrigin(0.5, 0)
       .setInteractive({ useHandCursor: true })
       .on('pointerdown', () => this.hide());
@@ -172,17 +164,14 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
     this.add(this.digimonSprite);
 
     this.nameText = this.scene.add.text(75, 22, '', {
-      fontSize: '18px',
-      color: '#ffffff',
-      fontStyle: 'bold',
+      ...TEXT_STYLES.PANEL_TITLE,
       wordWrap: { width: w - 100 },
     });
     this.add(this.nameText);
 
-    // Thin separator line
+    // Separator
     const separator1 = this.scene.add.graphics();
-    separator1.lineStyle(1, 0x4444aa, 0.5);
-    separator1.lineBetween(10, 70, w - 10, 70);
+    drawSeparator(separator1, 10, 70, w - 10);
     this.add(separator1);
 
     // --- Stats Section ---
@@ -205,8 +194,7 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
 
     // Second separator
     const separator2 = this.scene.add.graphics();
-    separator2.lineStyle(1, 0x4444aa, 0.3);
-    separator2.lineBetween(10, statsY + 2, w - 10, statsY + 2);
+    drawSeparator(separator2, 10, statsY + 2, w - 10);
     this.add(separator2);
     statsY += 12;
 
@@ -221,22 +209,17 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
 
     // Third separator
     const separator3 = this.scene.add.graphics();
-    separator3.lineStyle(1, 0x4444aa, 0.3);
-    separator3.lineBetween(10, statsY + 2, w - 10, statsY + 2);
+    drawSeparator(separator3, 10, statsY + 2, w - 10);
     this.add(separator3);
     statsY += 14;
 
     // --- Level Up Button ---
     this.levelUpBtn = this.scene.add.container(w / 2, statsY);
     this.levelUpBtnBg = this.scene.add.graphics();
-    this.drawButtonBg(this.levelUpBtnBg, 200, 36, 0x336633);
+    drawButton(this.levelUpBtnBg, 200, 36, COLORS.SUCCESS);
     this.levelUpBtn.add(this.levelUpBtnBg);
 
-    this.levelUpBtnText = this.scene.add.text(0, 0, 'Level Up (-- DB)', {
-      fontSize: '14px',
-      color: '#ffffff',
-      fontStyle: 'bold',
-    }).setOrigin(0.5);
+    this.levelUpBtnText = this.scene.add.text(0, 0, 'Level Up (-- DB)', TEXT_STYLES.BUTTON_SM).setOrigin(0.5);
     this.levelUpBtn.add(this.levelUpBtnText);
 
     const levelUpHitArea = new Phaser.Geom.Rectangle(-100, -18, 200, 36);
@@ -250,34 +233,28 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
     statsY += 50;
 
     // --- Target Priority Selector ---
-    this.priorityLabel = this.scene.add.text(15, statsY, 'Target:', {
-      fontSize: '13px',
-      color: '#aaaacc',
-    });
+    this.priorityLabel = this.scene.add.text(15, statsY, 'Target:', TEXT_STYLES.PANEL_LABEL);
     this.add(this.priorityLabel);
 
     this.priorityBtn = this.scene.add.container(w / 2 + 30, statsY + 10);
     this.priorityBtnBg = this.scene.add.graphics();
-    this.drawButtonBg(this.priorityBtnBg, 140, 28, 0x333355);
+    drawButton(this.priorityBtnBg, 140, 28, COLORS.PRIMARY);
     this.priorityBtn.add(this.priorityBtnBg);
 
-    this.priorityBtnText = this.scene.add.text(0, 0, 'First', {
-      fontSize: '13px',
-      color: '#ffffff',
-    }).setOrigin(0.5);
+    this.priorityBtnText = this.scene.add.text(0, 0, 'First', TEXT_STYLES.BUTTON_SM).setOrigin(0.5);
     this.priorityBtn.add(this.priorityBtnText);
 
     // Arrow indicators
     const leftArrow = this.scene.add.text(-60, 0, '<', {
       fontSize: '16px',
-      color: '#aaaacc',
+      color: COLORS.TEXT_LABEL,
       fontStyle: 'bold',
     }).setOrigin(0.5);
     this.priorityBtn.add(leftArrow);
 
     const rightArrow = this.scene.add.text(60, 0, '>', {
       fontSize: '16px',
-      color: '#aaaacc',
+      color: COLORS.TEXT_LABEL,
       fontStyle: 'bold',
     }).setOrigin(0.5);
     this.priorityBtn.add(rightArrow);
@@ -287,10 +264,12 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
     this.priorityBtn.input!.cursor = 'pointer';
     this.priorityBtn.on('pointerdown', () => this.cyclePriority());
     this.priorityBtn.on('pointerover', () => {
-      this.drawButtonBg(this.priorityBtnBg, 140, 28, 0x444477);
+      drawButton(this.priorityBtnBg, 140, 28, COLORS.PRIMARY_HOVER, { glowRing: true });
+      animateButtonHover(this.scene, this.priorityBtn, true);
     });
     this.priorityBtn.on('pointerout', () => {
-      this.drawButtonBg(this.priorityBtnBg, 140, 28, 0x333355);
+      drawButton(this.priorityBtnBg, 140, 28, COLORS.PRIMARY);
+      animateButtonHover(this.scene, this.priorityBtn, false);
     });
     this.add(this.priorityBtn);
 
@@ -299,14 +278,10 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
     // --- Sell Button ---
     this.sellBtn = this.scene.add.container(w / 2, statsY);
     this.sellBtnBg = this.scene.add.graphics();
-    this.drawButtonBg(this.sellBtnBg, 200, 36, 0x663333);
+    drawButton(this.sellBtnBg, 200, 36, COLORS.DANGER);
     this.sellBtn.add(this.sellBtnBg);
 
-    this.sellBtnText = this.scene.add.text(0, 0, 'Sell (-- DB)', {
-      fontSize: '14px',
-      color: '#ffffff',
-      fontStyle: 'bold',
-    }).setOrigin(0.5);
+    this.sellBtnText = this.scene.add.text(0, 0, 'Sell (-- DB)', TEXT_STYLES.BUTTON_SM).setOrigin(0.5);
     this.sellBtn.add(this.sellBtnText);
 
     const sellHitArea = new Phaser.Geom.Rectangle(-100, -18, 200, 36);
@@ -314,10 +289,12 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
     this.sellBtn.input!.cursor = 'pointer';
     this.sellBtn.on('pointerdown', () => this.onSell());
     this.sellBtn.on('pointerover', () => {
-      this.drawButtonBg(this.sellBtnBg, 200, 36, 0xaa4444);
+      drawButton(this.sellBtnBg, 200, 36, COLORS.DANGER_HOVER, { glowRing: true });
+      animateButtonHover(this.scene, this.sellBtn, true);
     });
     this.sellBtn.on('pointerout', () => {
-      this.drawButtonBg(this.sellBtnBg, 200, 36, 0x663333);
+      drawButton(this.sellBtnBg, 200, 36, COLORS.DANGER);
+      animateButtonHover(this.scene, this.sellBtn, false);
     });
     this.add(this.sellBtn);
 
@@ -326,14 +303,10 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
     // --- Digivolve Button (hidden by default, shown at max level) ---
     this.digivolveBtn = this.scene.add.container(w / 2, statsY);
     this.digivolveBtnBg = this.scene.add.graphics();
-    this.drawButtonBg(this.digivolveBtnBg, 200, 36, 0x553399);
+    drawButton(this.digivolveBtnBg, 200, 36, COLORS.SPECIAL);
     this.digivolveBtn.add(this.digivolveBtnBg);
 
-    this.digivolveBtnText = this.scene.add.text(0, 0, 'Digivolve', {
-      fontSize: '14px',
-      color: '#ffffff',
-      fontStyle: 'bold',
-    }).setOrigin(0.5);
+    this.digivolveBtnText = this.scene.add.text(0, 0, 'Digivolve', TEXT_STYLES.BUTTON_SM).setOrigin(0.5);
     this.digivolveBtn.add(this.digivolveBtnText);
 
     const digivolveHitArea = new Phaser.Geom.Rectangle(-100, -18, 200, 36);
@@ -341,10 +314,12 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
     this.digivolveBtn.input!.cursor = 'pointer';
     this.digivolveBtn.on('pointerdown', () => this.onDigivolve());
     this.digivolveBtn.on('pointerover', () => {
-      this.drawButtonBg(this.digivolveBtnBg, 200, 36, 0x7744cc);
+      drawButton(this.digivolveBtnBg, 200, 36, COLORS.SPECIAL_HOVER, { glowRing: true });
+      animateButtonHover(this.scene, this.digivolveBtn, true);
     });
     this.digivolveBtn.on('pointerout', () => {
-      this.drawButtonBg(this.digivolveBtnBg, 200, 36, 0x553399);
+      drawButton(this.digivolveBtnBg, 200, 36, COLORS.SPECIAL);
+      animateButtonHover(this.scene, this.digivolveBtn, false);
     });
     this.digivolveBtn.setVisible(false);
     this.add(this.digivolveBtn);
@@ -354,14 +329,10 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
     // --- Merge Button ---
     this.mergeBtn = this.scene.add.container(w / 2, statsY);
     this.mergeBtnBg = this.scene.add.graphics();
-    this.drawButtonBg(this.mergeBtnBg, 200, 36, 0x335566);
+    drawButton(this.mergeBtnBg, 200, 36, COLORS.MERGE);
     this.mergeBtn.add(this.mergeBtnBg);
 
-    this.mergeBtnText = this.scene.add.text(0, 0, 'Merge', {
-      fontSize: '14px',
-      color: '#ffffff',
-      fontStyle: 'bold',
-    }).setOrigin(0.5);
+    this.mergeBtnText = this.scene.add.text(0, 0, 'Merge', TEXT_STYLES.BUTTON_SM).setOrigin(0.5);
     this.mergeBtn.add(this.mergeBtnText);
 
     const mergeHitArea = new Phaser.Geom.Rectangle(-100, -18, 200, 36);
@@ -369,10 +340,12 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
     this.mergeBtn.input!.cursor = 'pointer';
     this.mergeBtn.on('pointerdown', () => this.onMerge());
     this.mergeBtn.on('pointerover', () => {
-      this.drawButtonBg(this.mergeBtnBg, 200, 36, 0x4488aa);
+      drawButton(this.mergeBtnBg, 200, 36, COLORS.MERGE_HOVER, { glowRing: true });
+      animateButtonHover(this.scene, this.mergeBtn, true);
     });
     this.mergeBtn.on('pointerout', () => {
-      this.drawButtonBg(this.mergeBtnBg, 200, 36, 0x335566);
+      drawButton(this.mergeBtnBg, 200, 36, COLORS.MERGE);
+      animateButtonHover(this.scene, this.mergeBtn, false);
     });
     this.mergeBtn.setVisible(false);
     this.add(this.mergeBtn);
@@ -382,36 +355,14 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
   // Helper: Create a stat label + value row
   // ---------------------------------------------------------------------------
 
-  /**
-   * Create a stat row with a left-aligned label and a right-aligned value.
-   * Returns the value Text object so it can be updated later.
-   */
   private createStatRow(label: string, labelX: number, valueX: number, y: number): Phaser.GameObjects.Text {
-    const labelObj = this.scene.add.text(labelX, y, label, {
-      fontSize: '13px',
-      color: '#aaaacc',
-    });
+    const labelObj = this.scene.add.text(labelX, y, label, TEXT_STYLES.PANEL_LABEL);
     this.add(labelObj);
 
-    const valueObj = this.scene.add.text(valueX, y, '--', {
-      fontSize: '13px',
-      color: '#ffffff',
-    }).setOrigin(1, 0);
+    const valueObj = this.scene.add.text(valueX, y, '--', TEXT_STYLES.PANEL_VALUE).setOrigin(1, 0);
     this.add(valueObj);
 
     return valueObj;
-  }
-
-  // ---------------------------------------------------------------------------
-  // Helper: Draw a centered button background
-  // ---------------------------------------------------------------------------
-
-  private drawButtonBg(graphics: Phaser.GameObjects.Graphics, width: number, height: number, color: number): void {
-    graphics.clear();
-    graphics.fillStyle(color, 1);
-    graphics.fillRoundedRect(-width / 2, -height / 2, width, height, 6);
-    graphics.lineStyle(1, 0x6666aa, 0.5);
-    graphics.strokeRoundedRect(-width / 2, -height / 2, width, height, 6);
   }
 
   // ---------------------------------------------------------------------------
@@ -424,7 +375,7 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
   public show(tower: Tower): void {
     this.currentTower = tower;
     this.refresh();
-    this.setVisible(true);
+    animateSlideIn(this.scene, this, this.panelBaseX);
     tower.showRange(true);
   }
 
@@ -438,7 +389,7 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
       this.currentTower = null;
       EventBus.emit(GameEvents.TOWER_DESELECTED);
     }
-    this.setVisible(false);
+    animateSlideOut(this.scene, this, this.panelBaseX);
   }
 
   /**
@@ -466,7 +417,7 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
 
     this.stageText.setText(STAGE_NAMES[tower.stage]);
 
-    const attrColor = ATTRIBUTE_COLORS[tower.attribute] || '#ffffff';
+    const attrColor = ATTRIBUTE_COLORS_STR[tower.attribute] || '#ffffff';
     this.attributeText.setText(ATTRIBUTE_NAMES[tower.attribute]);
     this.attributeText.setColor(attrColor);
 
@@ -478,7 +429,7 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
     const speed = tower.getAttackSpeed();
     this.speedText.setText(speed.toFixed(2));
 
-    const rangeInCells = tower.stats.range;
+    const rangeInCells = tower.getRangeCells();
     this.rangeText.setText(`${rangeInCells.toFixed(1)} cells`);
 
     // Level Up button
@@ -501,7 +452,6 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
     }
 
     // Merge button - show if there are valid merge candidates nearby
-    // We emit an event to ask GameScene for candidates count
     this.mergeBtn.setVisible(true);
     this.mergeBtnText.setText('Merge...');
   }
@@ -518,8 +468,8 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
 
     if (isMaxed) {
       this.levelUpBtnText.setText('MAX LEVEL');
-      this.drawButtonBg(this.levelUpBtnBg, 200, 36, 0x222233);
-      this.levelUpBtnText.setColor('#666666');
+      drawButton(this.levelUpBtnBg, 200, 36, COLORS.DISABLED);
+      this.levelUpBtnText.setColor(COLORS.DISABLED_TEXT);
       return;
     }
 
@@ -529,11 +479,11 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
     this.levelUpBtnText.setText(`Level Up (${cost} DB)`);
 
     if (canAfford) {
-      this.drawButtonBg(this.levelUpBtnBg, 200, 36, 0x336633);
+      drawButton(this.levelUpBtnBg, 200, 36, COLORS.SUCCESS);
       this.levelUpBtnText.setColor('#ffffff');
     } else {
-      this.drawButtonBg(this.levelUpBtnBg, 200, 36, 0x222233);
-      this.levelUpBtnText.setColor('#ff6666');
+      drawButton(this.levelUpBtnBg, 200, 36, COLORS.DISABLED);
+      this.levelUpBtnText.setColor(COLORS.TEXT_LIVES);
     }
   }
 
@@ -570,9 +520,11 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
     if (!canAfford) return;
 
     if (isOver) {
-      this.drawButtonBg(this.levelUpBtnBg, 200, 36, 0x44aa44);
+      drawButton(this.levelUpBtnBg, 200, 36, COLORS.SUCCESS_HOVER, { glowRing: true });
+      animateButtonHover(this.scene, this.levelUpBtn, true);
     } else {
-      this.drawButtonBg(this.levelUpBtnBg, 200, 36, 0x336633);
+      drawButton(this.levelUpBtnBg, 200, 36, COLORS.SUCCESS);
+      animateButtonHover(this.scene, this.levelUpBtn, false);
     }
   }
 

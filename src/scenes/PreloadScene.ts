@@ -1,4 +1,6 @@
 import Phaser from 'phaser';
+import { COLORS, TEXT_STYLES, FONTS } from '@/ui/UITheme';
+import { drawDigitalGrid } from '@/ui/UIHelpers';
 
 export class PreloadScene extends Phaser.Scene {
   constructor() {
@@ -8,6 +10,12 @@ export class PreloadScene extends Phaser.Scene {
   preload() {
     // -- Create loading bar --
     const { width, height } = this.cameras.main;
+
+    // Background
+    this.cameras.main.setBackgroundColor('#0a0a18');
+    const gridGfx = this.add.graphics();
+    drawDigitalGrid(gridGfx, width, height);
+
     const barWidth = 400;
     const barHeight = 32;
     const barX = (width - barWidth) / 2;
@@ -15,34 +23,34 @@ export class PreloadScene extends Phaser.Scene {
 
     // Background bar (dark)
     const barBg = this.add.graphics();
-    barBg.fillStyle(0x222244, 1);
-    barBg.fillRect(barX, barY, barWidth, barHeight);
+    barBg.fillStyle(COLORS.BG_PANEL, 1);
+    barBg.fillRoundedRect(barX, barY, barWidth, barHeight, 6);
+    barBg.lineStyle(1, COLORS.CYAN, 0.3);
+    barBg.strokeRoundedRect(barX, barY, barWidth, barHeight, 6);
 
     // Fill bar (grows with progress)
     const barFill = this.add.graphics();
 
     // Loading text
-    const loadingText = this.add.text(width / 2, barY - 40, 'Loading...', {
-      fontSize: '28px',
-      color: '#ffffff',
-    }).setOrigin(0.5);
+    this.add.text(width / 2, barY - 40, 'Connecting to Digital World...', TEXT_STYLES.SCENE_SUBTITLE).setOrigin(0.5);
 
     // Percentage text
     const percentText = this.add.text(width / 2, barY + barHeight + 20, '0%', {
+      fontFamily: FONTS.MONO,
       fontSize: '18px',
-      color: '#aaaacc',
+      color: COLORS.TEXT_LABEL,
     }).setOrigin(0.5);
 
     // Update loading bar on progress
     this.load.on('progress', (value: number) => {
       barFill.clear();
-      barFill.fillStyle(0x5555ff, 1);
-      barFill.fillRect(barX + 4, barY + 4, (barWidth - 8) * value, barHeight - 8);
+      barFill.fillStyle(COLORS.CYAN, 1);
+      barFill.fillRoundedRect(barX + 4, barY + 4, (barWidth - 8) * value, barHeight - 8, 4);
       percentText.setText(`${Math.round(value * 100)}%`);
     });
 
     this.load.on('complete', () => {
-      loadingText.setText('Complete!');
+      // Text already shown as subtitle, just leave it
     });
 
     // -- Load Digimon sprites --
@@ -157,6 +165,20 @@ export class PreloadScene extends Phaser.Scene {
     for (const name of sfxNames) {
       this.load.audio(name, `assets/sfx/${name}.wav`);
     }
+
+    // -- Load Tileset sprites --
+    this.load.spritesheet('tiles_grass', 'assets/tiles/grass.png', {
+      frameWidth: 16, frameHeight: 16,
+    });
+    this.load.spritesheet('tiles_dirt', 'assets/tiles/dirt.png', {
+      frameWidth: 16, frameHeight: 16,
+    });
+    this.load.spritesheet('tiles_water', 'assets/tiles/water.png', {
+      frameWidth: 16, frameHeight: 16,
+    });
+    this.load.spritesheet('tiles_decor', 'assets/tiles/decorations.png', {
+      frameWidth: 16, frameHeight: 16,
+    });
   }
 
   create() {

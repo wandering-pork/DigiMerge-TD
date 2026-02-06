@@ -69,6 +69,7 @@ export interface SaveData {
     lives: number;
     currentWave: number;
     gameMode: 'normal' | 'endless';
+    hasUsedFreeSpawn?: boolean;
   };
   towers: TowerSaveData[];
   statistics: GameStatistics;

@@ -32,3 +32,6 @@ coverage/
 
 # Claude Code
 .claude/
+
+# Windows device name artifacts
+nul

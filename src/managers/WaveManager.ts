@@ -64,8 +64,8 @@ export class WaveManager {
 
     this.currentWave = waveNumber;
 
-    // Within Phase 1 scaling: +8% HP per wave after wave 1
-    this.waveScaling = 1 + 0.08 * Math.max(0, waveNumber - 1);
+    // Within Phase 1 scaling: +5% HP per wave after wave 1
+    this.waveScaling = 1 + 0.05 * Math.max(0, waveNumber - 1);
 
     // Build spawn queue from wave enemies
     this.spawnQueue = [];

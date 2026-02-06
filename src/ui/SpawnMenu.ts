@@ -1,10 +1,12 @@
 import Phaser from 'phaser';
 import { Stage, Attribute, SpawnType, STAGE_NAMES } from '@/types';
-import { SPAWN_COSTS, GRID, GRID_OFFSET_X, GRID_OFFSET_Y } from '@/config/Constants';
+import { SPAWN_COSTS, GRID, GRID_OFFSET_X, GRID_OFFSET_Y, ALL_STARTER_IDS } from '@/config/Constants';
 import { DIGIMON_DATABASE } from '@/data/DigimonDatabase';
 import { EVOLUTION_PATHS } from '@/data/EvolutionPaths';
 import { EventBus, GameEvents } from '@/utils/EventBus';
 import { Tower } from '@/entities/Tower';
+import { COLORS, ATTRIBUTE_COLORS_STR, TEXT_STYLES, FONTS } from './UITheme';
+import { drawPanel, drawButton, drawSeparator, animateSlideIn, animateSlideOut, animateButtonHover, animateButtonPress } from './UIHelpers';
 
 /**
  * Given a list of selected starter IDs (In-Training stage), return all
@@ -54,6 +56,23 @@ export function getAvailableDigimonAtStage(
 }
 
 /**
+ * All Digimon at a stage from ALL 8 starter lines.
+ */
+export function getAllDigimonAtStage(targetStage: Stage): string[] {
+  return getAvailableDigimonAtStage([...ALL_STARTER_IDS], targetStage);
+}
+
+/**
+ * Digimon of a specific attribute at a stage from ALL 8 starter lines.
+ */
+export function getDigimonAtStageByAttribute(targetStage: Stage, attribute: Attribute): string[] {
+  return getAllDigimonAtStage(targetStage).filter(id => {
+    const stats = DIGIMON_DATABASE.towers[id];
+    return stats && stats.attribute === attribute;
+  });
+}
+
+/**
  * SpawnMenu UI panel. Displayed on the right side of the screen when
  * the player clicks an empty tower slot. Allows choosing a spawn stage
  * and specific Digimon from the selected starters pool.
@@ -64,7 +83,8 @@ export class SpawnMenu extends Phaser.GameObjects.Container {
   private closeBtn!: Phaser.GameObjects.Text;
 
   // Stage selection buttons
-  private stageButtons: Phaser.GameObjects.Text[] = [];
+  private stageButtonContainers: Phaser.GameObjects.Container[] = [];
+  private stageButtonBgs: Phaser.GameObjects.Graphics[] = [];
   private selectedStage: Stage = Stage.IN_TRAINING;
 
   // Digimon selection area
@@ -73,7 +93,9 @@ export class SpawnMenu extends Phaser.GameObjects.Container {
 
   // Cost display
   private costText!: Phaser.GameObjects.Text;
-  private spawnBtn!: Phaser.GameObjects.Text;
+  private spawnBtn!: Phaser.GameObjects.Container;
+  private spawnBtnBg!: Phaser.GameObjects.Graphics;
+  private spawnBtnText!: Phaser.GameObjects.Text;
 
   // State
   private targetCol: number = 0;
@@ -86,6 +108,9 @@ export class SpawnMenu extends Phaser.GameObjects.Container {
   private static readonly PANEL_WIDTH = 260;
   private static readonly PANEL_HEIGHT = 600;
 
+  // Panel position X (saved for animations)
+  private panelBaseX: number;
+
   constructor(
     scene: Phaser.Scene,
     getDigibytes: () => number,
@@ -95,6 +120,7 @@ export class SpawnMenu extends Phaser.GameObjects.Container {
     const panelY = 320;
     super(scene, panelX, panelY);
 
+    this.panelBaseX = panelX;
     this.getDigibytes = getDigibytes;
     this.spendDigibytes = spendDigibytes;
     this.selectedStarters = scene.registry.get('selectedStarters') || [];
@@ -114,52 +140,49 @@ export class SpawnMenu extends Phaser.GameObjects.Container {
     const w = SpawnMenu.PANEL_WIDTH;
     const h = SpawnMenu.PANEL_HEIGHT;
 
-    // Background
+    // Background — themed panel
     this.panelBg = this.scene.add.graphics();
-    this.panelBg.fillStyle(0x1a1a33, 0.95);
-    this.panelBg.fillRoundedRect(0, 0, w, h, 8);
-    this.panelBg.lineStyle(2, 0x4444aa, 1);
-    this.panelBg.strokeRoundedRect(0, 0, w, h, 8);
+    drawPanel(this.panelBg, 0, 0, w, h);
     this.add(this.panelBg);
 
     // Title
-    this.titleText = this.scene.add.text(w / 2, 15, 'Spawn Digimon', {
-      fontSize: '18px',
-      color: '#ffffff',
-      fontStyle: 'bold',
-    }).setOrigin(0.5, 0);
+    this.titleText = this.scene.add.text(w / 2, 15, 'Spawn Digimon', TEXT_STYLES.PANEL_TITLE).setOrigin(0.5, 0);
     this.add(this.titleText);
 
     // Close button
     this.closeBtn = this.scene.add.text(w - 15, 8, 'X', {
-      fontSize: '18px',
-      color: '#ff6666',
-      fontStyle: 'bold',
+      ...TEXT_STYLES.PANEL_TITLE,
+      color: COLORS.TEXT_LIVES,
     }).setOrigin(0.5, 0)
       .setInteractive({ useHandCursor: true })
       .on('pointerdown', () => this.hide());
     this.add(this.closeBtn);
 
     // Stage selection label
-    const stageLabel = this.scene.add.text(15, 48, 'Stage:', {
-      fontSize: '14px',
-      color: '#aaaacc',
-    });
+    const stageLabel = this.scene.add.text(15, 48, 'Stage:', TEXT_STYLES.PANEL_LABEL);
     this.add(stageLabel);
 
-    // Stage buttons
+    // Stage buttons (Container + Graphics)
     const spawnStages = [Stage.IN_TRAINING, Stage.ROOKIE, Stage.CHAMPION] as const;
     spawnStages.forEach((stage, i) => {
-      const btn = this.scene.add.text(15 + i * 82, 70, STAGE_NAMES[stage], {
-        fontSize: '12px',
-        color: '#ffffff',
-        backgroundColor: '#333355',
-        padding: { x: 6, y: 4 },
-      })
-        .setInteractive({ useHandCursor: true })
-        .on('pointerdown', () => this.selectStage(stage));
-      this.add(btn);
-      this.stageButtons.push(btn);
+      const btnW = 72;
+      const btnH = 26;
+      const container = this.scene.add.container(15 + i * 82 + btnW / 2, 70 + btnH / 2);
+      const bg = this.scene.add.graphics();
+      drawButton(bg, btnW, btnH, COLORS.BG_PANEL_LIGHT);
+      container.add(bg);
+
+      const text = this.scene.add.text(0, 0, STAGE_NAMES[stage], TEXT_STYLES.BUTTON_SM).setOrigin(0.5);
+      container.add(text);
+
+      const hitArea = new Phaser.Geom.Rectangle(-btnW / 2, -btnH / 2, btnW, btnH);
+      container.setInteractive(hitArea, Phaser.Geom.Rectangle.Contains);
+      container.input!.cursor = 'pointer';
+      container.on('pointerdown', () => this.selectStage(stage));
+
+      this.add(container);
+      this.stageButtonContainers.push(container);
+      this.stageButtonBgs.push(bg);
     });
 
     // Digimon list container
@@ -168,30 +191,44 @@ export class SpawnMenu extends Phaser.GameObjects.Container {
 
     // Cost text
     this.costText = this.scene.add.text(w / 2, h - 85, '', {
+      fontFamily: FONTS.MONO,
       fontSize: '16px',
-      color: '#ffdd44',
+      color: COLORS.TEXT_GOLD,
     }).setOrigin(0.5, 0);
     this.add(this.costText);
 
-    // Spawn button
-    this.spawnBtn = this.scene.add.text(w / 2, h - 50, 'Spawn', {
-      fontSize: '20px',
-      color: '#ffffff',
-      backgroundColor: '#336633',
-      padding: { x: 30, y: 8 },
-    }).setOrigin(0.5, 0)
-      .setInteractive({ useHandCursor: true })
-      .on('pointerover', () => {
-        if (this.selectedDigimon) {
-          this.spawnBtn.setStyle({ backgroundColor: '#44aa44' });
-        }
-      })
-      .on('pointerout', () => {
-        if (this.selectedDigimon) {
-          this.spawnBtn.setStyle({ backgroundColor: '#336633' });
-        }
-      })
-      .on('pointerdown', () => this.doSpawn());
+    // Spawn button (Container + Graphics)
+    const spawnBtnW = 160;
+    const spawnBtnH = 38;
+    this.spawnBtn = this.scene.add.container(w / 2, h - 50 + spawnBtnH / 2);
+    this.spawnBtnBg = this.scene.add.graphics();
+    drawButton(this.spawnBtnBg, spawnBtnW, spawnBtnH, COLORS.SUCCESS);
+    this.spawnBtn.add(this.spawnBtnBg);
+
+    this.spawnBtnText = this.scene.add.text(0, 0, 'Spawn', TEXT_STYLES.BUTTON).setOrigin(0.5);
+    this.spawnBtn.add(this.spawnBtnText);
+
+    const spawnHitArea = new Phaser.Geom.Rectangle(-spawnBtnW / 2, -spawnBtnH / 2, spawnBtnW, spawnBtnH);
+    this.spawnBtn.setInteractive(spawnHitArea, Phaser.Geom.Rectangle.Contains);
+    this.spawnBtn.input!.cursor = 'pointer';
+    this.spawnBtn.on('pointerover', () => {
+      if (this.selectedDigimon) {
+        drawButton(this.spawnBtnBg, spawnBtnW, spawnBtnH, COLORS.SUCCESS_HOVER, { glowRing: true });
+        animateButtonHover(this.scene, this.spawnBtn, true);
+      }
+    });
+    this.spawnBtn.on('pointerout', () => {
+      if (this.selectedDigimon) {
+        drawButton(this.spawnBtnBg, spawnBtnW, spawnBtnH, COLORS.SUCCESS);
+        animateButtonHover(this.scene, this.spawnBtn, false);
+      }
+    });
+    this.spawnBtn.on('pointerdown', () => {
+      if (this.selectedDigimon) {
+        animateButtonPress(this.scene, this.spawnBtn);
+      }
+      this.doSpawn();
+    });
     this.add(this.spawnBtn);
 
     // Initial state
@@ -210,14 +247,14 @@ export class SpawnMenu extends Phaser.GameObjects.Container {
     this.targetRow = row;
     this.selectedStarters = this.scene.registry.get('selectedStarters') || [];
     this.selectStage(Stage.IN_TRAINING);
-    this.setVisible(true);
+    animateSlideIn(this.scene, this, this.panelBaseX);
   }
 
   /**
    * Hide the spawn menu.
    */
   public hide(): void {
-    this.setVisible(false);
+    animateSlideOut(this.scene, this, this.panelBaseX);
     this.selectedDigimon = null;
   }
 
@@ -231,11 +268,11 @@ export class SpawnMenu extends Phaser.GameObjects.Container {
 
     // Highlight active stage button
     const spawnStages = [Stage.IN_TRAINING, Stage.ROOKIE, Stage.CHAMPION];
-    this.stageButtons.forEach((btn, i) => {
+    this.stageButtonBgs.forEach((bg, i) => {
       if (spawnStages[i] === stage) {
-        btn.setStyle({ backgroundColor: '#4444aa', color: '#ffffff' });
+        drawButton(bg, 72, 26, COLORS.CYAN);
       } else {
-        btn.setStyle({ backgroundColor: '#333355', color: '#aaaaaa' });
+        drawButton(bg, 72, 26, COLORS.BG_PANEL_LIGHT);
       }
     });
 
@@ -251,27 +288,71 @@ export class SpawnMenu extends Phaser.GameObjects.Container {
     // Clear existing list
     this.digimonListContainer.removeAll(true);
 
-    const available = getAvailableDigimonAtStage(this.selectedStarters, this.selectedStage);
     const startY = 105;
     const itemHeight = 56;
 
-    if (available.length === 0) {
+    // Check if any Digimon exist at this stage
+    const allAvailable = getAllDigimonAtStage(this.selectedStage);
+    if (allAvailable.length === 0) {
       const noDigimon = this.scene.add.text(SpawnMenu.PANEL_WIDTH / 2, startY + 20, 'No Digimon available', {
         fontSize: '13px',
-        color: '#666688',
+        color: COLORS.TEXT_DIM,
       }).setOrigin(0.5, 0);
       this.digimonListContainer.add(noDigimon);
       return;
     }
 
-    // "Random" option first
-    this.addDigimonOption('__random__', 'Random', null, startY, 0);
+    let nextIndex = 0;
 
-    // Specific Digimon options
-    available.forEach((digimonId, index) => {
-      const stats = DIGIMON_DATABASE.towers[digimonId];
-      if (!stats) return;
-      this.addDigimonOption(digimonId, stats.name, digimonId, startY + (index + 1) * itemHeight, index + 1);
+    // Show individual starter options when free spawn is available at In-Training stage
+    if (this.isFreeSpawnAvailable() && this.selectedStage === Stage.IN_TRAINING) {
+      for (const starterId of this.selectedStarters) {
+        const stats = DIGIMON_DATABASE.towers[starterId];
+        if (!stats) continue;
+        this.addDigimonOption(
+          starterId,
+          stats.name,
+          starterId,
+          startY + nextIndex * itemHeight,
+          nextIndex,
+          undefined,
+          'FREE Starter',
+        );
+        nextIndex++;
+      }
+      // Auto-select first starter if only one
+      if (this.selectedStarters.length === 1 && this.selectedStarters[0]) {
+        this.selectedDigimon = this.selectedStarters[0];
+        this.highlightSelected();
+        this.updateCostDisplay();
+      }
+      return;
+    }
+
+    // "Random" option - picks from ALL Digimon at this stage
+    this.addDigimonOption('__random__', 'Random', null, startY + nextIndex * itemHeight, nextIndex);
+    nextIndex++;
+
+    // Attribute-based options
+    const attributes: { id: string; label: string; attr: Attribute; color: string }[] = [
+      { id: '__attr_vaccine__', label: 'Vaccine', attr: Attribute.VACCINE, color: ATTRIBUTE_COLORS_STR[Attribute.VACCINE] || COLORS.TEXT_WHITE },
+      { id: '__attr_data__', label: 'Data', attr: Attribute.DATA, color: ATTRIBUTE_COLORS_STR[Attribute.DATA] || COLORS.TEXT_WHITE },
+      { id: '__attr_virus__', label: 'Virus', attr: Attribute.VIRUS, color: ATTRIBUTE_COLORS_STR[Attribute.VIRUS] || COLORS.TEXT_WHITE },
+    ];
+
+    attributes.forEach((attrOption) => {
+      const availableForAttr = getDigimonAtStageByAttribute(this.selectedStage, attrOption.attr);
+      if (availableForAttr.length > 0) {
+        this.addDigimonOption(
+          attrOption.id,
+          attrOption.label,
+          null,
+          startY + nextIndex * itemHeight,
+          nextIndex,
+          attrOption.color,
+        );
+        nextIndex++;
+      }
     });
   }
 
@@ -281,52 +362,73 @@ export class SpawnMenu extends Phaser.GameObjects.Container {
     spriteKey: string | null,
     y: number,
     _index: number,
+    labelColor?: string,
+    subLabel?: string,
   ): void {
     const itemContainer = this.scene.add.container(15, y);
 
     // Background
     const bg = this.scene.add.graphics();
-    bg.fillStyle(0x222244, 0.8);
+    bg.fillStyle(COLORS.BG_PANEL_LIGHT, 0.8);
     bg.fillRoundedRect(0, 0, SpawnMenu.PANEL_WIDTH - 30, 48, 4);
     itemContainer.add(bg);
 
-    // Sprite (if available)
-    if (spriteKey && this.scene.textures.exists(spriteKey)) {
-      const sprite = this.scene.add.image(24, 24, spriteKey);
-      sprite.setScale(2.5);
-      itemContainer.add(sprite);
-    } else if (id === '__random__') {
+    // Icon based on option type
+    if (id === '__random__') {
       const questionMark = this.scene.add.text(24, 24, '?', {
         fontSize: '24px',
-        color: '#ffdd44',
+        color: COLORS.TEXT_GOLD,
         fontStyle: 'bold',
       }).setOrigin(0.5);
       itemContainer.add(questionMark);
+    } else if (id.startsWith('__attr_')) {
+      // Attribute symbol
+      const symbol = id === '__attr_vaccine__' ? 'V' : id === '__attr_data__' ? 'D' : 'X';
+      const symbolText = this.scene.add.text(24, 24, symbol, {
+        fontSize: '22px',
+        color: labelColor || COLORS.TEXT_WHITE,
+        fontStyle: 'bold',
+      }).setOrigin(0.5);
+      itemContainer.add(symbolText);
+    } else if (spriteKey && this.scene.textures.exists(spriteKey)) {
+      const sprite = this.scene.add.image(24, 24, spriteKey);
+      sprite.setScale(2.5);
+      itemContainer.add(sprite);
     }
 
     // Name
     const nameText = this.scene.add.text(50, 8, label, {
       fontSize: '14px',
-      color: '#ffffff',
+      color: labelColor || COLORS.TEXT_WHITE,
     });
     itemContainer.add(nameText);
 
-    // Attribute + cost info
-    if (spriteKey) {
-      const stats = DIGIMON_DATABASE.towers[spriteKey];
-      if (stats) {
-        const attrText = this.scene.add.text(50, 26, `${stats.attribute === Attribute.VACCINE ? 'Vaccine' : stats.attribute === Attribute.DATA ? 'Data' : stats.attribute === Attribute.VIRUS ? 'Virus' : 'Free'}`, {
-          fontSize: '11px',
-          color: '#888899',
-        });
-        itemContainer.add(attrText);
-      }
-    } else if (id === '__random__') {
-      const costInfo = this.scene.add.text(50, 26, 'Cheapest option', {
+    // Sub-label
+    if (subLabel) {
+      const subText = this.scene.add.text(50, 26, subLabel, {
         fontSize: '11px',
-        color: '#888899',
+        color: '#44ff44',
+      });
+      itemContainer.add(subText);
+    } else if (id === '__random__') {
+      const costInfo = this.scene.add.text(50, 26, 'Any Digimon (cheapest)', {
+        fontSize: '11px',
+        color: COLORS.TEXT_DIM,
       });
       itemContainer.add(costInfo);
+    } else if (id.startsWith('__attr_')) {
+      const attrPool = id === '__attr_vaccine__'
+        ? getDigimonAtStageByAttribute(this.selectedStage, Attribute.VACCINE)
+        : id === '__attr_data__'
+        ? getDigimonAtStageByAttribute(this.selectedStage, Attribute.DATA)
+        : getDigimonAtStageByAttribute(this.selectedStage, Attribute.VIRUS);
+      const poolNames = attrPool.map(pid => DIGIMON_DATABASE.towers[pid]?.name || pid).join(', ');
+      const subText = this.scene.add.text(50, 26, poolNames, {
+        fontSize: '10px',
+        color: COLORS.TEXT_DIM,
+        wordWrap: { width: SpawnMenu.PANEL_WIDTH - 90 },
+      });
+      itemContainer.add(subText);
     }
 
     // Hit area for selection
@@ -343,7 +445,7 @@ export class SpawnMenu extends Phaser.GameObjects.Container {
     itemContainer.on('pointerover', () => {
       if (this.selectedDigimon !== id) {
         bg.clear();
-        bg.fillStyle(0x333366, 0.8);
+        bg.fillStyle(COLORS.BG_HOVER, 0.8);
         bg.fillRoundedRect(0, 0, SpawnMenu.PANEL_WIDTH - 30, 48, 4);
       }
     });
@@ -351,7 +453,7 @@ export class SpawnMenu extends Phaser.GameObjects.Container {
     itemContainer.on('pointerout', () => {
       if (this.selectedDigimon !== id) {
         bg.clear();
-        bg.fillStyle(0x222244, 0.8);
+        bg.fillStyle(COLORS.BG_PANEL_LIGHT, 0.8);
         bg.fillRoundedRect(0, 0, SpawnMenu.PANEL_WIDTH - 30, 48, 4);
       }
     });
@@ -372,9 +474,9 @@ export class SpawnMenu extends Phaser.GameObjects.Container {
 
       bg.clear();
       if (optionId === this.selectedDigimon) {
-        bg.fillStyle(0x4444aa, 0.9);
+        bg.fillStyle(COLORS.CYAN_DIM, 0.9);
       } else {
-        bg.fillStyle(0x222244, 0.8);
+        bg.fillStyle(COLORS.BG_PANEL_LIGHT, 0.8);
       }
       bg.fillRoundedRect(0, 0, SpawnMenu.PANEL_WIDTH - 30, 48, 4);
     }
@@ -390,6 +492,8 @@ export class SpawnMenu extends Phaser.GameObjects.Container {
 
     if (this.selectedDigimon === '__random__') {
       return stageCosts.random;
+    } else if (this.selectedDigimon?.startsWith('__attr_')) {
+      return stageCosts.specific;
     } else if (this.selectedDigimon) {
       return stageCosts.specific;
     }
@@ -399,20 +503,33 @@ export class SpawnMenu extends Phaser.GameObjects.Container {
   private updateCostDisplay(): void {
     if (!this.selectedDigimon) {
       this.costText.setText('Select a Digimon');
-      this.spawnBtn.setStyle({ backgroundColor: '#333333', color: '#666666' });
+      this.costText.setColor(COLORS.TEXT_DIM);
+      drawButton(this.spawnBtnBg, 160, 38, COLORS.DISABLED);
+      this.spawnBtnText.setColor(COLORS.DISABLED_TEXT);
       return;
     }
 
-    const cost = this.getSpawnCost();
-    const canAfford = this.getDigibytes() >= cost;
+    const effectiveCost = this.getEffectiveSpawnCost();
 
-    this.costText.setText(`Cost: ${cost} DB`);
-    this.costText.setColor(canAfford ? '#ffdd44' : '#ff4444');
+    if (effectiveCost === 0) {
+      this.costText.setText('FREE (first spawn!)');
+      this.costText.setColor('#44ff44');
+      drawButton(this.spawnBtnBg, 160, 38, COLORS.SUCCESS);
+      this.spawnBtnText.setColor('#ffffff');
+      return;
+    }
+
+    const canAfford = this.getDigibytes() >= effectiveCost;
+
+    this.costText.setText(`Cost: ${effectiveCost} DB`);
+    this.costText.setColor(canAfford ? COLORS.TEXT_GOLD : COLORS.TEXT_LIVES);
 
     if (canAfford) {
-      this.spawnBtn.setStyle({ backgroundColor: '#336633', color: '#ffffff' });
+      drawButton(this.spawnBtnBg, 160, 38, COLORS.SUCCESS);
+      this.spawnBtnText.setColor('#ffffff');
     } else {
-      this.spawnBtn.setStyle({ backgroundColor: '#333333', color: '#666666' });
+      drawButton(this.spawnBtnBg, 160, 38, COLORS.DISABLED);
+      this.spawnBtnText.setColor(COLORS.DISABLED_TEXT);
     }
   }
 
@@ -420,18 +537,45 @@ export class SpawnMenu extends Phaser.GameObjects.Container {
   // Spawning
   // ---------------------------------------------------------------------------
 
+  private getEffectiveSpawnCost(): number {
+    if (this.isFreeSpawnAvailable()) {
+      return 0;
+    }
+    return this.getSpawnCost();
+  }
+
+  private isFreeSpawnAvailable(): boolean {
+    return this.scene.registry.get('hasUsedFreeSpawn') === false;
+  }
+
   private doSpawn(): void {
     if (!this.selectedDigimon) return;
 
-    const cost = this.getSpawnCost();
-    if (!this.spendDigibytes(cost)) return;
+    const cost = this.getEffectiveSpawnCost();
+    if (cost > 0 && !this.spendDigibytes(cost)) return;
+    if (cost === 0 && this.isFreeSpawnAvailable()) {
+      // Free spawn: don't charge but still proceed
+    }
 
     let digimonId: string;
 
     if (this.selectedDigimon === '__random__') {
-      const available = getAvailableDigimonAtStage(this.selectedStarters, this.selectedStage);
+      // Random picks from ALL 8 starter lines at this stage
+      const available = getAllDigimonAtStage(this.selectedStage);
       if (available.length === 0) return;
       digimonId = available[Math.floor(Math.random() * available.length)];
+    } else if (this.selectedDigimon === '__attr_vaccine__') {
+      const pool = getDigimonAtStageByAttribute(this.selectedStage, Attribute.VACCINE);
+      if (pool.length === 0) return;
+      digimonId = pool[Math.floor(Math.random() * pool.length)];
+    } else if (this.selectedDigimon === '__attr_data__') {
+      const pool = getDigimonAtStageByAttribute(this.selectedStage, Attribute.DATA);
+      if (pool.length === 0) return;
+      digimonId = pool[Math.floor(Math.random() * pool.length)];
+    } else if (this.selectedDigimon === '__attr_virus__') {
+      const pool = getDigimonAtStageByAttribute(this.selectedStage, Attribute.VIRUS);
+      if (pool.length === 0) return;
+      digimonId = pool[Math.floor(Math.random() * pool.length)];
     } else {
       digimonId = this.selectedDigimon;
     }

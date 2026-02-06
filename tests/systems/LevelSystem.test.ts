@@ -11,22 +11,22 @@ import { Stage } from '@/types';
 
 describe('LevelSystem', () => {
   describe('getLevelUpCost', () => {
-    it('Lv1 -> Lv2 costs 5 DigiBytes', () => {
-      expect(getLevelUpCost(1)).toBe(5);
+    it('Lv1 -> Lv2 costs 3 DigiBytes', () => {
+      expect(getLevelUpCost(1)).toBe(3);
     });
 
-    it('Lv10 -> Lv11 costs 50 DigiBytes', () => {
-      expect(getLevelUpCost(10)).toBe(50);
+    it('Lv10 -> Lv11 costs 30 DigiBytes', () => {
+      expect(getLevelUpCost(10)).toBe(30);
     });
 
-    it('Lv20 -> Lv21 costs 100 DigiBytes', () => {
-      expect(getLevelUpCost(20)).toBe(100);
+    it('Lv20 -> Lv21 costs 60 DigiBytes', () => {
+      expect(getLevelUpCost(20)).toBe(60);
     });
 
     it('cost scales linearly with level', () => {
-      expect(getLevelUpCost(5)).toBe(25);
-      expect(getLevelUpCost(50)).toBe(250);
-      expect(getLevelUpCost(100)).toBe(500);
+      expect(getLevelUpCost(5)).toBe(15);
+      expect(getLevelUpCost(50)).toBe(150);
+      expect(getLevelUpCost(100)).toBe(300);
     });
   });
 
@@ -140,16 +140,16 @@ describe('LevelSystem', () => {
   });
 
   describe('getTotalLevelUpCost', () => {
-    it('Lv1 -> Lv5: 5 + 10 + 15 + 20 = 50', () => {
-      expect(getTotalLevelUpCost(1, 5)).toBe(50);
+    it('Lv1 -> Lv5: 3 + 6 + 9 + 12 = 30', () => {
+      expect(getTotalLevelUpCost(1, 5)).toBe(30);
     });
 
-    it('Lv1 -> Lv2: single level costs 5', () => {
-      expect(getTotalLevelUpCost(1, 2)).toBe(5);
+    it('Lv1 -> Lv2: single level costs 3', () => {
+      expect(getTotalLevelUpCost(1, 2)).toBe(3);
     });
 
-    it('Lv10 -> Lv15: 50 + 55 + 60 + 65 + 70 = 300', () => {
-      expect(getTotalLevelUpCost(10, 15)).toBe(300);
+    it('Lv10 -> Lv15: 30 + 33 + 36 + 39 + 42 = 180', () => {
+      expect(getTotalLevelUpCost(10, 15)).toBe(180);
     });
 
     it('same level to same level costs 0', () => {
@@ -160,14 +160,14 @@ describe('LevelSystem', () => {
       expect(getTotalLevelUpCost(10, 5)).toBe(0);
     });
 
-    it('Lv1 -> Lv10: sum of 5+10+15+20+25+30+35+40+45 = 225', () => {
-      // Sum = 5 * (1+2+3+4+5+6+7+8+9) = 5 * 45 = 225
-      expect(getTotalLevelUpCost(1, 10)).toBe(225);
+    it('Lv1 -> Lv10: sum of 3+6+9+12+15+18+21+24+27 = 135', () => {
+      // Sum = 3 * (1+2+3+4+5+6+7+8+9) = 3 * 45 = 135
+      expect(getTotalLevelUpCost(1, 10)).toBe(135);
     });
 
-    it('Lv1 -> Lv20: sum of 5*i for i=1..19 = 5 * 190 = 950', () => {
-      // Sum = 5 * (1+2+...+19) = 5 * (19*20/2) = 5 * 190 = 950
-      expect(getTotalLevelUpCost(1, 20)).toBe(950);
+    it('Lv1 -> Lv20: sum of 3*i for i=1..19 = 3 * 190 = 570', () => {
+      // Sum = 3 * (1+2+...+19) = 3 * (19*20/2) = 3 * 190 = 570
+      expect(getTotalLevelUpCost(1, 20)).toBe(570);
     });
   });
 });

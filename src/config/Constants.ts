@@ -9,21 +9,21 @@ export const GRID = {
   BASE: { col: 8, row: 15 },
 } as const;
 
-// Game Area
-export const GAME_WIDTH = 1280;
-export const GAME_HEIGHT = 720;
-export const GRID_OFFSET_X = 64;
-export const GRID_OFFSET_Y = 0;
+// Game Area - portrait layout to fit 8x18 grid at 64px cells
+export const GAME_WIDTH = 900;
+export const GAME_HEIGHT = 1200;
+export const GRID_OFFSET_X = 32;
+export const GRID_OFFSET_Y = 30;
 
 // Spawn Costs
 export const SPAWN_COSTS = {
-  [Stage.IN_TRAINING]: { random: 100, specific: 150, free: 200 },
-  [Stage.ROOKIE]: { random: 300, specific: 450, free: 600 },
-  [Stage.CHAMPION]: { random: 800, specific: 1200, free: 1600 },
+  [Stage.IN_TRAINING]: { random: 75, specific: 120 },
+  [Stage.ROOKIE]: { random: 225, specific: 350 },
+  [Stage.CHAMPION]: { random: 600, specific: 900 },
 } as const;
 
 // Digivolve Costs per stage transition
-export const DIGIVOLVE_COSTS = [100, 150, 200, 250] as const;
+export const DIGIVOLVE_COSTS = [80, 120, 160, 200] as const;
 
 // Stage Configuration
 export const STAGE_CONFIG = {
@@ -51,10 +51,19 @@ export const MAX_LIVES = 20;
 export const STARTING_DIGIBYTES = 500;
 export const TOTAL_WAVES_MVP = 20;
 
-// Level up cost formula: 5 * currentLevel
+// Level up cost formula: 3 * currentLevel
 export function getLevelUpCost(currentLevel: number): number {
-  return 5 * currentLevel;
+  return 3 * currentLevel;
 }
+
+// All 8 starter Digimon IDs (In-Training stage)
+export const ALL_STARTER_IDS = [
+  'koromon', 'tsunomon', 'tokomon', 'gigimon',
+  'tanemon', 'demiveemon', 'pagumon', 'viximon',
+] as const;
+
+// Game speed options
+export const GAME_SPEEDS = [1, 2, 3] as const;
 
 // Damage formula
 export function calculateDamage(baseDamage: number, level: number, attributeMultiplier: number): number {

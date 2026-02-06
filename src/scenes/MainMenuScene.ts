@@ -1,5 +1,7 @@
 import Phaser from 'phaser';
 import { SaveManager } from '@/managers/SaveManager';
+import { COLORS, TEXT_STYLES, ANIM, FONTS } from '@/ui/UITheme';
+import { drawDigitalGrid, drawButton, animateButtonHover, animateButtonPress } from '@/ui/UIHelpers';
 
 export class MainMenuScene extends Phaser.Scene {
   constructor() {
@@ -10,20 +12,28 @@ export class MainMenuScene extends Phaser.Scene {
     const { width, height } = this.cameras.main;
 
     // Background
-    this.cameras.main.setBackgroundColor('#1a1a2e');
+    this.cameras.main.setBackgroundColor('#0a0a18');
 
-    // Title text
-    this.add.text(width / 2, height / 3, 'DigiMerge TD', {
-      fontSize: '64px',
-      color: '#ffffff',
-      fontStyle: 'bold',
-    }).setOrigin(0.5);
+    // Digital grid texture
+    const gridGfx = this.add.graphics();
+    drawDigitalGrid(gridGfx, width, height);
+
+    // Title text with floating tween
+    const title = this.add.text(width / 2, height / 3, 'DigiMerge TD', TEXT_STYLES.SCENE_TITLE)
+      .setOrigin(0.5);
+
+    this.tweens.add({
+      targets: title,
+      y: title.y - 6,
+      duration: 3000,
+      ease: 'Sine.easeInOut',
+      yoyo: true,
+      repeat: -1,
+    });
 
     // Subtitle
-    this.add.text(width / 2, height / 3 + 60, 'A Digimon Tower Defense Merge Game', {
-      fontSize: '18px',
-      color: '#aaaacc',
-    }).setOrigin(0.5);
+    this.add.text(width / 2, height / 3 + 60, 'A Digimon Tower Defense Merge Game', TEXT_STYLES.SCENE_SUBTITLE)
+      .setOrigin(0.5);
 
     let btnY = height / 2 + 20;
 
@@ -31,48 +41,74 @@ export class MainMenuScene extends Phaser.Scene {
     if (SaveManager.hasSave()) {
       const save = SaveManager.load();
       if (save) {
-        const continueBtn = this.add.text(width / 2, btnY, `Continue (Wave ${save.gameState.currentWave})`, {
-          fontSize: '28px',
-          color: '#ffffff',
-          backgroundColor: '#336633',
-          padding: { x: 30, y: 12 },
-        })
-          .setOrigin(0.5)
-          .setInteractive({ useHandCursor: true })
-          .on('pointerover', () => continueBtn.setStyle({ backgroundColor: '#44aa44' }))
-          .on('pointerout', () => continueBtn.setStyle({ backgroundColor: '#336633' }))
-          .on('pointerdown', () => {
-            // Set flag so GameScene knows to load the save
+        this.createMenuButton(
+          width / 2, btnY, 240, 48,
+          `Continue (Wave ${save.gameState.currentWave})`,
+          COLORS.SUCCESS, COLORS.SUCCESS_HOVER,
+          () => {
             this.registry.set('loadSave', true);
-            // Use the saved starters if available (fallback to defaults)
             this.scene.start('GameScene');
-          });
-
+          },
+        );
         btnY += 65;
       }
     }
 
     // New Game button
-    const playBtn = this.add.text(width / 2, btnY, 'New Game', {
-      fontSize: '32px',
-      color: '#ffffff',
-      backgroundColor: '#333366',
-      padding: { x: 40, y: 14 },
-    })
-      .setOrigin(0.5)
-      .setInteractive({ useHandCursor: true })
-      .on('pointerover', () => playBtn.setStyle({ backgroundColor: '#4444aa' }))
-      .on('pointerout', () => playBtn.setStyle({ backgroundColor: '#333366' }))
-      .on('pointerdown', () => {
-        // Clear any save flag
+    this.createMenuButton(
+      width / 2, btnY, 240, 48,
+      'New Game',
+      COLORS.PRIMARY, COLORS.PRIMARY_HOVER,
+      () => {
         this.registry.remove('loadSave');
         this.scene.start('StarterSelectScene');
-      });
+      },
+    );
 
     // Version text
-    this.add.text(width / 2, height - 30, 'v0.1.0 - MVP', {
-      fontSize: '14px',
-      color: '#666688',
+    this.add.text(width / 2, height - 30, 'v0.1.0 - MVP', TEXT_STYLES.VERSION)
+      .setOrigin(0.5);
+
+    // Scene entrance fade
+    this.cameras.main.fadeIn(ANIM.FADE_IN_MS, 10, 10, 24);
+  }
+
+  private createMenuButton(
+    x: number, y: number, w: number, h: number,
+    label: string,
+    normalColor: number, hoverColor: number,
+    onClick: () => void,
+  ): Phaser.GameObjects.Container {
+    const container = this.add.container(x, y);
+    const bg = this.add.graphics();
+    drawButton(bg, w, h, normalColor);
+    container.add(bg);
+
+    const text = this.add.text(0, 0, label, {
+      fontFamily: FONTS.DISPLAY,
+      fontSize: '22px',
+      color: '#ffffff',
+      fontStyle: 'bold',
     }).setOrigin(0.5);
+    container.add(text);
+
+    const hitArea = new Phaser.Geom.Rectangle(-w / 2, -h / 2, w, h);
+    container.setInteractive(hitArea, Phaser.Geom.Rectangle.Contains);
+    container.input!.cursor = 'pointer';
+
+    container.on('pointerover', () => {
+      drawButton(bg, w, h, hoverColor, { glowRing: true });
+      animateButtonHover(this, container, true);
+    });
+    container.on('pointerout', () => {
+      drawButton(bg, w, h, normalColor);
+      animateButtonHover(this, container, false);
+    });
+    container.on('pointerdown', () => {
+      animateButtonPress(this, container);
+      onClick();
+    });
+
+    return container;
   }
 }

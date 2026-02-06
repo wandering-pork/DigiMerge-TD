@@ -103,20 +103,20 @@ describe('OriginSystem', () => {
   });
 
   describe('getDigivolveCost', () => {
-    it('IN_TRAINING → ROOKIE costs 100 (DIGIVOLVE_COSTS[0])', () => {
-      expect(getDigivolveCost(Stage.IN_TRAINING)).toBe(100);
+    it('IN_TRAINING → ROOKIE costs 80 (DIGIVOLVE_COSTS[0])', () => {
+      expect(getDigivolveCost(Stage.IN_TRAINING)).toBe(80);
     });
 
-    it('ROOKIE → CHAMPION costs 150 (DIGIVOLVE_COSTS[1])', () => {
-      expect(getDigivolveCost(Stage.ROOKIE)).toBe(150);
+    it('ROOKIE → CHAMPION costs 120 (DIGIVOLVE_COSTS[1])', () => {
+      expect(getDigivolveCost(Stage.ROOKIE)).toBe(120);
     });
 
-    it('CHAMPION → ULTIMATE costs 200 (DIGIVOLVE_COSTS[2])', () => {
-      expect(getDigivolveCost(Stage.CHAMPION)).toBe(200);
+    it('CHAMPION → ULTIMATE costs 160 (DIGIVOLVE_COSTS[2])', () => {
+      expect(getDigivolveCost(Stage.CHAMPION)).toBe(160);
     });
 
-    it('ULTIMATE → MEGA costs 250 (DIGIVOLVE_COSTS[3])', () => {
-      expect(getDigivolveCost(Stage.ULTIMATE)).toBe(250);
+    it('ULTIMATE → MEGA costs 200 (DIGIVOLVE_COSTS[3])', () => {
+      expect(getDigivolveCost(Stage.ULTIMATE)).toBe(200);
     });
 
     it('MEGA → ULTRA costs undefined (index out of range)', () => {
@@ -128,7 +128,7 @@ describe('OriginSystem', () => {
 
   describe('canDigivolve', () => {
     it('at max level, can evolve, can afford → canEvolve: true', () => {
-      // ROOKIE current, IN_TRAINING origin, at max level, 200 DB (cost is 150)
+      // ROOKIE current, IN_TRAINING origin, at max level, 200 DB (cost is 120)
       const result = canDigivolve(Stage.ROOKIE, Stage.IN_TRAINING, 20, 20, 200);
       expect(result.canEvolve).toBe(true);
       expect(result.reason).toBeUndefined();
@@ -150,7 +150,7 @@ describe('OriginSystem', () => {
     });
 
     it('at max level, can evolve, but cannot afford → canEvolve: false with reason', () => {
-      // ROOKIE current, IN_TRAINING origin, at max level, only 50 DB (cost is 150)
+      // ROOKIE current, IN_TRAINING origin, at max level, only 50 DB (cost is 120)
       const result = canDigivolve(Stage.ROOKIE, Stage.IN_TRAINING, 20, 20, 50);
       expect(result.canEvolve).toBe(false);
       expect(result.reason).toBeDefined();
@@ -164,14 +164,14 @@ describe('OriginSystem', () => {
     });
 
     it('exact cost amount is sufficient', () => {
-      // IN_TRAINING → ROOKIE costs 100
-      const result = canDigivolve(Stage.IN_TRAINING, Stage.IN_TRAINING, 10, 10, 100);
+      // IN_TRAINING → ROOKIE costs 80
+      const result = canDigivolve(Stage.IN_TRAINING, Stage.IN_TRAINING, 10, 10, 80);
       expect(result.canEvolve).toBe(true);
     });
 
     it('one DigiBytes short fails', () => {
-      // IN_TRAINING → ROOKIE costs 100
-      const result = canDigivolve(Stage.IN_TRAINING, Stage.IN_TRAINING, 10, 10, 99);
+      // IN_TRAINING → ROOKIE costs 80
+      const result = canDigivolve(Stage.IN_TRAINING, Stage.IN_TRAINING, 10, 10, 79);
       expect(result.canEvolve).toBe(false);
       expect(result.reason).toContain('DigiBytes');
     });

@@ -70,16 +70,16 @@ describe('Constants', () => {
   });
 
   describe('getLevelUpCost', () => {
-    it('level 1 costs 5 DigiBytes', () => {
-      expect(getLevelUpCost(1)).toBe(5);
+    it('level 1 costs 3 DigiBytes', () => {
+      expect(getLevelUpCost(1)).toBe(3);
     });
 
-    it('level 10 costs 50 DigiBytes', () => {
-      expect(getLevelUpCost(10)).toBe(50);
+    it('level 10 costs 30 DigiBytes', () => {
+      expect(getLevelUpCost(10)).toBe(30);
     });
 
-    it('level 20 costs 100 DigiBytes', () => {
-      expect(getLevelUpCost(20)).toBe(100);
+    it('level 20 costs 60 DigiBytes', () => {
+      expect(getLevelUpCost(20)).toBe(60);
     });
   });
 
@@ -163,11 +163,10 @@ describe('Constants', () => {
       expect(SPAWN_COSTS[Stage.CHAMPION]).toBeDefined();
     });
 
-    it('random < specific < free for each stage', () => {
+    it('random < specific for each stage', () => {
       for (const stage of [Stage.IN_TRAINING, Stage.ROOKIE, Stage.CHAMPION] as const) {
         const costs = SPAWN_COSTS[stage];
         expect(costs.random).toBeLessThan(costs.specific);
-        expect(costs.specific).toBeLessThan(costs.free);
       }
     });
 

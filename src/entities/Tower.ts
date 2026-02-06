@@ -172,10 +172,18 @@ export class Tower extends Phaser.GameObjects.Container {
   // ---------------------------------------------------------------------------
 
   /**
-   * Return the attack range in pixels (stats.range measured in grid cells).
+   * Return the attack range in pixels.
+   * Adds +1.0 cell base bonus so even In-Training towers can reach adjacent path cells comfortably.
    */
   public getRange(): number {
-    return this.stats.range * GRID.CELL_SIZE;
+    return (this.stats.range + 1.0) * GRID.CELL_SIZE;
+  }
+
+  /**
+   * Return the effective range in cells (for UI display).
+   */
+  public getRangeCells(): number {
+    return this.stats.range + 1.0;
   }
 
   /**

@@ -5,6 +5,8 @@ import { getEvolutions } from '@/data/EvolutionPaths';
 import { DIGIVOLVE_COSTS, GAME_WIDTH, GAME_HEIGHT } from '@/config/Constants';
 import { STAGE_NAMES, ATTRIBUTE_NAMES, EvolutionPath } from '@/types';
 import { EventBus, GameEvents } from '@/utils/EventBus';
+import { COLORS, ATTRIBUTE_COLORS_STR, TEXT_STYLES, FONTS } from './UITheme';
+import { drawPanel, drawButton, animateModalIn, animateModalOut, animateButtonHover, animateButtonPress } from './UIHelpers';
 
 /**
  * EvolutionModal is a centered overlay that shows available evolution
@@ -12,10 +14,12 @@ import { EventBus, GameEvents } from '@/utils/EventBus';
  */
 export class EvolutionModal extends Phaser.GameObjects.Container {
   private overlay!: Phaser.GameObjects.Graphics;
+  private panelContainer!: Phaser.GameObjects.Container;
   private panelBg!: Phaser.GameObjects.Graphics;
   private titleText!: Phaser.GameObjects.Text;
   private costText!: Phaser.GameObjects.Text;
-  private cancelBtn!: Phaser.GameObjects.Text;
+  private cancelBtn!: Phaser.GameObjects.Container;
+  private cancelBtnBg!: Phaser.GameObjects.Graphics;
   private optionContainer!: Phaser.GameObjects.Container;
 
   private currentTower: Tower | null = null;
@@ -52,7 +56,7 @@ export class EvolutionModal extends Phaser.GameObjects.Container {
   private buildModal(): void {
     // Dark semi-transparent overlay covering the whole screen
     this.overlay = this.scene.add.graphics();
-    this.overlay.fillStyle(0x000000, 0.6);
+    this.overlay.fillStyle(COLORS.OVERLAY_BLACK, 0.6);
     this.overlay.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
     this.overlay.setInteractive(
       new Phaser.Geom.Rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT),
@@ -65,56 +69,64 @@ export class EvolutionModal extends Phaser.GameObjects.Container {
     const px = (GAME_WIDTH - w) / 2;
     const py = (GAME_HEIGHT - h) / 2;
 
-    // Panel background
+    // Panel container for pop animation
+    this.panelContainer = this.scene.add.container(0, 0);
+    this.add(this.panelContainer);
+
+    // Panel background — themed with purple tint
     this.panelBg = this.scene.add.graphics();
-    this.panelBg.fillStyle(0x1a1a33, 0.98);
-    this.panelBg.fillRoundedRect(px, py, w, h, 10);
-    this.panelBg.lineStyle(2, 0x6666cc, 1);
-    this.panelBg.strokeRoundedRect(px, py, w, h, 10);
-    this.add(this.panelBg);
+    drawPanel(this.panelBg, px, py, w, h, { borderColor: COLORS.SPECIAL });
+    this.panelContainer.add(this.panelBg);
 
     // Title
-    this.titleText = this.scene.add.text(GAME_WIDTH / 2, py + 20, 'Digivolution', {
-      fontSize: '24px',
-      color: '#ffdd44',
-      fontStyle: 'bold',
-    }).setOrigin(0.5, 0);
-    this.add(this.titleText);
+    this.titleText = this.scene.add.text(GAME_WIDTH / 2, py + 20, 'Digivolution', TEXT_STYLES.MODAL_TITLE).setOrigin(0.5, 0);
+    this.panelContainer.add(this.titleText);
 
     // Cost text
     this.costText = this.scene.add.text(GAME_WIDTH / 2, py + 55, '', {
+      fontFamily: FONTS.DISPLAY,
       fontSize: '16px',
-      color: '#aaaacc',
+      color: COLORS.TEXT_LABEL,
     }).setOrigin(0.5, 0);
-    this.add(this.costText);
+    this.panelContainer.add(this.costText);
 
     // Options container
     this.optionContainer = this.scene.add.container(0, 0);
-    this.add(this.optionContainer);
+    this.panelContainer.add(this.optionContainer);
 
-    // Cancel button
-    this.cancelBtn = this.scene.add.text(GAME_WIDTH / 2, py + h - 45, 'Cancel', {
-      fontSize: '18px',
-      color: '#ffffff',
-      backgroundColor: '#663333',
-      padding: { x: 30, y: 8 },
-    }).setOrigin(0.5, 0)
-      .setInteractive({ useHandCursor: true })
-      .on('pointerover', () => this.cancelBtn.setStyle({ backgroundColor: '#aa4444' }))
-      .on('pointerout', () => this.cancelBtn.setStyle({ backgroundColor: '#663333' }))
-      .on('pointerdown', () => this.hide());
-    this.add(this.cancelBtn);
+    // Cancel button (Container + Graphics)
+    const cancelBtnW = 140;
+    const cancelBtnH = 38;
+    this.cancelBtn = this.scene.add.container(GAME_WIDTH / 2, py + h - 40);
+    this.cancelBtnBg = this.scene.add.graphics();
+    drawButton(this.cancelBtnBg, cancelBtnW, cancelBtnH, COLORS.DANGER);
+    this.cancelBtn.add(this.cancelBtnBg);
+
+    const cancelText = this.scene.add.text(0, 0, 'Cancel', TEXT_STYLES.BUTTON).setOrigin(0.5);
+    this.cancelBtn.add(cancelText);
+
+    const cancelHitArea = new Phaser.Geom.Rectangle(-cancelBtnW / 2, -cancelBtnH / 2, cancelBtnW, cancelBtnH);
+    this.cancelBtn.setInteractive(cancelHitArea, Phaser.Geom.Rectangle.Contains);
+    this.cancelBtn.input!.cursor = 'pointer';
+    this.cancelBtn.on('pointerdown', () => {
+      animateButtonPress(this.scene, this.cancelBtn);
+      this.hide();
+    });
+    this.cancelBtn.on('pointerover', () => {
+      drawButton(this.cancelBtnBg, cancelBtnW, cancelBtnH, COLORS.DANGER_HOVER, { glowRing: true });
+      animateButtonHover(this.scene, this.cancelBtn, true);
+    });
+    this.cancelBtn.on('pointerout', () => {
+      drawButton(this.cancelBtnBg, cancelBtnW, cancelBtnH, COLORS.DANGER);
+      animateButtonHover(this.scene, this.cancelBtn, false);
+    });
+    this.panelContainer.add(this.cancelBtn);
   }
 
   // ---------------------------------------------------------------------------
   // Public API
   // ---------------------------------------------------------------------------
 
-  /**
-   * Show the evolution modal for a specific tower.
-   * Looks up available evolution paths based on the tower's current
-   * Digimon and DP.
-   */
   public show(tower: Tower): void {
     this.currentTower = tower;
 
@@ -126,15 +138,25 @@ export class EvolutionModal extends Phaser.GameObjects.Container {
 
     this.buildOptions(evolutions, cost);
     this.setVisible(true);
+
+    // Fade in overlay
+    this.overlay.setAlpha(0);
+    this.scene.tweens.add({ targets: this.overlay, alpha: 1, duration: 200 });
+
+    // Pop in panel
+    animateModalIn(this.scene, this.panelContainer);
   }
 
-  /**
-   * Hide the modal and clear state.
-   */
   public hide(): void {
-    this.setVisible(false);
-    this.currentTower = null;
-    this.optionContainer.removeAll(true);
+    animateModalOut(this.scene, this.panelContainer);
+    this.scene.tweens.add({
+      targets: this.overlay, alpha: 0, duration: 200,
+      onComplete: () => {
+        this.setVisible(false);
+        this.currentTower = null;
+        this.optionContainer.removeAll(true);
+      },
+    });
   }
 
   // ---------------------------------------------------------------------------
@@ -152,7 +174,7 @@ export class EvolutionModal extends Phaser.GameObjects.Container {
     if (evolutions.length === 0) {
       const noEvolutions = this.scene.add.text(GAME_WIDTH / 2, py + 120, 'No evolution paths available\nat current DP level', {
         fontSize: '16px',
-        color: '#666688',
+        color: COLORS.TEXT_DIM,
         align: 'center',
       }).setOrigin(0.5, 0);
       this.optionContainer.add(noEvolutions);
@@ -166,67 +188,94 @@ export class EvolutionModal extends Phaser.GameObjects.Container {
       if (!stats) return;
 
       const optionY = py + 90 + index * 80;
-      const optionContainer = this.scene.add.container(0, 0);
+      const optionCont = this.scene.add.container(0, 0);
 
-      // Background
+      // Card background — mini panel with attribute accent
       const bg = this.scene.add.graphics();
-      bg.fillStyle(canAfford ? 0x222255 : 0x332222, 0.9);
-      bg.fillRoundedRect(px + 20, optionY, w - 40, 68, 6);
-      optionContainer.add(bg);
+      drawPanel(bg, px + 20, optionY, w - 40, 68, {
+        borderColor: canAfford ? COLORS.CYAN_DIM : COLORS.DANGER,
+        borderAlpha: 0.5,
+        radius: 6,
+      });
+      optionCont.add(bg);
+
+      // Attribute-colored left accent stripe
+      const attrColor = (COLORS as any)[['VACCINE', 'DATA', 'VIRUS', 'FREE'][stats.attribute]] || COLORS.CYAN;
+      const stripe = this.scene.add.graphics();
+      stripe.fillStyle(attrColor, 0.6);
+      stripe.fillRoundedRect(px + 20, optionY, 4, 68, { tl: 6, bl: 6, tr: 0, br: 0 });
+      optionCont.add(stripe);
 
       // Sprite
       if (this.scene.textures.exists(evo.resultId)) {
         const sprite = this.scene.add.image(px + 55, optionY + 34, evo.resultId);
         sprite.setScale(3);
-        optionContainer.add(sprite);
+        optionCont.add(sprite);
       }
 
       // Name and stage
       const nameText = this.scene.add.text(px + 90, optionY + 8, stats.name, {
+        fontFamily: FONTS.DISPLAY,
         fontSize: '16px',
         color: '#ffffff',
         fontStyle: 'bold',
       });
-      optionContainer.add(nameText);
+      optionCont.add(nameText);
 
       // Stats line
       const stageName = STAGE_NAMES[stats.stageTier];
       const attrName = ATTRIBUTE_NAMES[stats.attribute];
+      const attrStrColor = ATTRIBUTE_COLORS_STR[stats.attribute] || COLORS.TEXT_DIM;
       const infoText = this.scene.add.text(px + 90, optionY + 30, `${stageName} | ${attrName} | DMG: ${stats.baseDamage} | SPD: ${stats.baseSpeed}`, {
         fontSize: '11px',
-        color: '#888899',
+        color: COLORS.TEXT_DIM,
       });
-      optionContainer.add(infoText);
+      optionCont.add(infoText);
 
       // DP requirement
       const dpText = this.scene.add.text(px + 90, optionY + 48, `DP: ${evo.minDP}-${evo.maxDP}${evo.isDefault ? ' (Default)' : ' (Alternate)'}`, {
         fontSize: '11px',
-        color: evo.isDefault ? '#44cc44' : '#cccc44',
+        color: evo.isDefault ? COLORS.VACCINE_STR : COLORS.FREE_STR,
       });
-      optionContainer.add(dpText);
+      optionCont.add(dpText);
 
-      // Select button
+      // Evolve button (Container + Graphics)
       if (canAfford) {
-        const selectBtn = this.scene.add.text(px + w - 80, optionY + 20, 'Evolve', {
-          fontSize: '14px',
-          color: '#ffffff',
-          backgroundColor: '#336633',
-          padding: { x: 10, y: 6 },
-        }).setOrigin(0.5, 0)
-          .setInteractive({ useHandCursor: true })
-          .on('pointerover', () => selectBtn.setStyle({ backgroundColor: '#44aa44' }))
-          .on('pointerout', () => selectBtn.setStyle({ backgroundColor: '#336633' }))
-          .on('pointerdown', () => this.doEvolve(evo.resultId, cost));
-        optionContainer.add(selectBtn);
+        const evoBtnW = 80;
+        const evoBtnH = 30;
+        const evoBtn = this.scene.add.container(px + w - 60, optionY + 34);
+        const evoBtnBg = this.scene.add.graphics();
+        drawButton(evoBtnBg, evoBtnW, evoBtnH, COLORS.SUCCESS);
+        evoBtn.add(evoBtnBg);
+
+        const evoBtnText = this.scene.add.text(0, 0, 'Evolve', TEXT_STYLES.BUTTON_SM).setOrigin(0.5);
+        evoBtn.add(evoBtnText);
+
+        const evoHitArea = new Phaser.Geom.Rectangle(-evoBtnW / 2, -evoBtnH / 2, evoBtnW, evoBtnH);
+        evoBtn.setInteractive(evoHitArea, Phaser.Geom.Rectangle.Contains);
+        evoBtn.input!.cursor = 'pointer';
+        evoBtn.on('pointerdown', () => {
+          animateButtonPress(this.scene, evoBtn);
+          this.doEvolve(evo.resultId, cost);
+        });
+        evoBtn.on('pointerover', () => {
+          drawButton(evoBtnBg, evoBtnW, evoBtnH, COLORS.SUCCESS_HOVER, { glowRing: true });
+          animateButtonHover(this.scene, evoBtn, true);
+        });
+        evoBtn.on('pointerout', () => {
+          drawButton(evoBtnBg, evoBtnW, evoBtnH, COLORS.SUCCESS);
+          animateButtonHover(this.scene, evoBtn, false);
+        });
+        optionCont.add(evoBtn);
       } else {
-        const cantAffordText = this.scene.add.text(px + w - 80, optionY + 24, 'Need DB', {
+        const cantAffordText = this.scene.add.text(px + w - 60, optionY + 34, 'Need DB', {
           fontSize: '12px',
-          color: '#ff4444',
-        }).setOrigin(0.5, 0);
-        optionContainer.add(cantAffordText);
+          color: COLORS.TEXT_LIVES,
+        }).setOrigin(0.5);
+        optionCont.add(cantAffordText);
       }
 
-      this.optionContainer.add(optionContainer);
+      this.optionContainer.add(optionCont);
     });
   }
 
