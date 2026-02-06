@@ -120,6 +120,29 @@ export class Enemy extends Phaser.GameObjects.Container {
       this.sprite.setTint(0x88aaff);
     }
 
+    // Boss aura: pulsing colored glow
+    if (this.isBoss) {
+      const auraSpr = scene.add.sprite(0, 0, spriteKey);
+      auraSpr.setOrigin(0.5, 0.5);
+      auraSpr.setScale(scaleFactor * 1.4);
+      auraSpr.setAlpha(0.3);
+      auraSpr.setTint(0xff4444);
+      auraSpr.setBlendMode(Phaser.BlendModes.ADD);
+      this.addAt(auraSpr, 0); // Behind the main sprite
+
+      // Pulsing animation
+      scene.tweens.add({
+        targets: auraSpr,
+        alpha: { from: 0.2, to: 0.45 },
+        scaleX: { from: scaleFactor * 1.3, to: scaleFactor * 1.6 },
+        scaleY: { from: scaleFactor * 1.3, to: scaleFactor * 1.6 },
+        duration: 1200,
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.easeInOut',
+      });
+    }
+
     // Create health bar background
     this.healthBarBg = scene.add.graphics();
     this.add(this.healthBarBg);

@@ -106,7 +106,7 @@ export const ATTRIBUTE_COLORS_STR: Record<number, string> = {
 // TYPOGRAPHY — distinctive choices for a Digital World aesthetic
 // Georgia for elegant display text, Consolas for data readability
 export const FONTS = {
-  DISPLAY: 'Georgia, "Palatino Linotype", "Book Antiqua", serif',
+  DISPLAY: '"Pixel Digivolve", Georgia, "Palatino Linotype", "Book Antiqua", serif',
   BODY: '"Segoe UI", Tahoma, Geneva, sans-serif',
   MONO: 'Consolas, "Lucida Console", "Courier New", monospace',
 };

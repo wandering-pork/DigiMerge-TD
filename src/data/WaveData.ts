@@ -87,9 +87,8 @@ export const WAVE_DATA: Record<number, WaveConfig> = {
 
   6: {
     enemies: [
-      { id: 'enemy_agumon', count: 4 },
-      { id: 'enemy_gabumon', count: 3 },
-      { id: 'enemy_goblimon', count: 3 },
+      { id: 'enemy_agumon', count: 5 },
+      { id: 'enemy_gabumon', count: 5 },
     ],
     spawnInterval: 2000,
   },
@@ -97,41 +96,32 @@ export const WAVE_DATA: Record<number, WaveConfig> = {
   7: {
     enemies: [
       { id: 'enemy_elecmon', count: 6 },
-      { id: 'enemy_impmon', count: 2 },
-      { id: 'enemy_gazimon', count: 3 },
+      { id: 'enemy_gazimon', count: 5 },
     ],
     spawnInterval: 2000,
   },
 
   8: {
     enemies: [
-      { id: 'enemy_agumon', count: 4 },
-      { id: 'enemy_goblimon', count: 4 },
-      { id: 'enemy_patamon', count: 2 },
-      { id: 'enemy_gotsumon', count: 2 },
+      { id: 'enemy_agumon', count: 6 },
+      { id: 'enemy_goblimon', count: 6 },
     ],
     spawnInterval: 2000,
   },
 
   9: {
     enemies: [
-      { id: 'enemy_agumon', count: 3 },
-      { id: 'enemy_gabumon', count: 3 },
-      { id: 'enemy_goblimon', count: 2 },
-      { id: 'enemy_gazimon', count: 3 },
-      { id: 'enemy_patamon', count: 1 },
-      { id: 'enemy_gotsumon', count: 1 },
-      { id: 'enemy_impmon', count: 1 },
+      { id: 'enemy_agumon', count: 5 },
+      { id: 'enemy_gabumon', count: 5 },
+      { id: 'enemy_gazimon', count: 5 },
     ],
     spawnInterval: 1800,
   },
 
   10: {
     enemies: [
-      { id: 'enemy_agumon', count: 3 },
-      { id: 'enemy_gabumon', count: 3 },
-      { id: 'enemy_goblimon', count: 3 },
-      { id: 'enemy_gazimon', count: 3 },
+      { id: 'enemy_agumon', count: 6 },
+      { id: 'enemy_gabumon', count: 6 },
     ],
     spawnInterval: 1800,
     boss: 'boss_greymon',
@@ -144,55 +134,45 @@ export const WAVE_DATA: Record<number, WaveConfig> = {
 
   11: {
     enemies: [
-      { id: 'enemy_agumon', count: 3 },
-      { id: 'enemy_gabumon', count: 3 },
-      { id: 'enemy_gotsumon', count: 3 },
-      { id: 'enemy_guilmon', count: 3 },
-      { id: 'enemy_gazimon', count: 2 },
+      { id: 'enemy_agumon', count: 5 },
+      { id: 'enemy_gabumon', count: 5 },
+      { id: 'enemy_guilmon', count: 5 },
     ],
     spawnInterval: 1800,
   },
 
   12: {
     enemies: [
-      { id: 'enemy_impmon', count: 4 },
-      { id: 'enemy_gazimon', count: 4 },
-      { id: 'enemy_goblimon', count: 3 },
-      { id: 'enemy_agumon', count: 4 },
+      { id: 'enemy_impmon', count: 5 },
+      { id: 'enemy_gazimon', count: 5 },
+      { id: 'enemy_agumon', count: 5 },
     ],
     spawnInterval: 1800,
   },
 
   13: {
     enemies: [
-      { id: 'enemy_patamon', count: 4 },
-      { id: 'enemy_biyomon', count: 3 },
-      { id: 'enemy_agumon', count: 3 },
-      { id: 'enemy_gotsumon', count: 3 },
-      { id: 'enemy_guilmon', count: 3 },
+      { id: 'enemy_patamon', count: 5 },
+      { id: 'enemy_biyomon', count: 5 },
+      { id: 'enemy_guilmon', count: 6 },
     ],
     spawnInterval: 1800,
   },
 
   14: {
     enemies: [
-      { id: 'enemy_agumon', count: 3 },
-      { id: 'enemy_gabumon', count: 2 },
-      { id: 'enemy_patamon', count: 2 },
-      { id: 'enemy_gotsumon', count: 3 },
-      { id: 'enemy_impmon', count: 3 },
-      { id: 'enemy_gazimon', count: 4 },
+      { id: 'enemy_agumon', count: 6 },
+      { id: 'enemy_gotsumon', count: 6 },
+      { id: 'enemy_gazimon', count: 6 },
     ],
     spawnInterval: 1800,
   },
 
   15: {
     enemies: [
-      { id: 'enemy_gotsumon', count: 4 },
-      { id: 'enemy_guilmon', count: 3 },
-      { id: 'enemy_impmon', count: 4 },
-      { id: 'enemy_gazimon', count: 3 },
-      { id: 'enemy_agumon', count: 4 },
+      { id: 'enemy_gotsumon', count: 6 },
+      { id: 'enemy_impmon', count: 6 },
+      { id: 'enemy_agumon', count: 6 },
     ],
     spawnInterval: 1800,
   },
@@ -203,61 +183,49 @@ export const WAVE_DATA: Record<number, WaveConfig> = {
 
   16: {
     enemies: [
-      { id: 'enemy_agumon', count: 4 },
-      { id: 'enemy_gabumon', count: 3 },
-      { id: 'enemy_goblimon', count: 3 },
-      { id: 'enemy_patamon', count: 2 },
-      { id: 'enemy_gotsumon', count: 2 },
-      { id: 'enemy_greymon', count: 2 },
-      { id: 'enemy_impmon', count: 2 },
+      { id: 'enemy_agumon', count: 5 },
+      { id: 'enemy_goblimon', count: 5 },
+      { id: 'enemy_greymon', count: 5 },
+      { id: 'enemy_impmon', count: 5 },
     ],
     spawnInterval: 1800,
   },
 
   17: {
     enemies: [
-      { id: 'enemy_agumon', count: 3 },
-      { id: 'enemy_gabumon', count: 3 },
-      { id: 'enemy_goblimon', count: 3 },
-      { id: 'enemy_greymon', count: 3 },
-      { id: 'enemy_ogremon', count: 1 },
-      { id: 'enemy_impmon', count: 3 },
-      { id: 'enemy_gazimon', count: 3 },
+      { id: 'enemy_agumon', count: 5 },
+      { id: 'enemy_gabumon', count: 5 },
+      { id: 'enemy_greymon', count: 5 },
+      { id: 'enemy_gazimon', count: 5 },
     ],
     spawnInterval: 1800,
   },
 
   18: {
     enemies: [
-      { id: 'enemy_greymon', count: 4 },
-      { id: 'enemy_ogremon', count: 2 },
-      { id: 'enemy_agumon', count: 4 },
-      { id: 'enemy_gabumon', count: 4 },
-      { id: 'enemy_gotsumon', count: 3 },
-      { id: 'enemy_impmon', count: 3 },
+      { id: 'enemy_greymon', count: 6 },
+      { id: 'enemy_agumon', count: 5 },
+      { id: 'enemy_gabumon', count: 5 },
+      { id: 'enemy_impmon', count: 5 },
     ],
     spawnInterval: 1800,
   },
 
   19: {
     enemies: [
-      { id: 'enemy_greymon', count: 5 },
-      { id: 'enemy_ogremon', count: 3 },
-      { id: 'enemy_agumon', count: 3 },
-      { id: 'enemy_gabumon', count: 3 },
-      { id: 'enemy_goblimon', count: 4 },
-      { id: 'enemy_impmon', count: 4 },
+      { id: 'enemy_greymon', count: 6 },
+      { id: 'enemy_ogremon', count: 5 },
+      { id: 'enemy_goblimon', count: 5 },
+      { id: 'enemy_impmon', count: 6 },
     ],
     spawnInterval: 1800,
   },
 
   20: {
     enemies: [
-      { id: 'enemy_greymon', count: 5 },
-      { id: 'enemy_ogremon', count: 3 },
-      { id: 'enemy_gabumon', count: 4 },
-      { id: 'enemy_goblimon', count: 3 },
-      { id: 'enemy_impmon', count: 3 },
+      { id: 'enemy_greymon', count: 6 },
+      { id: 'enemy_ogremon', count: 5 },
+      { id: 'enemy_gabumon', count: 5 },
     ],
     spawnInterval: 1800,
     boss: 'boss_greymon_evolved',
@@ -271,57 +239,47 @@ export const WAVE_DATA: Record<number, WaveConfig> = {
   // Waves 21-25: Champion Introduction
   21: {
     enemies: [
-      { id: 'enemy_greymon', count: 4 },
-      { id: 'enemy_garurumon', count: 4 },
-      { id: 'enemy_leomon', count: 4 },
-      { id: 'enemy_seadramon', count: 4 },
+      { id: 'enemy_greymon', count: 5 },
+      { id: 'enemy_garurumon', count: 5 },
+      { id: 'enemy_leomon', count: 5 },
     ],
     spawnInterval: 1500,
   },
 
   22: {
     enemies: [
-      { id: 'enemy_greymon', count: 4 },
-      { id: 'enemy_garurumon', count: 4 },
-      { id: 'enemy_leomon', count: 3 },
-      { id: 'enemy_seadramon', count: 3 },
-      { id: 'enemy_tyrannomon', count: 3 },
+      { id: 'enemy_greymon', count: 5 },
+      { id: 'enemy_garurumon', count: 5 },
+      { id: 'enemy_tyrannomon', count: 5 },
     ],
     spawnInterval: 1500,
   },
 
   23: {
     enemies: [
-      { id: 'enemy_greymon', count: 4 },
-      { id: 'enemy_garurumon', count: 4 },
-      { id: 'enemy_leomon', count: 3 },
-      { id: 'enemy_birdramon', count: 3 },
-      { id: 'enemy_airdramon', count: 2 },
-      { id: 'enemy_meramon', count: 2 },
+      { id: 'enemy_greymon', count: 5 },
+      { id: 'enemy_garurumon', count: 5 },
+      { id: 'enemy_birdramon', count: 5 },
     ],
     spawnInterval: 1500,
   },
 
   24: {
     enemies: [
-      { id: 'enemy_greymon', count: 3 },
-      { id: 'enemy_garurumon', count: 3 },
-      { id: 'enemy_leomon', count: 3 },
-      { id: 'enemy_tyrannomon', count: 3 },
-      { id: 'enemy_birdramon', count: 2 },
-      { id: 'enemy_meramon', count: 2 },
-      { id: 'enemy_bakemon', count: 3 },
+      { id: 'enemy_greymon', count: 5 },
+      { id: 'enemy_tyrannomon', count: 5 },
+      { id: 'enemy_bakemon', count: 5 },
+      { id: 'enemy_meramon', count: 5 },
     ],
     spawnInterval: 1500,
   },
 
   25: {
     enemies: [
-      { id: 'enemy_ogremon', count: 6 },
-      { id: 'enemy_kuwagamon', count: 4 },
-      { id: 'enemy_greymon', count: 4 },
-      { id: 'enemy_garurumon', count: 3 },
-      { id: 'enemy_tyrannomon', count: 3 },
+      { id: 'enemy_ogremon', count: 7 },
+      { id: 'enemy_kuwagamon', count: 5 },
+      { id: 'enemy_greymon', count: 5 },
+      { id: 'enemy_tyrannomon', count: 5 },
     ],
     spawnInterval: 1500,
   },
@@ -357,17 +315,16 @@ export const WAVE_DATA: Record<number, WaveConfig> = {
     enemies: [
       { id: 'enemy_meramon', count: 8 },
       { id: 'enemy_kuwagamon', count: 8 },
-      { id: 'enemy_bakemon', count: 4 },
+      { id: 'enemy_bakemon', count: 5 },
     ],
     spawnInterval: 1500,
   },
 
   30: {
     enemies: [
-      { id: 'enemy_greymon', count: 4 },
-      { id: 'enemy_garurumon', count: 4 },
-      { id: 'enemy_ogremon', count: 4 },
-      { id: 'enemy_birdramon', count: 4 },
+      { id: 'enemy_greymon', count: 5 },
+      { id: 'enemy_garurumon', count: 5 },
+      { id: 'enemy_ogremon', count: 5 },
     ],
     spawnInterval: 1500,
     boss: 'boss_devimon',
@@ -377,12 +334,10 @@ export const WAVE_DATA: Record<number, WaveConfig> = {
   // Waves 31-35: Mixed Pressure
   31: {
     enemies: [
-      { id: 'enemy_greymon', count: 5 },
-      { id: 'enemy_garurumon', count: 5 },
-      { id: 'enemy_ogremon', count: 4 },
-      { id: 'enemy_leomon', count: 4 },
-      { id: 'enemy_tyrannomon', count: 2 },
-      { id: 'enemy_weregarurumon', count: 2 },
+      { id: 'enemy_greymon', count: 6 },
+      { id: 'enemy_garurumon', count: 6 },
+      { id: 'enemy_ogremon', count: 5 },
+      { id: 'enemy_leomon', count: 5 },
     ],
     spawnInterval: 1500,
   },
@@ -401,8 +356,7 @@ export const WAVE_DATA: Record<number, WaveConfig> = {
     enemies: [
       { id: 'enemy_guardromon', count: 8 },
       { id: 'enemy_monochromon', count: 8 },
-      { id: 'enemy_greymon', count: 4 },
-      { id: 'enemy_garurumon', count: 4 },
+      { id: 'enemy_greymon', count: 5 },
     ],
     spawnInterval: 1500,
   },
@@ -412,21 +366,18 @@ export const WAVE_DATA: Record<number, WaveConfig> = {
       { id: 'enemy_meramon', count: 6 },
       { id: 'enemy_kuwagamon', count: 6 },
       { id: 'enemy_airdramon', count: 5 },
-      { id: 'enemy_bakemon', count: 4 },
-      { id: 'enemy_numemon', count: 4 },
+      { id: 'enemy_bakemon', count: 5 },
     ],
     spawnInterval: 1500,
   },
 
   35: {
     enemies: [
-      { id: 'enemy_greymon', count: 4 },
-      { id: 'enemy_ogremon', count: 4 },
-      { id: 'enemy_meramon', count: 4 },
-      { id: 'enemy_birdramon', count: 4 },
+      { id: 'enemy_greymon', count: 6 },
+      { id: 'enemy_ogremon', count: 5 },
+      { id: 'enemy_meramon', count: 5 },
+      { id: 'enemy_birdramon', count: 5 },
       { id: 'enemy_bakemon', count: 5 },
-      { id: 'enemy_togemon', count: 3 },
-      { id: 'enemy_guardromon', count: 2 },
     ],
     spawnInterval: 1500,
   },
@@ -434,48 +385,41 @@ export const WAVE_DATA: Record<number, WaveConfig> = {
   // Waves 36-40: Phase 2 Finale (Ultimate Preview)
   36: {
     enemies: [
-      { id: 'enemy_greymon', count: 4 },
-      { id: 'enemy_garurumon', count: 4 },
-      { id: 'enemy_ogremon', count: 4 },
-      { id: 'enemy_metalgreymon', count: 4 },
-      { id: 'enemy_weregarurumon', count: 4 },
-      { id: 'enemy_leomon', count: 4 },
+      { id: 'enemy_greymon', count: 5 },
+      { id: 'enemy_ogremon', count: 5 },
+      { id: 'enemy_metalgreymon', count: 5 },
+      { id: 'enemy_weregarurumon', count: 5 },
+      { id: 'enemy_leomon', count: 5 },
     ],
     spawnInterval: 1500,
   },
 
   37: {
     enemies: [
-      { id: 'enemy_greymon', count: 3 },
-      { id: 'enemy_garurumon', count: 3 },
-      { id: 'enemy_ogremon', count: 4 },
-      { id: 'enemy_metalgreymon', count: 5 },
-      { id: 'enemy_weregarurumon', count: 5 },
-      { id: 'enemy_andromon', count: 5 },
+      { id: 'enemy_ogremon', count: 5 },
+      { id: 'enemy_metalgreymon', count: 7 },
+      { id: 'enemy_weregarurumon', count: 7 },
+      { id: 'enemy_andromon', count: 6 },
     ],
     spawnInterval: 1500,
   },
 
   38: {
     enemies: [
-      { id: 'enemy_greymon', count: 3 },
-      { id: 'enemy_garurumon', count: 3 },
-      { id: 'enemy_metalgreymon', count: 6 },
-      { id: 'enemy_weregarurumon', count: 6 },
-      { id: 'enemy_andromon', count: 4 },
-      { id: 'enemy_mamemon', count: 4 },
+      { id: 'enemy_metalgreymon', count: 7 },
+      { id: 'enemy_weregarurumon', count: 7 },
+      { id: 'enemy_andromon', count: 6 },
+      { id: 'enemy_mamemon', count: 6 },
     ],
     spawnInterval: 1500,
   },
 
   39: {
     enemies: [
-      { id: 'enemy_greymon', count: 2 },
-      { id: 'enemy_garurumon', count: 2 },
-      { id: 'enemy_metalgreymon', count: 7 },
-      { id: 'enemy_weregarurumon', count: 7 },
-      { id: 'enemy_andromon', count: 5 },
-      { id: 'enemy_mamemon', count: 5 },
+      { id: 'enemy_metalgreymon', count: 8 },
+      { id: 'enemy_weregarurumon', count: 8 },
+      { id: 'enemy_andromon', count: 6 },
+      { id: 'enemy_mamemon', count: 6 },
     ],
     spawnInterval: 1500,
   },
@@ -512,44 +456,38 @@ export const WAVE_DATA: Record<number, WaveConfig> = {
       { id: 'enemy_metalgreymon', count: 5 },
       { id: 'enemy_megaseadramon', count: 5 },
       { id: 'enemy_myotismon', count: 5 },
-      { id: 'enemy_zudomon', count: 4 },
-      { id: 'enemy_skullgreymon', count: 4 },
+      { id: 'enemy_zudomon', count: 5 },
+      { id: 'enemy_skullgreymon', count: 5 },
     ],
     spawnInterval: 1200,
   },
 
   43: {
     enemies: [
-      { id: 'enemy_metalgreymon', count: 5 },
-      { id: 'enemy_megaseadramon', count: 5 },
-      { id: 'enemy_megakabuterimon', count: 4 },
-      { id: 'enemy_garudamon', count: 4 },
-      { id: 'enemy_weregarurumon', count: 3 },
-      { id: 'enemy_bluemeramon', count: 3 },
+      { id: 'enemy_metalgreymon', count: 6 },
+      { id: 'enemy_megaseadramon', count: 6 },
+      { id: 'enemy_megakabuterimon', count: 6 },
+      { id: 'enemy_garudamon', count: 6 },
     ],
     spawnInterval: 1200,
   },
 
   44: {
     enemies: [
-      { id: 'enemy_metalgreymon', count: 4 },
-      { id: 'enemy_megaseadramon', count: 4 },
-      { id: 'enemy_myotismon', count: 4 },
-      { id: 'enemy_skullgreymon', count: 3 },
-      { id: 'enemy_megakabuterimon', count: 3 },
-      { id: 'enemy_weregarurumon', count: 3 },
-      { id: 'enemy_ladydevimon', count: 4 },
+      { id: 'enemy_metalgreymon', count: 5 },
+      { id: 'enemy_myotismon', count: 5 },
+      { id: 'enemy_skullgreymon', count: 5 },
+      { id: 'enemy_megakabuterimon', count: 5 },
+      { id: 'enemy_ladydevimon', count: 5 },
     ],
     spawnInterval: 1200,
   },
 
   45: {
     enemies: [
-      { id: 'enemy_andromon', count: 8 },
-      { id: 'enemy_skullgreymon', count: 8 },
-      { id: 'enemy_metalgreymon', count: 4 },
-      { id: 'enemy_myotismon', count: 3 },
-      { id: 'enemy_megaseadramon', count: 3 },
+      { id: 'enemy_andromon', count: 9 },
+      { id: 'enemy_skullgreymon', count: 9 },
+      { id: 'enemy_metalgreymon', count: 8 },
     ],
     spawnInterval: 1200,
   },
@@ -597,7 +535,7 @@ export const WAVE_DATA: Record<number, WaveConfig> = {
       { id: 'enemy_myotismon', count: 5 },
       { id: 'enemy_skullgreymon', count: 5 },
       { id: 'enemy_megakabuterimon', count: 5 },
-      { id: 'enemy_andromon', count: 4 },
+      { id: 'enemy_andromon', count: 5 },
     ],
     spawnInterval: 1200,
     boss: 'boss_skullgreymon',
@@ -639,10 +577,9 @@ export const WAVE_DATA: Record<number, WaveConfig> = {
     enemies: [
       { id: 'enemy_metalgreymon', count: 6 },
       { id: 'enemy_myotismon', count: 6 },
-      { id: 'enemy_angewomon', count: 5 },
-      { id: 'enemy_mamemon', count: 5 },
-      { id: 'enemy_metalmamemon', count: 4 },
-      { id: 'enemy_warumonzaemon', count: 5 },
+      { id: 'enemy_angewomon', count: 6 },
+      { id: 'enemy_mamemon', count: 6 },
+      { id: 'enemy_warumonzaemon', count: 6 },
     ],
     spawnInterval: 1200,
   },
@@ -671,38 +608,33 @@ export const WAVE_DATA: Record<number, WaveConfig> = {
 
   57: {
     enemies: [
-      { id: 'enemy_metalgreymon', count: 5 },
-      { id: 'enemy_myotismon', count: 5 },
-      { id: 'enemy_skullgreymon', count: 5 },
-      { id: 'enemy_andromon', count: 5 },
-      { id: 'enemy_mamemon', count: 6 },
-      { id: 'enemy_ladydevimon', count: 5 },
+      { id: 'enemy_metalgreymon', count: 6 },
+      { id: 'enemy_myotismon', count: 6 },
+      { id: 'enemy_skullgreymon', count: 6 },
+      { id: 'enemy_andromon', count: 6 },
+      { id: 'enemy_mamemon', count: 7 },
     ],
     spawnInterval: 1200,
   },
 
   58: {
     enemies: [
-      { id: 'enemy_metalgreymon', count: 5 },
-      { id: 'enemy_skullgreymon', count: 5 },
-      { id: 'enemy_andromon', count: 5 },
-      { id: 'enemy_mamemon', count: 5 },
-      { id: 'enemy_metalmamemon', count: 5 },
-      { id: 'enemy_angewomon', count: 4 },
-      { id: 'enemy_megadramon', count: 3 },
+      { id: 'enemy_metalgreymon', count: 7 },
+      { id: 'enemy_skullgreymon', count: 7 },
+      { id: 'enemy_andromon', count: 7 },
+      { id: 'enemy_mamemon', count: 6 },
+      { id: 'enemy_metalmamemon', count: 6 },
     ],
     spawnInterval: 1200,
   },
 
   59: {
     enemies: [
-      { id: 'enemy_metalgreymon', count: 5 },
-      { id: 'enemy_skullgreymon', count: 5 },
-      { id: 'enemy_weregarurumon', count: 5 },
-      { id: 'enemy_andromon', count: 5 },
-      { id: 'enemy_mamemon', count: 5 },
-      { id: 'enemy_ladydevimon', count: 5 },
-      { id: 'enemy_megadramon', count: 5 },
+      { id: 'enemy_metalgreymon', count: 7 },
+      { id: 'enemy_skullgreymon', count: 7 },
+      { id: 'enemy_andromon', count: 7 },
+      { id: 'enemy_ladydevimon', count: 7 },
+      { id: 'enemy_megadramon', count: 7 },
     ],
     spawnInterval: 1200,
   },
@@ -738,51 +670,44 @@ export const WAVE_DATA: Record<number, WaveConfig> = {
 
   62: {
     enemies: [
-      { id: 'enemy_wargreymon', count: 5 },
-      { id: 'enemy_metalgarurumon', count: 5 },
-      { id: 'enemy_piedmon', count: 5 },
-      { id: 'enemy_machinedramon', count: 4 },
-      { id: 'enemy_blackwargreymon', count: 4 },
-      { id: 'enemy_metalseadramon', count: 4 },
-      { id: 'enemy_phoenixmon', count: 4 },
+      { id: 'enemy_wargreymon', count: 7 },
+      { id: 'enemy_metalgarurumon', count: 7 },
+      { id: 'enemy_piedmon', count: 7 },
+      { id: 'enemy_machinedramon', count: 5 },
+      { id: 'enemy_blackwargreymon', count: 5 },
     ],
     spawnInterval: 1000,
   },
 
   63: {
     enemies: [
-      { id: 'enemy_wargreymon', count: 5 },
-      { id: 'enemy_metalgarurumon', count: 5 },
-      { id: 'enemy_phoenixmon', count: 6 },
-      { id: 'enemy_herculeskabuterimon', count: 6 },
-      { id: 'enemy_piedmon', count: 5 },
-      { id: 'enemy_boltmon', count: 5 },
+      { id: 'enemy_wargreymon', count: 6 },
+      { id: 'enemy_phoenixmon', count: 7 },
+      { id: 'enemy_herculeskabuterimon', count: 7 },
+      { id: 'enemy_piedmon', count: 6 },
+      { id: 'enemy_boltmon', count: 6 },
     ],
     spawnInterval: 1000,
   },
 
   64: {
     enemies: [
-      { id: 'enemy_wargreymon', count: 5 },
-      { id: 'enemy_metalgarurumon', count: 5 },
-      { id: 'enemy_saberleomon', count: 6 },
-      { id: 'enemy_beelzemon', count: 6 },
-      { id: 'enemy_puppetmon', count: 5 },
-      { id: 'enemy_piedmon', count: 6 },
+      { id: 'enemy_wargreymon', count: 6 },
+      { id: 'enemy_saberleomon', count: 7 },
+      { id: 'enemy_beelzemon', count: 7 },
+      { id: 'enemy_puppetmon', count: 6 },
+      { id: 'enemy_piedmon', count: 7 },
     ],
     spawnInterval: 1000,
   },
 
   65: {
     enemies: [
-      { id: 'enemy_wargreymon', count: 5 },
-      { id: 'enemy_metalgarurumon', count: 5 },
-      { id: 'enemy_machinedramon', count: 4 },
-      { id: 'enemy_daemon', count: 4 },
-      { id: 'enemy_saberleomon', count: 4 },
-      { id: 'enemy_phoenixmon', count: 4 },
-      { id: 'enemy_piedmon', count: 5 },
-      { id: 'enemy_leviamon', count: 4 },
+      { id: 'enemy_wargreymon', count: 7 },
+      { id: 'enemy_metalgarurumon', count: 7 },
+      { id: 'enemy_machinedramon', count: 7 },
+      { id: 'enemy_daemon', count: 7 },
+      { id: 'enemy_piedmon', count: 7 },
     ],
     spawnInterval: 1000,
   },
@@ -817,25 +742,21 @@ export const WAVE_DATA: Record<number, WaveConfig> = {
 
   69: {
     enemies: [
-      { id: 'enemy_wargreymon', count: 6 },
-      { id: 'enemy_metalgarurumon', count: 6 },
-      { id: 'enemy_machinedramon', count: 5 },
-      { id: 'enemy_saberleomon', count: 5 },
-      { id: 'enemy_phoenixmon', count: 5 },
-      { id: 'enemy_piedmon', count: 5 },
-      { id: 'enemy_diaboromon', count: 4 },
-      { id: 'enemy_daemon', count: 4 },
+      { id: 'enemy_wargreymon', count: 8 },
+      { id: 'enemy_metalgarurumon', count: 8 },
+      { id: 'enemy_machinedramon', count: 8 },
+      { id: 'enemy_saberleomon', count: 8 },
+      { id: 'enemy_diaboromon', count: 8 },
     ],
     spawnInterval: 1000,
   },
 
   70: {
     enemies: [
-      { id: 'enemy_wargreymon', count: 7 },
-      { id: 'enemy_metalgarurumon', count: 7 },
-      { id: 'enemy_machinedramon', count: 5 },
-      { id: 'enemy_daemon', count: 5 },
-      { id: 'enemy_saberleomon', count: 5 },
+      { id: 'enemy_wargreymon', count: 8 },
+      { id: 'enemy_metalgarurumon', count: 8 },
+      { id: 'enemy_machinedramon', count: 7 },
+      { id: 'enemy_daemon', count: 6 },
       { id: 'enemy_phoenixmon', count: 6 },
     ],
     spawnInterval: 1000,
@@ -868,38 +789,33 @@ export const WAVE_DATA: Record<number, WaveConfig> = {
 
   73: {
     enemies: [
-      { id: 'enemy_wargreymon', count: 7 },
-      { id: 'enemy_metalgarurumon', count: 7 },
-      { id: 'enemy_machinedramon', count: 6 },
-      { id: 'enemy_saberleomon', count: 6 },
-      { id: 'enemy_beelzemon', count: 7 },
-      { id: 'enemy_diaboromon', count: 7 },
+      { id: 'enemy_wargreymon', count: 8 },
+      { id: 'enemy_metalgarurumon', count: 8 },
+      { id: 'enemy_machinedramon', count: 8 },
+      { id: 'enemy_beelzemon', count: 8 },
+      { id: 'enemy_diaboromon', count: 8 },
     ],
     spawnInterval: 1000,
   },
 
   74: {
     enemies: [
-      { id: 'enemy_machinedramon', count: 8 },
-      { id: 'enemy_daemon', count: 8 },
-      { id: 'enemy_leviamon', count: 8 },
+      { id: 'enemy_machinedramon', count: 9 },
+      { id: 'enemy_daemon', count: 9 },
+      { id: 'enemy_leviamon', count: 9 },
       { id: 'enemy_blackwargreymon', count: 8 },
-      { id: 'enemy_cherubimon', count: 5 },
-      { id: 'enemy_phoenixmon', count: 5 },
+      { id: 'enemy_cherubimon', count: 7 },
     ],
     spawnInterval: 1000,
   },
 
   75: {
     enemies: [
-      { id: 'enemy_wargreymon', count: 6 },
-      { id: 'enemy_metalgarurumon', count: 6 },
-      { id: 'enemy_machinedramon', count: 6 },
-      { id: 'enemy_saberleomon', count: 6 },
-      { id: 'enemy_phoenixmon', count: 6 },
-      { id: 'enemy_diaboromon', count: 6 },
-      { id: 'enemy_daemon', count: 4 },
-      { id: 'enemy_piedmon', count: 4 },
+      { id: 'enemy_wargreymon', count: 9 },
+      { id: 'enemy_metalgarurumon', count: 9 },
+      { id: 'enemy_machinedramon', count: 9 },
+      { id: 'enemy_saberleomon', count: 8 },
+      { id: 'enemy_diaboromon', count: 9 },
     ],
     spawnInterval: 1000,
   },
@@ -907,68 +823,55 @@ export const WAVE_DATA: Record<number, WaveConfig> = {
   // Waves 76-80: Phase 4 Finale (Ultra Preview)
   76: {
     enemies: [
-      { id: 'enemy_wargreymon', count: 8 },
-      { id: 'enemy_metalgarurumon', count: 8 },
-      { id: 'enemy_piedmon', count: 8 },
-      { id: 'enemy_machinedramon', count: 6 },
-      { id: 'enemy_saberleomon', count: 6 },
-      { id: 'enemy_beelzemon', count: 6 },
+      { id: 'enemy_wargreymon', count: 9 },
+      { id: 'enemy_metalgarurumon', count: 9 },
+      { id: 'enemy_piedmon', count: 9 },
+      { id: 'enemy_machinedramon', count: 8 },
+      { id: 'enemy_beelzemon', count: 7 },
     ],
     spawnInterval: 1000,
   },
 
   77: {
     enemies: [
-      { id: 'enemy_wargreymon', count: 6 },
-      { id: 'enemy_metalgarurumon', count: 6 },
-      { id: 'enemy_machinedramon', count: 6 },
-      { id: 'enemy_daemon', count: 6 },
-      { id: 'enemy_phoenixmon', count: 6 },
-      { id: 'enemy_omegamon', count: 4 },
-      { id: 'enemy_omegamon_zwart', count: 4 },
-      { id: 'enemy_saberleomon', count: 6 },
+      { id: 'enemy_wargreymon', count: 9 },
+      { id: 'enemy_machinedramon', count: 9 },
+      { id: 'enemy_daemon', count: 9 },
+      { id: 'enemy_omegamon', count: 8 },
+      { id: 'enemy_omegamon_zwart', count: 8 },
     ],
     spawnInterval: 1000,
   },
 
   78: {
     enemies: [
-      { id: 'enemy_wargreymon', count: 5 },
-      { id: 'enemy_metalgarurumon', count: 5 },
-      { id: 'enemy_machinedramon', count: 5 },
-      { id: 'enemy_omegamon', count: 6 },
-      { id: 'enemy_omegamon_zwart', count: 6 },
-      { id: 'enemy_imperialdramon_dm', count: 5 },
-      { id: 'enemy_saberleomon', count: 7 },
-      { id: 'enemy_phoenixmon', count: 7 },
+      { id: 'enemy_omegamon', count: 10 },
+      { id: 'enemy_omegamon_zwart', count: 10 },
+      { id: 'enemy_imperialdramon_dm', count: 9 },
+      { id: 'enemy_saberleomon', count: 9 },
+      { id: 'enemy_phoenixmon', count: 8 },
     ],
     spawnInterval: 1000,
   },
 
   79: {
     enemies: [
-      { id: 'enemy_wargreymon', count: 5 },
-      { id: 'enemy_metalgarurumon', count: 5 },
-      { id: 'enemy_omegamon', count: 8 },
-      { id: 'enemy_omegamon_zwart', count: 8 },
-      { id: 'enemy_imperialdramon_dm', count: 8 },
-      { id: 'enemy_armageddemon', count: 5 },
-      { id: 'enemy_machinedramon', count: 5 },
-      { id: 'enemy_daemon', count: 6 },
+      { id: 'enemy_omegamon', count: 10 },
+      { id: 'enemy_omegamon_zwart', count: 10 },
+      { id: 'enemy_imperialdramon_dm', count: 10 },
+      { id: 'enemy_armageddemon', count: 10 },
+      { id: 'enemy_machinedramon', count: 10 },
     ],
     spawnInterval: 1000,
   },
 
   80: {
     enemies: [
-      { id: 'enemy_omegamon', count: 6 },
-      { id: 'enemy_omegamon_zwart', count: 6 },
-      { id: 'enemy_imperialdramon_dm', count: 6 },
-      { id: 'enemy_armageddemon', count: 6 },
-      { id: 'enemy_machinedramon', count: 5 },
-      { id: 'enemy_daemon', count: 5 },
-      { id: 'enemy_wargreymon', count: 3 },
-      { id: 'enemy_metalgarurumon', count: 3 },
+      { id: 'enemy_omegamon', count: 8 },
+      { id: 'enemy_omegamon_zwart', count: 8 },
+      { id: 'enemy_imperialdramon_dm', count: 8 },
+      { id: 'enemy_armageddemon', count: 8 },
+      { id: 'enemy_machinedramon', count: 8 },
     ],
     spawnInterval: 1000,
     boss: 'boss_omegamon',
@@ -982,58 +885,44 @@ export const WAVE_DATA: Record<number, WaveConfig> = {
   // Waves 81-85: Ultra Era
   81: {
     enemies: [
-      { id: 'enemy_wargreymon', count: 6 },
-      { id: 'enemy_metalgarurumon', count: 6 },
-      { id: 'enemy_machinedramon', count: 6 },
-      { id: 'enemy_omegamon', count: 4 },
-      { id: 'enemy_omegamon_zwart', count: 4 },
-      { id: 'enemy_imperialdramon_dm', count: 4 },
-      { id: 'enemy_daemon', count: 6 },
-      { id: 'enemy_saberleomon', count: 6 },
+      { id: 'enemy_wargreymon', count: 9 },
+      { id: 'enemy_machinedramon', count: 9 },
+      { id: 'enemy_omegamon', count: 8 },
+      { id: 'enemy_omegamon_zwart', count: 8 },
+      { id: 'enemy_daemon', count: 8 },
     ],
     spawnInterval: 800,
   },
 
   82: {
     enemies: [
-      { id: 'enemy_wargreymon', count: 5 },
-      { id: 'enemy_metalgarurumon', count: 5 },
-      { id: 'enemy_machinedramon', count: 5 },
-      { id: 'enemy_omegamon', count: 5 },
-      { id: 'enemy_omegamon_zwart', count: 5 },
-      { id: 'enemy_imperialdramon_dm', count: 5 },
-      { id: 'enemy_daemon', count: 5 },
-      { id: 'enemy_blackwargreymon', count: 5 },
-      { id: 'enemy_phoenixmon', count: 4 },
+      { id: 'enemy_omegamon', count: 9 },
+      { id: 'enemy_omegamon_zwart', count: 9 },
+      { id: 'enemy_imperialdramon_dm', count: 9 },
+      { id: 'enemy_machinedramon', count: 9 },
+      { id: 'enemy_blackwargreymon', count: 8 },
     ],
     spawnInterval: 800,
   },
 
   83: {
     enemies: [
-      { id: 'enemy_wargreymon', count: 4 },
-      { id: 'enemy_metalgarurumon', count: 4 },
-      { id: 'enemy_omegamon', count: 6 },
-      { id: 'enemy_omegamon_zwart', count: 6 },
-      { id: 'enemy_imperialdramon_dm', count: 6 },
-      { id: 'enemy_armageddemon', count: 4 },
-      { id: 'enemy_machinedramon', count: 6 },
-      { id: 'enemy_saberleomon', count: 5 },
-      { id: 'enemy_beelzemon', count: 5 },
+      { id: 'enemy_omegamon', count: 9 },
+      { id: 'enemy_omegamon_zwart', count: 9 },
+      { id: 'enemy_imperialdramon_dm', count: 9 },
+      { id: 'enemy_machinedramon', count: 9 },
+      { id: 'enemy_armageddemon', count: 10 },
     ],
     spawnInterval: 800,
   },
 
   84: {
     enemies: [
-      { id: 'enemy_omegamon', count: 8 },
-      { id: 'enemy_omegamon_zwart', count: 8 },
-      { id: 'enemy_imperialdramon_dm', count: 8 },
-      { id: 'enemy_armageddemon', count: 6 },
-      { id: 'enemy_millenniummon', count: 4 },
-      { id: 'enemy_wargreymon', count: 4 },
-      { id: 'enemy_metalgarurumon', count: 4 },
-      { id: 'enemy_machinedramon', count: 6 },
+      { id: 'enemy_omegamon', count: 10 },
+      { id: 'enemy_omegamon_zwart', count: 10 },
+      { id: 'enemy_imperialdramon_dm', count: 10 },
+      { id: 'enemy_armageddemon', count: 8 },
+      { id: 'enemy_millenniummon', count: 10 },
     ],
     spawnInterval: 800,
   },
@@ -1043,9 +932,8 @@ export const WAVE_DATA: Record<number, WaveConfig> = {
       { id: 'enemy_omegamon', count: 10 },
       { id: 'enemy_omegamon_zwart', count: 10 },
       { id: 'enemy_imperialdramon_dm', count: 10 },
-      { id: 'enemy_armageddemon', count: 8 },
-      { id: 'enemy_millenniummon', count: 6 },
-      { id: 'enemy_machinedramon', count: 6 },
+      { id: 'enemy_armageddemon', count: 10 },
+      { id: 'enemy_millenniummon', count: 10 },
     ],
     spawnInterval: 800,
   },
@@ -1086,12 +974,11 @@ export const WAVE_DATA: Record<number, WaveConfig> = {
 
   89: {
     enemies: [
-      { id: 'enemy_omegamon', count: 10 },
-      { id: 'enemy_omegamon_zwart', count: 10 },
-      { id: 'enemy_imperialdramon_dm', count: 10 },
-      { id: 'enemy_armageddemon', count: 10 },
-      { id: 'enemy_millenniummon', count: 10 },
-      { id: 'enemy_diaboromon', count: 5 },
+      { id: 'enemy_omegamon', count: 11 },
+      { id: 'enemy_omegamon_zwart', count: 11 },
+      { id: 'enemy_imperialdramon_dm', count: 11 },
+      { id: 'enemy_armageddemon', count: 11 },
+      { id: 'enemy_millenniummon', count: 11 },
     ],
     spawnInterval: 800,
   },
@@ -1099,11 +986,10 @@ export const WAVE_DATA: Record<number, WaveConfig> = {
   90: {
     enemies: [
       { id: 'enemy_omegamon', count: 10 },
-      { id: 'enemy_omegamon_zwart', count: 8 },
-      { id: 'enemy_imperialdramon_dm', count: 8 },
-      { id: 'enemy_armageddemon', count: 8 },
-      { id: 'enemy_millenniummon', count: 6 },
-      { id: 'enemy_machinedramon', count: 5 },
+      { id: 'enemy_omegamon_zwart', count: 9 },
+      { id: 'enemy_imperialdramon_dm', count: 9 },
+      { id: 'enemy_armageddemon', count: 9 },
+      { id: 'enemy_millenniummon', count: 8 },
     ],
     spawnInterval: 800,
     boss: 'boss_omegamon_zwart',
@@ -1253,9 +1139,22 @@ const ENDLESS_BOSS_POOL = [
 ];
 
 /**
+ * Simple seeded random number generator for deterministic endless waves.
+ * Uses a linear congruential generator seeded by wave number.
+ */
+function seededRandom(seed: number): () => number {
+  let state = seed;
+  return () => {
+    state = (state * 1664525 + 1013904223) & 0x7fffffff;
+    return state / 0x7fffffff;
+  };
+}
+
+/**
  * Generate wave config for endless mode (waves 101+).
  * Enemies scale exponentially: HP multiplied by 1.05^(wave-100).
  * Count increases linearly capped at 100.
+ * Randomly selects 4-5 enemy types from the pool per wave (max 5 types).
  * Bosses every 10 waves.
  */
 export function generateEndlessWave(waveNumber: number): WaveConfig {
@@ -1263,18 +1162,29 @@ export function generateEndlessWave(waveNumber: number): WaveConfig {
   const enemyCount = Math.min(50 + wavesIntoEndless * 2, 100);
   const spawnInterval = Math.max(300, 600 - wavesIntoEndless * 10);
 
-  // Distribute enemies evenly across the pool
-  const enemies: { id: string; count: number }[] = [];
-  const poolSize = ENDLESS_ENEMY_POOL.length;
-  const basePerEnemy = Math.floor(enemyCount / poolSize);
-  let remainder = enemyCount - basePerEnemy * poolSize;
+  // Use seeded RNG for deterministic wave composition
+  const rng = seededRandom(waveNumber * 7919);
 
-  for (const id of ENDLESS_ENEMY_POOL) {
+  // Pick 4-5 types from the pool
+  const typeCount = rng() < 0.5 ? 4 : 5;
+
+  // Shuffle pool using Fisher-Yates with seeded RNG, then take first typeCount
+  const shuffled = [...ENDLESS_ENEMY_POOL];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  const selectedTypes = shuffled.slice(0, typeCount);
+
+  // Distribute enemies evenly across selected types
+  const enemies: { id: string; count: number }[] = [];
+  const basePerEnemy = Math.floor(enemyCount / typeCount);
+  let remainder = enemyCount - basePerEnemy * typeCount;
+
+  for (const id of selectedTypes) {
     const count = basePerEnemy + (remainder > 0 ? 1 : 0);
     if (remainder > 0) remainder--;
-    if (count > 0) {
-      enemies.push({ id, count });
-    }
+    enemies.push({ id, count });
   }
 
   const config: WaveConfig = {

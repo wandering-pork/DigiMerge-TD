@@ -229,6 +229,7 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
     // Listen for tower events
     EventBus.on(GameEvents.TOWER_SELECTED, this.onTowerSelected, this);
     EventBus.on(GameEvents.TOWER_DESELECTED, this.onTowerDeselected, this);
+    EventBus.on(GameEvents.DIGIBYTES_CHANGED, this.onDigibytesChanged, this);
 
     // ESC key to close
     if (scene.input.keyboard) {
@@ -945,6 +946,12 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
     }
   }
 
+  private onDigibytesChanged(): void {
+    if (this.visible && this.currentTower) {
+      this.refresh();
+    }
+  }
+
   // ---------------------------------------------------------------------------
   // Cleanup
   // ---------------------------------------------------------------------------
@@ -952,6 +959,7 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
   public destroy(fromScene?: boolean): void {
     EventBus.off(GameEvents.TOWER_SELECTED, this.onTowerSelected, this);
     EventBus.off(GameEvents.TOWER_DESELECTED, this.onTowerDeselected, this);
+    EventBus.off(GameEvents.DIGIBYTES_CHANGED, this.onDigibytesChanged, this);
 
     if (this.escKey) {
       this.escKey.off('down', this.onEscPressed, this);

@@ -90,35 +90,66 @@ export class CombatManager {
    * effectiveness against the target's attribute.
    * If the tower has an effectType and the random roll succeeds, the projectile
    * carries the status effect to apply on hit.
+   *
+   * Multi-hit towers (effectType contains 'multihit', 'multishot', or 'barrage')
+   * fire 3 staggered projectiles with slight position offsets for visual clarity.
+   * Total damage is split evenly and only the first projectile rolls for status
+   * effects so triple-proccing is avoided.
    */
   public fireProjectile(tower: Tower, target: Enemy): void {
     const baseDamage = tower.getAttackDamage();
     const attributeMult = getAttributeMultiplier(tower.attribute, target.attribute);
-    const damage = baseDamage * attributeMult;
+    const totalDamage = baseDamage * attributeMult;
 
-    const projectile = new Projectile(
-      this.scene,
-      tower.x,
-      tower.y,
-      damage,
-      target,
-      tower.attribute,
-    );
-    projectile.attributeMultiplier = attributeMult;
-
-    // Roll for status effect proc
     const effectType = tower.stats.effectType;
-    const effectChance = tower.stats.effectChance ?? 0;
-    if (effectType && effectChance > 0 && Math.random() < effectChance) {
-      // Only attach the effect if it resolves to a valid base status effect
-      const baseEffect = getBaseEffectType(effectType);
-      if (baseEffect) {
-        projectile.effectType = effectType;
-        projectile.sourceDamage = baseDamage;
+    const isMultiHit = effectType != null &&
+      (effectType.includes('multihit') || effectType.includes('multishot') || effectType.includes('barrage'));
+
+    const projectileCount = isMultiHit ? 3 : 1;
+    const damagePerProjectile = totalDamage / projectileCount;
+
+    for (let i = 0; i < projectileCount; i++) {
+      const delay = i * 50; // 0ms, 50ms, 100ms stagger
+      const isFirstProjectile = i === 0;
+
+      const spawn = (): void => {
+        // Target may have died while waiting for staggered spawn
+        if (!target.isAlive) return;
+
+        const offsetX = isMultiHit ? (Math.random() - 0.5) * 12 : 0;
+        const offsetY = isMultiHit ? (Math.random() - 0.5) * 12 : 0;
+
+        const projectile = new Projectile(
+          this.scene,
+          tower.x + offsetX,
+          tower.y + offsetY,
+          damagePerProjectile,
+          target,
+          tower.attribute,
+        );
+        projectile.attributeMultiplier = attributeMult;
+
+        // Only the first projectile rolls for status effect to avoid triple-proc
+        if (isFirstProjectile) {
+          const effectChance = tower.stats.effectChance ?? 0;
+          if (effectType && effectChance > 0 && Math.random() < effectChance) {
+            const baseEffect = getBaseEffectType(effectType);
+            if (baseEffect) {
+              projectile.effectType = effectType;
+              projectile.sourceDamage = baseDamage;
+            }
+          }
+        }
+
+        this.projectileContainer.add(projectile);
+      };
+
+      if (delay === 0) {
+        spawn();
+      } else {
+        this.scene.time.delayedCall(delay, spawn);
       }
     }
-
-    this.projectileContainer.add(projectile);
   }
 
   // ---------------------------------------------------------------------------

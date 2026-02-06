@@ -184,6 +184,7 @@ export class GameScene extends Phaser.Scene {
       if (this.digibytes >= amount) {
         this.digibytes -= amount;
         this.digibytesText.setText(`${this.digibytes}`);
+        EventBus.emit(GameEvents.DIGIBYTES_CHANGED, this.digibytes);
         return true;
       }
       return false;
@@ -191,6 +192,7 @@ export class GameScene extends Phaser.Scene {
     const addDigibytes = (amount: number) => {
       this.digibytes += amount;
       this.digibytesText.setText(`${this.digibytes}`);
+      EventBus.emit(GameEvents.DIGIBYTES_CHANGED, this.digibytes);
     };
 
     // Create spawn menu UI
@@ -236,7 +238,9 @@ export class GameScene extends Phaser.Scene {
   }
 
   update(time: number, delta: number) {
-    const scaledDelta = delta * this.gameSpeed;
+    // Cap delta to prevent enemy teleportation when tab loses focus
+    const cappedDelta = Math.min(delta, 100); // Max 100ms (10fps minimum)
+    const scaledDelta = cappedDelta * this.gameSpeed;
 
     // Update wave spawning
     this.waveManager.update(time, scaledDelta);
@@ -754,13 +758,15 @@ export class GameScene extends Phaser.Scene {
       fontStyle: 'bold',
     }).setOrigin(0.5, 1).setDepth(15);
 
-    // Show boss ability name below the health bar
+    // Show boss ability name below the health bar (larger, bold, with stroke for visibility)
     if (bossStats?.bossAbility) {
       this.bossAbilityText = this.add.text(barX + barWidth / 2, barY + barHeight + 4,
-        `${bossStats.bossAbility.name}: ${bossStats.bossAbility.description}`, {
-          fontSize: '10px',
-          color: '#ffaa44',
-          fontStyle: 'italic',
+        `${bossStats.bossAbility.name}`, {
+          fontSize: '13px',
+          color: '#ffcc66',
+          fontStyle: 'bold',
+          stroke: '#000000',
+          strokeThickness: 2,
         }).setOrigin(0.5, 0).setDepth(15);
     }
 
@@ -864,6 +870,7 @@ export class GameScene extends Phaser.Scene {
         if (drain > 0) {
           this.digibytes -= drain;
           this.digibytesText.setText(`${this.digibytes}`);
+          EventBus.emit(GameEvents.DIGIBYTES_CHANGED, this.digibytes);
           // Floating drain indicator near DB display
           const drainText = this.add.text(
             this.digibytesText.x + 40, this.digibytesText.y,
@@ -1072,6 +1079,12 @@ export class GameScene extends Phaser.Scene {
     this.waveText.setText(`${this.currentWave} / ${TOTAL_WAVES_MVP}`);
     this.livesText.setText(`${this.lives}`);
     this.digibytesText.setText(`${this.digibytes}`);
+
+    // Ensure selectedStarters is set for ghost preview / HUD display
+    if (!this.registry.get('selectedStarters') && save.towers.length > 0) {
+      const starterIds = [...new Set(save.towers.map(t => t.digimonId))];
+      this.registry.set('selectedStarters', starterIds.slice(0, 3));
+    }
 
     // Restore towers from save data
     for (const towerData of save.towers) {
@@ -1410,14 +1423,16 @@ export class GameScene extends Phaser.Scene {
       }).setDepth(10);
       this.wavePreviewSprites.push(nameText);
 
-      // Type tag
-      const typeColor = TYPE_COLORS[enemyStats.type] ?? '#888888';
-      const typeText = this.add.text(rightPanelX + 28, rowY + 13, enemyStats.type, {
-        fontFamily: FONTS.MONO,
-        fontSize: '9px',
-        color: typeColor,
-      }).setDepth(10);
-      this.wavePreviewSprites.push(typeText);
+      // Type tag (skip "standard" as it's redundant)
+      if (enemyStats.type !== 'standard') {
+        const typeColor = TYPE_COLORS[enemyStats.type] ?? '#888888';
+        const typeText = this.add.text(rightPanelX + 28, rowY + 13, enemyStats.type, {
+          fontFamily: FONTS.MONO,
+          fontSize: '9px',
+          color: typeColor,
+        }).setDepth(10);
+        this.wavePreviewSprites.push(typeText);
+      }
 
       yOffset += 28;
 
@@ -1525,6 +1540,7 @@ export class GameScene extends Phaser.Scene {
   private onEnemyDied(data: { reward: number }) {
     this.digibytes += data.reward;
     this.digibytesText.setText(`${this.digibytes}`);
+    EventBus.emit(GameEvents.DIGIBYTES_CHANGED, this.digibytes);
   }
 
   private onEnemyReachedBase() {
@@ -1625,6 +1641,7 @@ export class GameScene extends Phaser.Scene {
     const waveReward = 65 + (data.wave * 13);
     this.digibytes += waveReward;
     this.digibytesText.setText(`${this.digibytes}`);
+    EventBus.emit(GameEvents.DIGIBYTES_CHANGED, this.digibytes);
 
     // Auto-save after each wave
     this.saveGame();

@@ -23,10 +23,11 @@ All 8 sprints + gameplay enhancements + QoL + full 100-wave content + endless mo
 | 9 | QoL + Waves 21-100 + Endless | **Done** | Enemy mechanics, 5 phases, endless mode |
 | 10 | Boss Abilities | **Done** | 10 unique boss abilities, stun/aura/shield/spawn, 26 tests |
 | 11 | Tutorial + Encyclopedia + Wave Preview | **Done** | 8-step tutorial, encyclopedia browser, sprite wave preview, 10 tests |
-| 12 | Audio + Sprites + Save Export | Planned | Background music, sprite sheets, save export/import |
-| 13 | Polish & Cleanup | Planned | Drag-drop merge, HUD refactor, UI components, object pooling, new enemies, DNA digivolution |
-| 14 | Map Expansion | Planned | Larger/alternative maps, new path layouts |
-| 15 | Public Release Prep | Planned | Credits, disclaimer, branding, final polish |
+| 12 | Polish, Bug Fixes & Gameplay Improvements | Planned | 18 items across 4 sub-sprints (A-D): critical bugs, UI/UX polish, gameplay, content |
+| 13 | Audio + Sprites + Save Export | Planned | Background music, sprite sheets, save export/import |
+| 14 | Polish & Cleanup | Planned | Drag-drop merge, HUD refactor, UI components, object pooling, new enemies, DNA digivolution |
+| 15 | Map Expansion | Planned | Larger/alternative maps, new path layouts |
+| 16 | Public Release Prep | Planned | Credits, disclaimer, branding, final polish |
 
 ### Test Inventory (453 tests, 18 files)
 
@@ -1014,13 +1015,156 @@ A sprint is complete when:
 
 ---
 
-## Sprint 12: Audio, Sprite Sheets & Save Export
+## Sprint 12: Polish, Bug Fixes & Gameplay Improvements
+
+**Goal:** Address 18 issues discovered during playtesting — critical bugs, UI/UX polish, gameplay improvements, and content expansion.
+
+### Sprint 12A — Critical Bug Fixes
+
+#### A1: Game Over Freeze (Registry Mismatch)
+- [ ] Game freezes on Game Over — likely registry key mismatch between GameScene and GameOverScene
+- [ ] Investigate which registry keys GameOverScene reads vs what GameScene writes
+- [ ] Ensure `gameResult`, `finalWave`, `finalDigibytes` (or equivalent) are set before scene transition
+- [ ] Test: Game Over from losing all lives, Game Over from victory (wave 100)
+- **Files:** `GameScene.ts`, `GameOverScene.ts`
+
+#### A2: Continue Button Wave/Lives Issue
+- [ ] Continue button starts game at wrong wave or with wrong lives count
+- [ ] Investigate SaveManager.load() → GameScene.loadSavedGame() data flow
+- [ ] Verify wave number, lives, and DigiBytes are all restored correctly
+- [ ] Test: Save mid-game, return to main menu, hit Continue — should restore exact state
+- **Files:** `SaveManager.ts`, `GameScene.ts`, `MainMenuScene.ts`
+
+#### A3: TowerInfoPanel Buttons Not Updating When DB Changes
+- [ ] Level Up / Digivolve / Merge buttons don't reflect current DigiBytes in real-time
+- [ ] Buttons should update enabled/disabled state when DigiBytes change (enemy kills, spending)
+- [ ] Listen to `DIGIBYTES_CHANGED` event to refresh button states
+- [ ] Test: Select tower, earn DigiBytes from kills, verify buttons update without re-selecting
+- **Files:** `TowerInfoPanel.ts`, `EventBus.ts`
+
+### Sprint 12B — UI/UX Polish
+
+#### B1: Starter Selection — Pick Exactly 1
+- [ ] StarterSelectScene currently allows selecting up to 4 starters
+- [ ] Change to pick exactly 1 starter (simpler for new players, cleaner UX)
+- [ ] Update grid layout and selection logic for single selection
+- [ ] Confirm button enabled only when exactly 1 is selected
+- **Files:** `StarterSelectScene.ts`
+
+#### B2: Digimon Font Integration (Pixel Digivolve)
+- [ ] Integrate "Pixel Digivolve" font (or similar thematic pixel font)
+- [ ] Add font file to `public/assets/fonts/`
+- [ ] Load via CSS @font-face or Phaser WebFont loader
+- [ ] Apply to game title, stage names, boss announcements, and major UI headings
+- [ ] Keep readable system font for small text (stats, tooltips)
+- **Files:** `PreloadScene.ts` or `index.html`, `UITheme.ts`, `MainMenuScene.ts`, various UI files
+
+#### B3: Starter Scene Text Blocking
+- [ ] Text in StarterSelectScene overlaps or blocks interactive elements
+- [ ] Review layout: ensure starter name, attribute, and description text doesn't cover sprites or buttons
+- [ ] Adjust positioning, font sizes, or add text truncation as needed
+- **Files:** `StarterSelectScene.ts`
+
+#### B4: Hide "Standard" Label (Verify Only)
+- [ ] In spawn menu, enemy type labels may show "Standard" unnecessarily
+- [ ] Verify if "Standard" label appears where it shouldn't
+- [ ] If visible and redundant, hide it; if already hidden, mark as done
+- **Files:** `SpawnMenu.ts` or `GameScene.ts` (wave preview)
+
+#### B5: Boss Ability Details Visibility
+- [ ] Boss ability text (name + description) in boss health bar area may be too small or obscured
+- [ ] Increase font size, add background panel behind text, or reposition for clarity
+- [ ] Ensure ability cooldown/trigger info is readable during gameplay
+- **Files:** `GameScene.ts` (boss HUD section)
+
+#### B6: Encyclopedia Raw Skill Names
+- [ ] Encyclopedia shows raw effect IDs (e.g., "burn_aoe", "slow") instead of friendly display names
+- [ ] Create a mapping from effect IDs to display names (e.g., "burn_aoe" → "Fire Burst", "slow" → "Slow")
+- [ ] Apply formatting in Encyclopedia detail panel
+- **Files:** `EncyclopediaScene.ts`, possibly `StatusEffects.ts` or new mapping constant
+
+#### B7: Encyclopedia Evolution Chains
+- [ ] Encyclopedia detail view doesn't show the Digimon's evolution chain
+- [ ] Add evolution chain display: show previous and next evolutions with sprites
+- [ ] Clickable evolution chain entries to navigate between related Digimon
+- **Files:** `EncyclopediaScene.ts`, `EvolutionPaths.ts` (lookup helpers)
+
+#### B8: Encyclopedia — Hide Enemies, Show Towers Only
+- [ ] Encyclopedia currently shows both towers and enemies
+- [ ] Default to showing only tower Digimon (player-relevant information)
+- [ ] Optionally keep enemies accessible via a filter toggle, but towers should be the primary view
+- **Files:** `EncyclopediaScene.ts`
+
+#### B9: Boss Sprites Aura
+- [ ] Boss enemies on the map lack visual distinction from regular enemies
+- [ ] Add a colored aura/glow effect around boss sprites (pulsing or static)
+- [ ] Use red or gold aura to clearly mark bosses during gameplay
+- **Files:** `Enemy.ts` or `GameScene.ts` (boss visual setup)
+
+### Sprint 12C — Gameplay Improvements
+
+#### C1: Wave Enemy Type Limits
+- [ ] Some waves have too many different enemy types, making them visually chaotic
+- [ ] Limit each wave to max 5 different enemy types
+- [ ] Ensure each enemy type in a wave has at least 5 units (avoid 1-2 unit filler types)
+- [ ] Audit WaveData.ts for waves violating these constraints and adjust compositions
+- **Files:** `WaveData.ts`
+
+#### C2: Game Continues When Window Unfocused
+- [ ] Game should pause or maintain consistent timing when browser tab loses focus
+- [ ] Investigate Phaser's `visibilityChange` event or `game.events.on('blur')`
+- [ ] Either auto-pause on blur, or cap delta time to prevent enemy teleportation on refocus
+- **Files:** `GameScene.ts` or `main.ts` (Phaser config)
+
+#### C3: Improved Projectile Particles
+- [ ] Current projectiles are simple colored circles with basic trails
+- [ ] Add particle emitter effects: small trailing particles that match attribute color
+- [ ] Consider different particle shapes per attribute (sparks for Vaccine, orbs for Data, etc.)
+- **Files:** `Projectile.ts`, `CombatManager.ts`
+
+#### C4: Hit Particles Per Attack Effect
+- [ ] On-hit effects (burn, poison, slow, etc.) lack distinctive visual feedback
+- [ ] Add per-effect hit particles: orange burst for burn, green cloud for poison, blue crystals for freeze, etc.
+- [ ] Trigger particle effect at enemy position when status effect is applied
+- **Files:** `Enemy.ts` or `CombatManager.ts`, `Projectile.ts`
+
+#### C5: Multi-Hit Visual
+- [ ] Multi-hit towers fire multiple projectiles but they all look identical
+- [ ] Add slight spread or stagger to multi-hit projectiles for visual clarity
+- [ ] Consider rapid-fire animation or burst pattern
+- **Files:** `CombatManager.ts`, `Projectile.ts`
+
+### Sprint 12D — Content Expansion
+
+#### D1: Enemy Digimon as Towers (~40 New Tower Entries)
+- [ ] Many enemy-only Digimon could be used as towers to expand player options
+- [ ] Identify ~40 enemy Digimon with existing sprites that can be repurposed as tower Digimon
+- [ ] Add tower stats (damage, speed, range, effect) based on their enemy stats and stage
+- [ ] Create evolution paths connecting them to existing lines or as standalone lines
+- [ ] Add to SpawnMenu if they're new starter-tier Digimon
+- [ ] Update tests for new database entries
+- **Files:** `DigimonDatabase.ts`, `EvolutionPaths.ts`, `PreloadScene.ts`, `SpawnMenu.ts`
+
+### Sprint 12 Acceptance Criteria
+- [ ] Game Over screen works correctly (no freeze)
+- [ ] Continue button restores exact game state
+- [ ] TowerInfoPanel buttons update in real-time with DigiBytes changes
+- [ ] Starter selection picks exactly 1 Digimon
+- [ ] Boss sprites have visible aura effects
+- [ ] Encyclopedia shows friendly skill names and evolution chains
+- [ ] Wave compositions limited to max 5 types with min 5 each
+- [ ] Projectile and hit particles add visual fidelity
+- [ ] All unit tests pass
+
+---
+
+## Sprint 13: Audio, Sprite Sheets & Save Export
 
 **Goal:** Add background music, optimize sprite rendering with sprite sheets, and allow save file export/import.
 
 ### Tasks
 
-#### 12.1 Background Music
+#### 13.1 Background Music
 - [ ] Source or create looping background tracks:
   - Main Menu theme (calm, digital ambient)
   - Gameplay theme (upbeat, action)
@@ -1036,7 +1180,7 @@ A sprint is complete when:
 - [ ] Save music volume/mute preference in SaveManager
 - **Files:** `AudioManager.ts`, `SettingsScene.ts`, `GameScene.ts`, `MainMenuScene.ts`, `GameOverScene.ts`, `SaveManager.ts`
 
-#### 12.2 Sprite Sheet Implementation
+#### 13.2 Sprite Sheet Implementation
 - [ ] Create texture atlases from individual sprite PNGs for performance
   - Group by category: tower sprites, enemy sprites, UI elements
   - Use Phaser's multi-atlas or spritesheet format
@@ -1047,7 +1191,7 @@ A sprint is complete when:
 - [ ] Measure performance improvement (draw call reduction)
 - **Files:** `PreloadScene.ts`, `Tower.ts`, `Enemy.ts`, build scripts, atlas configs
 
-#### 12.3 Save File Export/Import
+#### 13.3 Save File Export/Import
 - [ ] Add "Export Save" button in SettingsScene
   - Serializes current save data to JSON
   - Triggers browser file download (`DigiMerge_TD_save.json`)
@@ -1061,14 +1205,14 @@ A sprint is complete when:
 - [ ] Add save file version migration support (for future compatibility)
 - **Files:** `SaveManager.ts` (export/import methods), `SettingsScene.ts` (buttons), `MainMenuScene.ts` (import option)
 
-#### 12.4 Tests
+#### 13.4 Tests
 - [ ] Music playback state tests (play, pause, crossfade, volume)
 - [ ] Atlas frame lookup tests (verify sprite names resolve correctly)
 - [ ] Save export serialization tests
 - [ ] Save import validation tests (valid, corrupted, wrong version)
 - **Files:** `tests/managers/AudioManager.test.ts`, `tests/managers/SaveManager.test.ts` (extended)
 
-### Sprint 12 Acceptance Criteria
+### Sprint 13 Acceptance Criteria
 - [ ] Background music plays during menu, gameplay, boss, and game over
 - [ ] Music and SFX volumes are independently controllable
 - [ ] Sprite sheets load correctly and all sprites render from atlases
@@ -1078,13 +1222,13 @@ A sprint is complete when:
 
 ---
 
-## Sprint 13: Remaining Polish & Cleanup
+## Sprint 14: Remaining Polish & Cleanup
 
 **Goal:** Address all remaining deferred items, refactoring, and polish.
 
 ### Tasks
 
-#### 13.1 Drag-and-Drop Merge (Alternative UX)
+#### 14.1 Drag-and-Drop Merge (Alternative UX)
 - [ ] Enable dragging a tower onto another tower to initiate merge
 - [ ] Visual drag indicator (tower follows pointer with transparency)
 - [ ] Valid drop targets highlight (same attribute + stage)
@@ -1093,13 +1237,13 @@ A sprint is complete when:
 - [ ] Cancel drag on right-click or ESC
 - **Files:** `Tower.ts` (drag events), `TowerManager.ts`, `GameScene.ts`
 
-#### 13.2 Visual Merge Effect
+#### 14.2 Visual Merge Effect
 - [ ] Particle burst on successful merge (attribute-colored particles)
 - [ ] Surviving tower glow/pulse animation after merge
 - [ ] Sacrificed tower fade + shrink tween toward survivor
 - **Files:** `GameScene.ts`, `TowerManager.ts`
 
-#### 13.3 Placement Confirmation & Cancel
+#### 14.3 Placement Confirmation & Cancel
 - [ ] After selecting a Digimon to spawn, enter placement mode
 - [ ] Ghost preview follows pointer (already exists)
 - [ ] Left-click confirms placement
@@ -1107,14 +1251,14 @@ A sprint is complete when:
 - [ ] Visual feedback for cancel (red flash on ghost)
 - **Files:** `GameScene.ts`, `SpawnMenu.ts`
 
-#### 13.4 HUD Refactor
+#### 14.4 HUD Refactor
 - [ ] Extract HUD creation from `GameScene.createHUD()` into `src/ui/HUD.ts`
 - [ ] HUD class manages: lives, DigiBytes, wave counter, speed buttons, pause/settings buttons
 - [ ] HUD exposes update methods called from GameScene
 - [ ] Reduce GameScene line count
 - **Files:** `HUD.ts` (new), `GameScene.ts` (delegate to HUD)
 
-#### 13.5 Reusable UI Components
+#### 14.5 Reusable UI Components
 - [ ] `src/ui/components/Button.ts` — configurable button (label, colors, callbacks, hover/press states)
 - [ ] `src/ui/components/Panel.ts` — background panel with border, title, close button
 - [ ] `src/ui/components/ProgressBar.ts` — configurable bar (health, loading, XP)
@@ -1122,27 +1266,27 @@ A sprint is complete when:
 - [ ] Refactor existing panels to use shared components where practical
 - **Files:** `src/ui/components/*.ts`, existing UI files
 
-#### 13.6 UIManager
+#### 14.6 UIManager
 - [ ] Create `src/managers/UIManager.ts`
 - [ ] Centralized panel visibility coordination (only one modal open at a time)
 - [ ] UI state machine: idle, tower_selected, merge_mode, modal_open, placement_mode
 - [ ] Route UI events through UIManager instead of direct EventBus
 - **Files:** `UIManager.ts`, `GameScene.ts`, existing UI files
 
-#### 13.7 Panel Animations
+#### 14.7 Panel Animations
 - [ ] Smooth slide-in/fade-in for TowerInfoPanel, SpawnMenu
 - [ ] Modal scale-up entrance for EvolutionModal, MergeModal
 - [ ] Panel slide-out on close
 - **Files:** `TowerInfoPanel.ts`, `SpawnMenu.ts`, `EvolutionModal.ts`, `MergeModal.ts`
 
-#### 13.8 Object Pooling
+#### 14.8 Object Pooling
 - [ ] Implement object pool for Projectiles (reuse instead of create/destroy)
 - [ ] Implement object pool for Enemies (reuse instead of create/destroy)
 - [ ] Pool manager with `get()`, `release()`, `preload()` methods
 - [ ] Measure performance improvement on high-enemy waves (50+)
 - **Files:** `src/utils/ObjectPool.ts` (new), `CombatManager.ts`, `WaveManager.ts`, `GameScene.ts`
 
-#### 13.9 New Enemies (Phase 10 Remaining)
+#### 14.9 New Enemies (Phase 10 Remaining)
 - [ ] Add ~60 new enemy Digimon to `DigimonDatabase.ts` (see Phase 10 enemy lists)
   - 12 Rookie enemies
   - 12 Champion enemies
@@ -1154,7 +1298,7 @@ A sprint is complete when:
 - [ ] Update wave generation for endless mode variety
 - **Files:** `DigimonDatabase.ts`, `PreloadScene.ts`, `WaveData.ts`
 
-#### 13.10 DNA Digivolution System
+#### 14.10 DNA Digivolution System
 - [ ] Add DNA Digivolution as Ultra-tier evolution option
 - [ ] Requires two specific Mega towers on the field simultaneously
 - [ ] New UI for selecting DNA partners
@@ -1163,13 +1307,13 @@ A sprint is complete when:
 - [ ] Add DNA paths to `EvolutionPaths.ts`
 - **Files:** `DigimonDatabase.ts`, `EvolutionPaths.ts`, `OriginSystem.ts`, `EvolutionModal.ts`, `PreloadScene.ts`
 
-#### 13.11 Miscellaneous
+#### 14.11 Miscellaneous
 - [ ] Debug grid lines toggle (dev mode)
 - [ ] Mute/unmute toggle button in HUD (quick access)
 - [ ] Comprehensive bug fix pass / playtesting
 - **Files:** Various
 
-### Sprint 13 Acceptance Criteria
+### Sprint 14 Acceptance Criteria
 - [ ] Drag-and-drop merge works alongside button-based merge
 - [ ] Visual effects for merge and panel transitions
 - [ ] HUD extracted into reusable class
@@ -1182,13 +1326,13 @@ A sprint is complete when:
 
 ---
 
-## Sprint 14: Map Expansion
+## Sprint 15: Map Expansion
 
 **Goal:** Expand beyond the single 8x18 map with larger grids, new path layouts, and map selection.
 
 ### Tasks
 
-#### 14.1 Map Data Architecture
+#### 15.1 Map Data Architecture
 - [ ] Create `src/data/MapData.ts` — defines multiple map configurations
 - [ ] Map interface: `{ id, name, description, columns, rows, cellSize, pathWaypoints, spawn, base, towerSlots, difficulty }`
 - [ ] Extract current map (8x18 serpentine) as "Classic" map
@@ -1196,7 +1340,7 @@ A sprint is complete when:
 - [ ] Update `GRID`, `PATH_WAYPOINTS`, `PATH_CELLS`, `isPathCell`, `isValidTowerSlot` to load from selected map
 - **Files:** `MapData.ts` (new), `Constants.ts` (refactor to dynamic), `GridUtils.ts`
 
-#### 14.2 New Maps
+#### 15.2 New Maps
 - [ ] **Map 2: "Wide Valley"** — 12x14 grid, wider with multiple branching paths, more tower slots (~120), shorter path but more enemies per wave
 - [ ] **Map 3: "Gauntlet"** — 6x24 grid, narrow and tall, single long winding path (~80 waypoints), fewer tower slots (~60) but long kill corridor
 - [ ] **Map 4: "Crossroads"** — 10x16 grid, two enemy spawn points converging to one base, requires split defense strategy
@@ -1204,7 +1348,7 @@ A sprint is complete when:
 - [ ] Each map has custom decoration placement
 - **Files:** `MapData.ts`
 
-#### 14.3 Map Select Scene
+#### 15.3 Map Select Scene
 - [ ] Create `src/scenes/MapSelectScene.ts` — shown after StarterSelectScene
 - [ ] Display map thumbnails with name, difficulty rating, grid size, tower slot count
 - [ ] Preview shows miniature path layout
@@ -1212,7 +1356,7 @@ A sprint is complete when:
 - [ ] Back button to StarterSelectScene
 - **Files:** `MapSelectScene.ts` (new), `StarterSelectScene.ts` (transition), `GameConfig.ts` (register scene)
 
-#### 14.4 GameScene Map Integration
+#### 15.4 GameScene Map Integration
 - [ ] GameScene reads selected map from registry on create
 - [ ] Dynamic grid rendering based on map dimensions
 - [ ] Dynamic camera/viewport scaling for larger grids (zoom to fit or scrollable)
@@ -1222,27 +1366,27 @@ A sprint is complete when:
 - [ ] HUD repositions based on available screen space
 - **Files:** `GameScene.ts`, `WaveManager.ts`, `CombatManager.ts`
 
-#### 14.5 Multi-Spawn Support (Map 4)
+#### 15.5 Multi-Spawn Support (Map 4)
 - [ ] WaveManager supports multiple spawn points
 - [ ] Enemies split between spawn points (alternating or configurable split ratio)
 - [ ] Each spawn point has its own path to the base
 - [ ] Base can receive enemies from multiple paths
 - **Files:** `WaveManager.ts`, `Enemy.ts`, `MapData.ts`
 
-#### 14.6 Save/Load Map Support
+#### 15.6 Save/Load Map Support
 - [ ] Save data includes selected map ID
 - [ ] Loading a save restores the correct map
 - [ ] Map-specific high scores / statistics
 - **Files:** `SaveManager.ts`, `GameTypes.ts`
 
-#### 14.7 Tests
+#### 15.7 Tests
 - [ ] Map data validation tests (all maps have valid paths, spawn, base)
 - [ ] Dynamic grid utility tests for different map sizes
 - [ ] Multi-spawn path tests
 - [ ] Save/load with map ID tests
 - **Files:** `tests/data/MapData.test.ts`, `tests/utils/GridUtils.test.ts` (extended)
 
-### Sprint 14 Acceptance Criteria
+### Sprint 15 Acceptance Criteria
 - [ ] At least 3 playable maps with distinct layouts
 - [ ] Map selection screen shows all maps with previews
 - [ ] Game renders correctly on all map sizes
@@ -1252,13 +1396,13 @@ A sprint is complete when:
 
 ---
 
-## Sprint 15: Public Release Preparation
+## Sprint 16: Public Release Preparation
 
 **Goal:** Prepare the game for public sharing with proper credits, legal disclaimers, and final presentation polish.
 
 ### Tasks
 
-#### 15.1 Credits Scene
+#### 16.1 Credits Scene
 - [ ] Create `src/scenes/CreditsScene.ts` — scrollable credits display
 - [ ] Accessible from MainMenuScene ("Credits" button)
 - [ ] Credits content:
@@ -1275,7 +1419,7 @@ A sprint is complete when:
 - [ ] Back button to MainMenuScene
 - **Files:** `CreditsScene.ts` (new), `MainMenuScene.ts` (button), `GameConfig.ts` (register scene)
 
-#### 15.2 Disclaimer / Legal Notice
+#### 16.2 Disclaimer / Legal Notice
 - [ ] Add disclaimer overlay or section (accessible from MainMenuScene or Credits)
 - [ ] Disclaimer text:
   - "DigiMerge TD is a fan-made, non-commercial project"
@@ -1288,7 +1432,7 @@ A sprint is complete when:
 - [ ] Accessible later from Credits or MainMenu
 - **Files:** `CreditsScene.ts` or `DisclaimerScene.ts`, `MainMenuScene.ts`
 
-#### 15.3 Version & Branding
+#### 16.3 Version & Branding
 - [ ] Add version number display on MainMenuScene (e.g., "v1.0.0")
 - [ ] Version sourced from `package.json` or a `VERSION` constant
 - [ ] Finalize game title styling on MainMenuScene
@@ -1302,7 +1446,7 @@ A sprint is complete when:
   - License information
 - **Files:** `MainMenuScene.ts`, `index.html`, `README.md`, `package.json`
 
-#### 15.4 Final Polish Pass
+#### 16.4 Final Polish Pass
 - [ ] Comprehensive playtesting across all 100 waves + endless
 - [ ] Fix any visual glitches, overlapping UI, or broken interactions
 - [ ] Verify all 21 starter lines evolve correctly through all stages
@@ -1312,7 +1456,7 @@ A sprint is complete when:
 - [ ] Performance check on wave 80+ (high enemy counts)
 - [ ] Ensure no console errors during normal gameplay
 
-#### 15.5 Deployment Finalization
+#### 16.5 Deployment Finalization
 - [ ] Verify GitHub Pages deployment works correctly
 - [ ] Confirm live URL loads and plays without issues
 - [ ] Add Open Graph meta tags for link previews (title, description, image)
@@ -1320,7 +1464,7 @@ A sprint is complete when:
 - [ ] Create a release tag in git (v1.0.0)
 - **Files:** `index.html`, `.github/workflows/deploy.yml`, git tags
 
-### Sprint 15 Acceptance Criteria
+### Sprint 16 Acceptance Criteria
 - [ ] Credits scene lists all contributors and asset sources
 - [ ] Disclaimer clearly states fan-made, non-commercial nature
 - [ ] Version number visible on main menu
@@ -1333,7 +1477,7 @@ A sprint is complete when:
 
 ## Future Roadmap
 
-### Post-Sprint 15 (if desired)
+### Post-Sprint 16 (if desired)
 - Achievements / Leaderboards
 - Advanced visual effects / particles
 - Mobile touch optimization

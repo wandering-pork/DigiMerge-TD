@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { DIGIMON_DATABASE } from '@/data/DigimonDatabase';
+import { EVOLUTION_PATHS } from '@/data/EvolutionPaths';
 import { DigimonStats, EnemyStats, Stage, Attribute, STAGE_NAMES, ATTRIBUTE_NAMES } from '@/types';
 import { GAME_WIDTH, GAME_HEIGHT } from '@/config/Constants';
 import { COLORS, TEXT_STYLES, FONTS, ANIM } from '@/ui/UITheme';
@@ -8,6 +9,35 @@ import { ATTRIBUTE_COLORS_STR } from '@/ui/UITheme';
 
 type FilterMode = 'all' | 'towers' | 'enemies';
 type StageFilter = 'all' | Stage;
+
+const SKILL_DISPLAY_NAMES: Record<string, string> = {
+  'burn': 'Fire Attack',
+  'burn_aoe': 'Fire Burst (AoE)',
+  'poison': 'Poison',
+  'poison_aoe': 'Poison Cloud (AoE)',
+  'slow': 'Slow',
+  'slow_pierce': 'Slow Pierce',
+  'freeze': 'Freeze',
+  'freeze_aoe': 'Blizzard (AoE)',
+  'stun': 'Stun',
+  'stun_aoe': 'Stun Burst (AoE)',
+  'armor_break': 'Armor Break',
+  'armor_pierce': 'Armor Pierce',
+  'anti_air': 'Anti-Air',
+  'burn_multishot': 'Fire Barrage',
+  'slow_multishot': 'Slow Barrage',
+  'freeze_multishot': 'Frost Barrage',
+  'stun_multishot': 'Stun Barrage',
+  'poison_multihit': 'Venom Strike',
+  'burn_multihit': 'Flame Strike',
+  'slow_aoe': 'Frost Wave (AoE)',
+  'aura_damage': 'Damage Aura',
+  'aura_all_holy': 'Holy Aura',
+};
+
+function getSkillDisplayName(effectType: string): string {
+  return SKILL_DISPLAY_NAMES[effectType] || effectType.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+}
 
 interface DigimonEntry {
   id: string;
@@ -21,7 +51,7 @@ interface DigimonEntry {
 export class EncyclopediaScene extends Phaser.Scene {
   private entries: DigimonEntry[] = [];
   private filteredEntries: DigimonEntry[] = [];
-  private filterMode: FilterMode = 'all';
+  private filterMode: FilterMode = 'towers';
   private stageFilter: StageFilter = 'all';
 
   // Pagination
@@ -247,6 +277,24 @@ export class EncyclopediaScene extends Phaser.Scene {
     g.strokeRoundedRect(x, y, w, h, 8);
   }
 
+  private getEvolutionChain(digimonId: string): { prevIds: string[]; nextIds: string[] } {
+    const prevIds: string[] = [];
+    // Search all keys in EVOLUTION_PATHS for entries where resultId matches digimonId
+    for (const [sourceId, paths] of Object.entries(EVOLUTION_PATHS)) {
+      for (const path of paths) {
+        if (path.resultId === digimonId) {
+          prevIds.push(sourceId);
+        }
+      }
+    }
+
+    // Next evolutions: look up this Digimon's own paths
+    const nextPaths = EVOLUTION_PATHS[digimonId] ?? [];
+    const nextIds = nextPaths.map(p => p.resultId);
+
+    return { prevIds, nextIds };
+  }
+
   private showDetail(entry: DigimonEntry): void {
     this.detailPanel.removeAll(true);
     this.detailVisible = true;
@@ -263,9 +311,14 @@ export class EncyclopediaScene extends Phaser.Scene {
     const panelCont = this.add.container(0, 0);
     this.detailPanel.add(panelCont);
 
-    // Detail card
+    // Determine card height: towers with evolution chains need more space
     const cardW = 420;
-    const cardH = 380;
+    let evoChain: { prevIds: string[]; nextIds: string[] } | null = null;
+    if (entry.isTower) {
+      evoChain = this.getEvolutionChain(entry.id);
+    }
+    const hasEvoData = evoChain && (evoChain.prevIds.length > 0 || evoChain.nextIds.length > 0);
+    const cardH = entry.isTower && hasEvoData ? 480 : 380;
     const cardX = (GAME_WIDTH - cardW) / 2;
     const cardY = (GAME_HEIGHT - cardH) / 2;
 
@@ -326,7 +379,7 @@ export class EncyclopediaScene extends Phaser.Scene {
         { label: 'Range', value: `${ts.range.toFixed(1)} cells` },
       ];
       if (ts.effectType) {
-        statLines.push({ label: 'Skill', value: `${ts.effectType} (${Math.round((ts.effectChance ?? 0) * 100)}%)` });
+        statLines.push({ label: 'Skill', value: `${getSkillDisplayName(ts.effectType)} (${Math.round((ts.effectChance ?? 0) * 100)}%)` });
       }
       for (const stat of statLines) {
         panelCont.add(this.add.text(cardX + 30, statsY, stat.label, {
@@ -340,6 +393,136 @@ export class EncyclopediaScene extends Phaser.Scene {
           color: '#ddddee',
         }).setOrigin(1, 0));
         statsY += 24;
+      }
+
+      // Evolution Chain section (towers only)
+      if (evoChain && hasEvoData) {
+        statsY += 8;
+        const evoSep = this.add.graphics();
+        drawSeparator(evoSep, cardX + 20, statsY, cardX + cardW - 20, COLORS.CYAN);
+        panelCont.add(evoSep);
+        statsY += 12;
+
+        panelCont.add(this.add.text(cardX + 30, statsY, 'Evolution Chain', {
+          fontFamily: FONTS.DISPLAY,
+          fontSize: '14px',
+          color: '#00ddff',
+          fontStyle: 'bold',
+        }));
+        statsY += 24;
+
+        // "From:" row - previous evolutions
+        panelCont.add(this.add.text(cardX + 30, statsY + 10, 'From:', {
+          fontFamily: FONTS.BODY,
+          fontSize: '11px',
+          color: '#7788aa',
+        }));
+
+        if (evoChain.prevIds.length === 0) {
+          panelCont.add(this.add.text(cardX + 80, statsY + 10, '\u2014', {
+            fontFamily: FONTS.MONO,
+            fontSize: '13px',
+            color: '#556677',
+          }));
+        } else {
+          let prevX = cardX + 80;
+          for (const prevId of evoChain.prevIds) {
+            const prevEntry = this.entries.find(e => e.id === prevId && e.isTower);
+            if (!prevEntry) continue;
+            const prevSpriteKey = (prevEntry.stats as DigimonStats).spriteKey ?? prevEntry.id;
+
+            // Clickable sprite + name group
+            const evoContainer = this.add.container(prevX + 20, statsY + 10);
+
+            if (this.textures.exists(prevSpriteKey)) {
+              const evoSprite = this.add.image(0, 0, prevSpriteKey).setScale(2);
+              evoContainer.add(evoSprite);
+            } else {
+              const placeholder = this.add.text(0, 0, '?', {
+                fontSize: '14px', color: '#556677',
+              }).setOrigin(0.5);
+              evoContainer.add(placeholder);
+            }
+
+            const evoName = this.add.text(0, 18, prevEntry.name, {
+              fontFamily: FONTS.BODY,
+              fontSize: '9px',
+              color: '#aabbcc',
+              align: 'center',
+            }).setOrigin(0.5, 0);
+            evoContainer.add(evoName);
+
+            // Hit zone for clicking
+            const hitZone = this.add.zone(0, 6, 44, 42).setInteractive({ cursor: 'pointer' });
+            hitZone.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+              pointer.event.stopPropagation();
+              this.showDetail(prevEntry);
+            });
+            hitZone.on('pointerover', () => { evoName.setColor('#00ddff'); });
+            hitZone.on('pointerout', () => { evoName.setColor('#aabbcc'); });
+            evoContainer.add(hitZone);
+
+            panelCont.add(evoContainer);
+            prevX += 70;
+          }
+        }
+        statsY += 40;
+
+        // "To:" row - next evolutions
+        panelCont.add(this.add.text(cardX + 30, statsY + 10, 'To:', {
+          fontFamily: FONTS.BODY,
+          fontSize: '11px',
+          color: '#7788aa',
+        }));
+
+        if (evoChain.nextIds.length === 0) {
+          panelCont.add(this.add.text(cardX + 80, statsY + 10, '\u2014', {
+            fontFamily: FONTS.MONO,
+            fontSize: '13px',
+            color: '#556677',
+          }));
+        } else {
+          let nextX = cardX + 80;
+          for (const nextId of evoChain.nextIds) {
+            const nextEntry = this.entries.find(e => e.id === nextId && e.isTower);
+            if (!nextEntry) continue;
+            const nextSpriteKey = (nextEntry.stats as DigimonStats).spriteKey ?? nextEntry.id;
+
+            // Clickable sprite + name group
+            const evoContainer = this.add.container(nextX + 20, statsY + 10);
+
+            if (this.textures.exists(nextSpriteKey)) {
+              const evoSprite = this.add.image(0, 0, nextSpriteKey).setScale(2);
+              evoContainer.add(evoSprite);
+            } else {
+              const placeholder = this.add.text(0, 0, '?', {
+                fontSize: '14px', color: '#556677',
+              }).setOrigin(0.5);
+              evoContainer.add(placeholder);
+            }
+
+            const evoName = this.add.text(0, 18, nextEntry.name, {
+              fontFamily: FONTS.BODY,
+              fontSize: '9px',
+              color: '#aabbcc',
+              align: 'center',
+            }).setOrigin(0.5, 0);
+            evoContainer.add(evoName);
+
+            // Hit zone for clicking
+            const hitZone = this.add.zone(0, 6, 44, 42).setInteractive({ cursor: 'pointer' });
+            hitZone.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+              pointer.event.stopPropagation();
+              this.showDetail(nextEntry);
+            });
+            hitZone.on('pointerover', () => { evoName.setColor('#00ddff'); });
+            hitZone.on('pointerout', () => { evoName.setColor('#aabbcc'); });
+            evoContainer.add(hitZone);
+
+            panelCont.add(evoContainer);
+            nextX += 70;
+          }
+        }
       }
     } else {
       const es = entry.stats as EnemyStats;

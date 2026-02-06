@@ -127,14 +127,39 @@ Live at: https://wandering-pork.github.io/DigiMerge-TD/
 
 ## Remaining Work
 
-### UX & Polish
+### Sprint 12: Polish, Bug Fixes & Gameplay Improvements (Planned)
+
+**Sprint 12A — Critical Bug Fixes:**
+- [ ] A1: Game Over freeze (registry mismatch between GameScene and GameOverScene)
+- [ ] A2: Continue button wave/lives issue (SaveManager → GameScene data flow)
+- [ ] A3: TowerInfoPanel buttons not updating when DigiBytes changes (listen to DIGIBYTES_CHANGED)
+
+**Sprint 12B — UI/UX Polish:**
+- [ ] B1: Starter selection — pick exactly 1 (currently allows up to 4)
+- [ ] B2: Digimon font integration (Pixel Digivolve font for titles/headings)
+- [ ] B3: Starter scene text blocking (text overlaps interactive elements)
+- [ ] B4: Hide "Standard" label (verify if redundant label appears in spawn/wave preview)
+- [ ] B5: Boss ability details visibility (increase font size, add background panel)
+- [ ] B6: Encyclopedia raw skill names (map effect IDs to friendly display names)
+- [ ] B7: Encyclopedia evolution chains (show prev/next evolutions with sprites)
+- [ ] B8: Encyclopedia — hide enemies, show towers only (default to tower-only view)
+- [ ] B9: Boss sprites aura (add colored glow/pulse around boss enemies)
+
+**Sprint 12C — Gameplay Improvements:**
+- [ ] C1: Wave enemy type limits (max 5 types per wave, min 5 units each)
+- [ ] C2: Game continues when window unfocused (auto-pause or cap delta time)
+- [ ] C3: Improved projectile particles (trailing particles matching attribute color)
+- [ ] C4: Hit particles per attack effect (per-effect visual: orange for burn, blue for freeze, etc.)
+- [ ] C5: Multi-hit visual (spread/stagger multi-hit projectiles for clarity)
+
+**Sprint 12D — Content Expansion:**
+- [ ] D1: Enemy Digimon as towers (~40 new tower entries from existing enemy sprites)
+
+### Future Work
 - [ ] Drag-and-drop merge (alternative UX)
 - [ ] Visual merge effect (particle/tween)
 - [ ] Object pooling (projectiles, enemies)
 - [ ] Background music
-- [ ] Enemy modifiers (Enraged, Hasty, Armored, Vampiric, Giant) for waves 51+
-
-### Content
 - [ ] More Digimon roster expansion (~150+ target, currently ~105 tower Digimon)
 - [ ] DNA Digivolution system (Ultra tier)
 

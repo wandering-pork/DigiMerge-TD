@@ -66,23 +66,23 @@ export class StarterSelectScene extends Phaser.Scene {
     createDigitalParticles(this, width, height, 15, COLORS.CYAN);
 
     // Title
-    this.add.text(width / 2, 35, 'Choose Your Starters', {
+    this.add.text(width / 2, 35, 'Choose Your Starter', {
       ...TEXT_STYLES.SCENE_TITLE,
       fontSize: '40px',
     }).setOrigin(0.5);
 
-    // Selection count with visual indicator dots
-    this.selectionCountText = this.add.text(width / 2, 85, 'Select up to 3 Starter Digimon', {
+    // Selection count with visual indicator
+    this.selectionCountText = this.add.text(width / 2, 80, 'Choose Your Starter Digimon', {
       ...TEXT_STYLES.SCENE_SUBTITLE,
       fontSize: '15px',
     }).setOrigin(0.5);
 
-    // Selection indicator dots (3 circles)
-    for (let i = 0; i < 3; i++) {
+    // Selection indicator dot (single)
+    for (let i = 0; i < 1; i++) {
       const dot = this.add.graphics();
-      const dx = width / 2 - 20 + i * 20;
+      const dx = width / 2;
       dot.lineStyle(1.5, COLORS.CYAN_DIM, 0.5);
-      dot.strokeCircle(dx, 108, 6);
+      dot.strokeCircle(dx, 100, 6);
       this.selectionDots.push(dot);
     }
 
@@ -91,7 +91,7 @@ export class StarterSelectScene extends Phaser.Scene {
     const cellWidth = 115;
     const cellHeight = 145;
     const gridStartX = (width - cols * cellWidth) / 2 + cellWidth / 2;
-    const gridStartY = 145;
+    const gridStartY = 135;
 
     this.starters.forEach((starter, index) => {
       const col = index % cols;
@@ -304,9 +304,19 @@ export class StarterSelectScene extends Phaser.Scene {
       this.tweens.killTweensOf(container);
       container.setScale(1);
     } else {
-      // Allow up to 3 starters
-      if (this.selected.size >= 3) return;
+      // Deselect any previously selected starter first
+      for (const prevKey of this.selected) {
+        const prevContainer = this.starterContainers.get(prevKey)!;
+        const prevHighlight = this.cardHighlights.get(prevKey)!;
+        const prevBg = this.cardBgs.get(prevKey)!;
+        prevHighlight.setVisible(false);
+        this.drawCardBg(prevBg, 100, 125, false);
+        this.tweens.killTweensOf(prevContainer);
+        prevContainer.setScale(1);
+      }
+      this.selected.clear();
 
+      // Select the new one
       this.selected.add(key);
       highlight.setVisible(true);
       this.drawCardBg(bg, 100, 125, true);
@@ -339,24 +349,27 @@ export class StarterSelectScene extends Phaser.Scene {
   private updateStartButton(): void {
     const count = this.selected.size;
     if (count === 0) {
-      this.selectionCountText.setText('Select up to 3 Starter Digimon');
+      this.selectionCountText.setText('Choose Your Starter Digimon');
     } else {
-      this.selectionCountText.setText(`Selected: ${count} / 3`);
+      // Show the selected starter's name
+      const selectedKey = Array.from(this.selected)[0];
+      const starter = this.starters.find(s => s.key === selectedKey);
+      this.selectionCountText.setText(`Selected: ${starter ? starter.name : '1 Starter'}`);
     }
 
-    // Update selection indicator dots
+    // Update selection indicator dot (single)
     this.selectionDots.forEach((dot, i) => {
       const { width } = this.cameras.main;
-      const dx = width / 2 - 20 + i * 20;
+      const dx = width / 2;
       dot.clear();
       if (i < count) {
         dot.fillStyle(COLORS.CYAN, 0.9);
-        dot.fillCircle(dx, 108, 6);
+        dot.fillCircle(dx, 100, 6);
         dot.lineStyle(1, COLORS.CYAN_BRIGHT, 0.5);
-        dot.strokeCircle(dx, 108, 6);
+        dot.strokeCircle(dx, 100, 6);
       } else {
         dot.lineStyle(1.5, COLORS.CYAN_DIM, 0.3);
-        dot.strokeCircle(dx, 108, 6);
+        dot.strokeCircle(dx, 100, 6);
       }
     });
 

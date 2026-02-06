@@ -3,8 +3,14 @@ import { COLORS, TEXT_STYLES, FONTS, ANIM } from '@/ui/UITheme';
 import { drawDigitalGrid, drawPanel, drawButton, drawSeparator, createDigitalParticles, animateButtonHover, animateButtonPress, animateStaggeredEntrance } from '@/ui/UIHelpers';
 
 export class GameOverScene extends Phaser.Scene {
+  private gameData: { wave: number; won: boolean } = { wave: 1, won: false };
+
   constructor() {
     super({ key: 'GameOverScene' });
+  }
+
+  init(data: { wave: number; won: boolean }) {
+    this.gameData = data || { wave: 1, won: false };
   }
 
   create() {
@@ -14,8 +20,8 @@ export class GameOverScene extends Phaser.Scene {
     this.cameras.main.setBackgroundColor('#060614');
 
     // Determine if victory or defeat
-    const isVictory: boolean = this.registry.get('gameResult') === 'victory';
-    const waveReached: number = this.registry.get('waveReached') || 1;
+    const isVictory: boolean = this.gameData.won;
+    const waveReached: number = this.gameData.wave || 1;
 
     // Digital grid with tinted color
     const gridGfx = this.add.graphics();
