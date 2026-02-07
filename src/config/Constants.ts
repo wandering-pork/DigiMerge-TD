@@ -188,3 +188,23 @@ export function isPathCell(col: number, row: number): boolean {
 export function isValidTowerSlot(col: number, row: number): boolean {
   return col >= 1 && col <= GRID.COLUMNS && row >= 1 && row <= GRID.ROWS && !isPathCell(col, row);
 }
+
+/**
+ * Calculate tower sell price.
+ * Returns 50% of estimated investment (base cost + level-up costs spent).
+ * Minimum sell price is 25.
+ */
+export function getSellPrice(level: number, stage: Stage): number {
+  // Flat base cost estimate (rough average low-tier spawn cost)
+  const baseCost = 50;
+
+  // Sum of level-up costs from level 1 to current level
+  let levelUpInvestment = 0;
+  const multiplier = STAGE_LEVEL_COST_MULTIPLIER[stage] ?? 1;
+  for (let lv = 1; lv < level; lv++) {
+    levelUpInvestment += Math.ceil(3 * lv * multiplier);
+  }
+
+  const totalInvestment = baseCost + levelUpInvestment;
+  return Math.max(25, Math.floor(totalInvestment * 0.5));
+}

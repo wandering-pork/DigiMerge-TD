@@ -2,7 +2,7 @@
 
 ## Current Status
 
-**All 11 sprints complete + Sprint 12A-D + Sprint 13-16 + Sprint 18 + Sprint 19 done** | 479 tests passing | 18 test files | TypeScript clean | Vite build succeeds
+**All 11 sprints complete + Sprint 12A-D + Sprint 13-16 + Sprint 18-22 done** | 498 tests passing | 19 test files | TypeScript clean | Vite build succeeds
 
 Live at: https://wandering-pork.github.io/DigiMerge-TD/
 
@@ -20,6 +20,13 @@ Live at: https://wandering-pork.github.io/DigiMerge-TD/
 - Credits scene with disclaimer, version v1.0.0
 - Sprout Lands tileset, 149 loaded sprites, 17 SFX, 2 music tracks
 - Volume persistence across scenes (localStorage), improved UI text readability
+- Statistics tracking (kills, towers, merges, digivolutions, DB earned, playtime)
+- Per-tower kill count and damage tracking, MVP tower in post-game
+- Investment-based sell formula (50% of base + level-up costs)
+- Low lives warning (flash at ≤5), danger vignette (red border at <3), boss incoming alert
+- Keyboard shortcuts: S/Del=sell, U=level up, D=deselect, Tab=cycle towers
+- Post-game stats screen with run summary, MVP tower, animated stat entries
+- High scores system (top 10, localStorage), High Scores scene from main menu
 
 ---
 
@@ -84,9 +91,23 @@ Live at: https://wandering-pork.github.io/DigiMerge-TD/
 - Save/load preserves bonusEffects (GameTypes.TowerSaveData + GameScene restore)
 - 11 new tests (479 total), files: Tower.ts, GameTypes.ts, MergeSystem.ts, CombatManager.ts, TowerInfoPanel.ts, MergeModal.ts, GameScene.ts
 
+### Sprint 20: Bug Fixes & Foundation
+- **20A Boss Sprite Fix**: Added `spriteKey: 'greymon'` to boss_greymon_evolved, updated Enemy.ts to prefer spriteKey field, verified all 12 boss sprites resolve correctly
+- **20C Statistics Activation**: Wired up GameStatistics tracking in GameScene — enemiesKilled, towersPlaced, mergesPerformed, digivolutionsPerformed, totalDigibytesEarned, highestWave, playtimeSeconds; saved/restored with auto-save
+- **20D Sell Value Formula**: Added `getSellPrice(level, stage)` to Constants.ts — 50% of (base cost + cumulative level-up costs with stage multiplier), minimum 25 DB; 6 new tests
+
+### Sprint 21: Quality of Life & UX
+- **21C Warnings & Notifications**: Low lives warning (flash lives counter at ≤5), danger vignette (pulsing red border when lives < 3), boss incoming warning text below grid
+- **21D Keyboard Shortcuts**: S/Del=sell selected tower, U=level up, D=deselect, Tab=cycle through towers; hotkey hints on buttons ([U], [S]); EventBus events for shortcut actions
+
+### Sprint 22: Statistics & Post-Game
+- **22A Per-Tower Tracking**: Added killCount and totalDamageDealt to Tower class, sourceTowerID on Projectile for attribution, CombatManager sets sourceTowerID, kills/damage displayed in TowerInfoPanel, saved/restored
+- **22B Post-Game Stats Screen**: Redesigned GameOverScene with expanded panel (statistics grid: 2 columns × 3 rows, MVP tower section, animated staggered entries), score calculation, "New Record!" indicator
+- **22C Run History & High Scores**: HighScoreManager.ts (top 10, localStorage, score formula: wave×100 + kills×10 + lives×50), HighScoresScene.ts (table with rank/wave/score/kills/time/date), High Scores button on MainMenu, Clear High Scores in Settings; 13 new tests
+
 ---
 
-## Test Summary (479 tests, 18 files)
+## Test Summary (498 tests, 19 files)
 
 | Test File | Tests |
 |-----------|-------|
@@ -99,7 +120,7 @@ Live at: https://wandering-pork.github.io/DigiMerge-TD/
 | StatusEffects | 73 |
 | BossAbilitySystem | 26 |
 | GridUtils | 16 |
-| Constants | 31 |
+| Constants | 37 |
 | DigimonDatabase | 20 |
 | EvolutionPaths | 28 |
 | WaveData | 26 |
@@ -108,16 +129,17 @@ Live at: https://wandering-pork.github.io/DigiMerge-TD/
 | SpawnMenu | 18 |
 | TutorialOverlay | 4 |
 | EncyclopediaScene | 6 |
+| HighScoreManager | 13 |
 
 ---
 
-## File Inventory (45 source files)
+## File Inventory (47 source files)
 
 - **config/**: Constants.ts, GameConfig.ts
 - **data/**: DigimonDatabase.ts, EvolutionPaths.ts, StatusEffects.ts, WaveData.ts
 - **entities/**: Tower.ts, Enemy.ts, Projectile.ts
-- **managers/**: AudioManager.ts, CombatManager.ts, GameStateManager.ts, SaveManager.ts, TowerManager.ts, WaveManager.ts
-- **scenes/**: BootScene.ts, PreloadScene.ts, MainMenuScene.ts, StarterSelectScene.ts, GameScene.ts, PauseScene.ts, SettingsScene.ts, GameOverScene.ts, EncyclopediaScene.ts, CreditsScene.ts
+- **managers/**: AudioManager.ts, CombatManager.ts, GameStateManager.ts, HighScoreManager.ts, SaveManager.ts, TowerManager.ts, WaveManager.ts
+- **scenes/**: BootScene.ts, PreloadScene.ts, MainMenuScene.ts, StarterSelectScene.ts, GameScene.ts, PauseScene.ts, SettingsScene.ts, GameOverScene.ts, HighScoresScene.ts, EncyclopediaScene.ts, CreditsScene.ts
 - **systems/**: AttributeSystem.ts, BossAbilitySystem.ts, DPSystem.ts, LevelSystem.ts, MergeSystem.ts, OriginSystem.ts, TargetingSystem.ts
 - **ui/**: SpawnMenu.ts, TowerInfoPanel.ts, EvolutionModal.ts, MergeModal.ts, TutorialOverlay.ts, UITheme.ts, UIHelpers.ts
 - **utils/**: EventBus.ts, GridUtils.ts
@@ -128,45 +150,32 @@ Live at: https://wandering-pork.github.io/DigiMerge-TD/
 
 ## Roadmap
 
-### Sprint 20 — Bug Fixes & Effect Audit
+### Sprint 20 — Bug Fixes & Effect Audit ✓ (partial)
 
-#### 20A: Boss Sprite Fix
-- [ ] Wave 20 boss `boss_greymon_evolved` resolves to sprite key `greymon_evolved` which doesn't exist — falls back to missing texture
-- [ ] Decide: use existing `greymon` sprite, or find/add a distinct sprite (e.g. GeoGreymon, Greymon_X)
-- [ ] Verify all other boss sprite keys resolve correctly
+#### 20A: Boss Sprite Fix ✓
+- [x] Wave 20 boss `boss_greymon_evolved` — added `spriteKey: 'greymon'` override
+- [x] Updated Enemy.ts to prefer `spriteKey` field over ID-derived key
+- [x] Verified all 12 boss sprite keys resolve correctly
 
-#### 20B: Tower Effect Audit
-- [ ] Playtest and verify all tower status effects work correctly:
-  - Burn (DoT, 5% HP/tick over 3s)
-  - Poison (DoT, 3% HP/tick over 4s, stacks x3)
-  - Slow (40% speed reduction, 2s)
-  - Freeze (full stop 1.5s + slow after thaw)
-  - Stun (full stop 1s)
-  - Armor Break (armor reduction, 3s)
-- [ ] Check proc rates feel correct across all towers with effects
-- [ ] Verify bonus effect inheritance works in practice (merge a tower with an effect, confirm the survivor gains it)
-- [ ] Check visual indicators (tint, particles) display for each effect
-- [ ] Fix any broken or unbalanced effects found during testing
+#### 20B: Tower Effect Audit (manual playtest)
+- [ ] Playtest and verify all tower status effects work correctly
+- [ ] Check proc rates, bonus effect inheritance, visual indicators
 
-#### 20C: Statistics Activation
-- [ ] Wire up `GameStatistics` tracking in GameStateManager (interface already exists in SaveManager)
-- [ ] Increment `enemiesKilled` on enemy death event
-- [ ] Increment `towersPlaced` on tower spawn
-- [ ] Increment `mergesPerformed` on merge
-- [ ] Increment `digivolutionsPerformed` on evolution
-- [ ] Track `totalDigibytesEarned` (wave rewards + sell income)
-- [ ] Track `highestWave` on wave completion
-- [ ] Pass statistics to SaveManager on auto-save
-- [ ] Add playtime tracker (elapsed seconds, saved/restored)
+#### 20C: Statistics Activation ✓
+- [x] Wire up `GameStatistics` tracking in GameScene via EventBus listeners
+- [x] Track enemiesKilled, towersPlaced, mergesPerformed, digivolutionsPerformed
+- [x] Track totalDigibytesEarned (wave rewards + sell income), highestWave
+- [x] Pass statistics to SaveManager on auto-save, restore from save
+- [x] Playtime tracker (elapsed ms, converted to seconds, saved/restored)
 
-#### 20D: Sell Value Formula
-- [ ] Move sell price calculation from TowerInfoPanel (`level * 25`) to Constants.ts
-- [ ] Define clear refund formula based on total investment (spawn cost + level-up costs spent)
-- [ ] Display sell value prominently in TowerInfoPanel
+#### 20D: Sell Value Formula ✓
+- [x] Added `getSellPrice(level, stage)` to Constants.ts — 50% of (base + cumulative level-up costs)
+- [x] Updated TowerInfoPanel to use investment-based formula
+- [x] 6 new tests for sell price calculation
 
 ---
 
-### Sprint 21 — Quality of Life & UX
+### Sprint 21 — Quality of Life & UX ✓ (partial)
 
 #### 21A: Range Preview on Placement
 - [ ] Show range circle when hovering over valid grid cells during tower placement
@@ -179,43 +188,39 @@ Live at: https://wandering-pork.github.io/DigiMerge-TD/
 - [ ] Show Digimon base stats on hover before spawning (damage, speed, range, effect)
 - [ ] Show evolution path preview (what this Digimon can evolve into)
 
-#### 21C: Warnings & Notifications
-- [ ] Low lives warning — flash HUD lives counter + play alert SFX when lives drop below threshold (e.g. 5)
-- [ ] Boss incoming warning — show "Boss incoming next wave!" in wave preview when next wave has a boss
-- [ ] Critical state indicator — tint screen edges red when lives < 3
+#### 21C: Warnings & Notifications ✓
+- [x] Low lives warning — flash HUD lives counter when lives ≤ 5
+- [x] Boss incoming warning — "Boss incoming next wave!" text below grid
+- [x] Critical state indicator — pulsing red vignette border when lives < 3
 
-#### 21D: Keyboard Shortcuts
-- [ ] `S` or `Del` — sell selected tower
-- [ ] `U` — level up selected tower
-- [ ] `D` or `Click empty` — deselect current tower
-- [ ] `Tab` — cycle through placed towers
-- [ ] Display hotkey hints on buttons (e.g. "Sell (S)")
+#### 21D: Keyboard Shortcuts ✓
+- [x] `S` or `Del` — sell selected tower
+- [x] `U` — level up selected tower
+- [x] `D` — deselect current tower
+- [x] `Tab` — cycle through placed towers
+- [x] Hotkey hints on buttons ([U], [S])
 
 ---
 
-### Sprint 22 — Statistics & Post-Game
+### Sprint 22 — Statistics & Post-Game ✓
 
-#### 22A: Per-Tower Tracking
-- [ ] Add `killCount` to Tower class, increment in CombatManager on kill
-- [ ] Add `totalDamageDealt` to Tower class, increment on each hit
-- [ ] Display kill count and total damage in TowerInfoPanel
-- [ ] Highlight "MVP tower" (most kills) in post-game
+#### 22A: Per-Tower Tracking ✓
+- [x] Added `killCount` and `totalDamageDealt` to Tower class
+- [x] Added `sourceTowerID` to Projectile for kill/damage attribution
+- [x] Display kill count and total damage in TowerInfoPanel
+- [x] MVP tower (most kills) computed and passed to post-game
 
-#### 22B: Post-Game Stats Screen
-- [ ] Redesign GameOverScene to show detailed run summary:
-  - Waves completed, playtime
-  - Total enemies killed, towers placed
-  - Merges performed, digivolutions performed
-  - Total DigiBytes earned
-  - MVP tower (name, kills, damage dealt)
-- [ ] Different layouts for victory vs defeat
-- [ ] "New Record!" highlight when beating previous best wave
+#### 22B: Post-Game Stats Screen ✓
+- [x] Redesigned GameOverScene with expanded panel (statistics grid, MVP tower, score)
+- [x] Animated staggered stat entries (2-column layout)
+- [x] "New Record!" highlight when beating previous best score
 
-#### 22C: Run History & High Scores
-- [ ] Save top 10 runs to localStorage (wave, time, date, score)
-- [ ] Score formula: waves cleared + kills + bonus for lives remaining
-- [ ] High scores viewable from MainMenuScene
-- [ ] Clear history button in settings
+#### 22C: Run History & High Scores ✓
+- [x] HighScoreManager.ts — top 10 runs in localStorage, score formula (wave×100 + kills×10 + lives×50)
+- [x] HighScoresScene.ts — table with rank, wave, score, kills, time, date, W/L
+- [x] High Scores button on MainMenuScene (conditional on existing scores)
+- [x] Clear High Scores button in SettingsScene
+- [x] 13 new tests for HighScoreManager
 
 ---
 

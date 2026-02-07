@@ -1,15 +1,23 @@
 import Phaser from 'phaser';
+import { GameStatistics } from '@/types';
 import { COLORS, TEXT_STYLES, FONTS, ANIM } from '@/ui/UITheme';
 import { drawDigitalGrid, drawPanel, drawButton, drawSeparator, createDigitalParticles, animateButtonHover, animateButtonPress, animateStaggeredEntrance } from '@/ui/UIHelpers';
+import { HighScoreManager, calculateScore, HighScoreEntry } from '@/managers/HighScoreManager';
 
 export class GameOverScene extends Phaser.Scene {
-  private gameData: { wave: number; won: boolean } = { wave: 1, won: false };
+  private gameData: {
+    wave: number;
+    won: boolean;
+    lives?: number;
+    statistics?: GameStatistics;
+    mvpTower?: { name: string; kills: number; damage: number };
+  } = { wave: 1, won: false };
 
   constructor() {
     super({ key: 'GameOverScene' });
   }
 
-  init(data: { wave: number; won: boolean }) {
+  init(data: { wave: number; won: boolean; lives?: number; statistics?: GameStatistics; mvpTower?: { name: string; kills: number; damage: number } }) {
     this.gameData = data || { wave: 1, won: false };
   }
 
@@ -23,6 +31,22 @@ export class GameOverScene extends Phaser.Scene {
     const isVictory: boolean = this.gameData.won;
     const waveReached: number = this.gameData.wave || 1;
 
+    // Save high score
+    const gameStats = this.gameData.statistics;
+    const livesRemaining = this.gameData.lives ?? (isVictory ? 20 : 0);
+    const score = calculateScore(waveReached, gameStats?.enemiesKilled ?? 0, livesRemaining);
+    const hsEntry: HighScoreEntry = {
+      wave: waveReached,
+      score,
+      enemiesKilled: gameStats?.enemiesKilled ?? 0,
+      livesRemaining,
+      playtimeSeconds: gameStats?.playtimeSeconds ?? 0,
+      date: new Date().toISOString(),
+      won: isVictory,
+    };
+    const rank = HighScoreManager.addScore(hsEntry);
+    const isNewRecord = rank === 1 && HighScoreManager.getHighScores().length > 1;
+
     // Digital grid with tinted color
     const gridGfx = this.add.graphics();
     const gridColor = isVictory ? COLORS.VACCINE : COLORS.DANGER;
@@ -32,10 +56,12 @@ export class GameOverScene extends Phaser.Scene {
     createDigitalParticles(this, width, height, 20, isVictory ? COLORS.GOLD : COLORS.DANGER);
 
     // Central result panel with glass effect
+    const hasStats = !!this.gameData.statistics;
+    const hasMvp = !!this.gameData.mvpTower;
     const panelW = 420;
-    const panelH = 350;
+    const panelH = hasStats ? (hasMvp ? 520 : 470) : 350;
     const panelX = (width - panelW) / 2;
-    const panelY = (height - panelH) / 2 - 30;
+    const panelY = (height - panelH) / 2 - 10;
     const panelBg = this.add.graphics();
     drawPanel(panelBg, panelX, panelY, panelW, panelH, {
       borderColor: isVictory ? COLORS.GOLD : COLORS.DANGER,
@@ -123,6 +149,27 @@ export class GameOverScene extends Phaser.Scene {
       delay: 500,
     });
 
+    // New Record indicator
+    if (isNewRecord) {
+      const recordText = this.add.text(width / 2, panelY + 185, 'New Record!', {
+        fontFamily: FONTS.MONO,
+        fontSize: '16px',
+        color: '#ffdd44',
+        fontStyle: 'bold',
+        resolution: 2,
+      }).setOrigin(0.5).setAlpha(0);
+
+      this.tweens.add({
+        targets: recordText,
+        alpha: 1,
+        scaleX: { from: 0.5, to: 1 },
+        scaleY: { from: 0.5, to: 1 },
+        duration: 400,
+        ease: 'Back.easeOut',
+        delay: 600,
+      });
+    }
+
     // Subtitle message
     const subtitle = isVictory
       ? 'You defended the Digital World!'
@@ -141,8 +188,103 @@ export class GameOverScene extends Phaser.Scene {
       delay: 650,
     });
 
+    // Statistics section
+    let statsEndY = panelY + 240;
+    const stats = this.gameData.statistics;
+    if (stats) {
+      const statsBaseY = panelY + 240;
+      const leftX = panelX + 40;
+      const rightX = panelX + panelW / 2 + 20;
+      const valueOffsetX = 150;
+      const lineH = 22;
+
+      // Separator before stats
+      const statsSepGfx = this.add.graphics();
+      drawSeparator(statsSepGfx, panelX + 30, statsBaseY - 10, panelX + panelW - 30, isVictory ? COLORS.GOLD : COLORS.DANGER);
+
+      // Format playtime
+      const playtime = stats.playtimeSeconds || 0;
+      const minutes = Math.floor(playtime / 60);
+      const seconds = playtime % 60;
+      const timeStr = minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
+
+      const statEntries = [
+        { label: 'Enemies Killed', value: `${stats.enemiesKilled}`, x: leftX, color: '#ff6666' },
+        { label: 'Towers Placed', value: `${stats.towersPlaced}`, x: leftX, color: '#44ccff' },
+        { label: 'Merges', value: `${stats.mergesPerformed}`, x: leftX, color: '#00ddff' },
+        { label: 'Digivolutions', value: `${stats.digivolutionsPerformed}`, x: rightX, color: '#ffaa44' },
+        { label: 'DB Earned', value: `${stats.totalDigibytesEarned}`, x: rightX, color: '#ffdd44' },
+        { label: 'Playtime', value: timeStr, x: rightX, color: '#aabbcc' },
+      ];
+
+      // Arrange in two columns, 3 rows each
+      statEntries.forEach((entry, i) => {
+        const row = i % 3;
+        const y = statsBaseY + row * lineH;
+
+        const label = this.add.text(entry.x, y, entry.label, {
+          fontFamily: FONTS.MONO,
+          fontSize: '12px',
+          color: '#7788aa',
+          resolution: 2,
+        }).setAlpha(0);
+
+        const value = this.add.text(entry.x + valueOffsetX, y, entry.value, {
+          fontFamily: FONTS.MONO,
+          fontSize: '12px',
+          color: entry.color,
+          fontStyle: 'bold',
+          resolution: 2,
+        }).setOrigin(1, 0).setAlpha(0);
+
+        // Staggered fade-in
+        this.tweens.add({
+          targets: [label, value],
+          alpha: 1,
+          duration: 300,
+          delay: 700 + i * 80,
+        });
+      });
+
+      statsEndY = statsBaseY + 3 * lineH + 5;
+
+      // MVP Tower section
+      const mvp = this.gameData.mvpTower;
+      if (mvp) {
+        const mvpY = statsEndY + 5;
+
+        // Separator
+        const mvpSepGfx = this.add.graphics();
+        drawSeparator(mvpSepGfx, panelX + 30, mvpY, panelX + panelW - 30, isVictory ? COLORS.GOLD : COLORS.DANGER);
+
+        const mvpTitle = this.add.text(width / 2, mvpY + 10, 'MVP Tower', {
+          fontFamily: FONTS.MONO,
+          fontSize: '11px',
+          color: '#ffdd44',
+          resolution: 2,
+        }).setOrigin(0.5, 0).setAlpha(0);
+
+        const mvpInfo = this.add.text(width / 2, mvpY + 26, `${mvp.name}  -  ${mvp.kills} kills, ${mvp.damage} dmg`, {
+          fontFamily: FONTS.MONO,
+          fontSize: '13px',
+          color: '#ffffff',
+          fontStyle: 'bold',
+          resolution: 2,
+        }).setOrigin(0.5, 0).setAlpha(0);
+
+        this.tweens.add({
+          targets: [mvpTitle, mvpInfo],
+          alpha: 1,
+          duration: 400,
+          delay: 1200,
+        });
+
+        statsEndY = mvpY + 48;
+      }
+    }
+
     // Action buttons with staggered entrance
-    const btnStartY = panelY + 260;
+    const btnStartY = statsEndY + 20;
     const buttons: Phaser.GameObjects.Container[] = [];
 
     buttons.push(this.createMenuButton(

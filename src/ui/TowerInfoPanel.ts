@@ -5,7 +5,7 @@ import { STAGE_NAMES, ATTRIBUTE_NAMES, TargetPriority } from '@/types';
 import { getLevelUpCost, getTotalLevelUpCost, canLevelUp, calculateMaxLevel, getMaxAffordableLevel } from '@/systems/LevelSystem';
 import { getEvolutions } from '@/data/EvolutionPaths';
 import { canMerge, MergeCandidate } from '@/systems/MergeSystem';
-import { GRID, GRID_OFFSET_X } from '@/config/Constants';
+import { GRID, GRID_OFFSET_X, getSellPrice as calculateSellPrice } from '@/config/Constants';
 import { STATUS_EFFECTS, STATUS_EFFECT_CONFIGS } from '@/data/StatusEffects';
 import { COLORS, ATTRIBUTE_COLORS_STR, TEXT_STYLES, FONTS, ANIM } from './UITheme';
 import { drawPanel, drawButton, drawSeparator, animateSlideIn, animateSlideOut, animateButtonHover, animateButtonPress } from './UIHelpers';
@@ -167,6 +167,8 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
   private damageText!: Phaser.GameObjects.Text;
   private speedText!: Phaser.GameObjects.Text;
   private rangeText!: Phaser.GameObjects.Text;
+  private killsText!: Phaser.GameObjects.Text;
+  private totalDmgText!: Phaser.GameObjects.Text;
   private skillNameText!: Phaser.GameObjects.Text;
   private skillChanceText!: Phaser.GameObjects.Text;
   private skillDescText!: Phaser.GameObjects.Text;
@@ -236,6 +238,10 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
     EventBus.on(GameEvents.TOWER_SELECTED, this.onTowerSelected, this);
     EventBus.on(GameEvents.TOWER_DESELECTED, this.onTowerDeselected, this);
     EventBus.on(GameEvents.DIGIBYTES_CHANGED, this.onDigibytesChanged, this);
+
+    // Listen for keyboard shortcut events
+    EventBus.on(GameEvents.TOWER_SOLD_SHORTCUT, this.onSell, this);
+    EventBus.on(GameEvents.TOWER_LEVELUP_SHORTCUT, this.onLevelUp, this);
 
     // ESC key to close
     if (scene.input.keyboard) {
@@ -316,6 +322,12 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
     this.rangeText = this.createStatRow('Range', statsX, statsValueX, statsY);
     statsY += lineH;
 
+    this.killsText = this.createStatRow('Kills', statsX, statsValueX, statsY);
+    statsY += lineH;
+
+    this.totalDmgText = this.createStatRow('Total Dmg', statsX, statsValueX, statsY);
+    statsY += lineH;
+
     // Skill display row
     this.skillNameText = this.scene.add.text(statsX, statsY, '', {
       ...TEXT_STYLES.PANEL_LABEL,
@@ -357,7 +369,7 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
     drawButton(this.levelUpBtnBg, 200, 36, COLORS.SUCCESS);
     this.levelUpBtn.add(this.levelUpBtnBg);
 
-    this.levelUpBtnText = this.scene.add.text(0, 0, 'Level Up (-- DB)', TEXT_STYLES.BUTTON_SM).setOrigin(0.5);
+    this.levelUpBtnText = this.scene.add.text(0, 0, 'Level Up [U] (-- DB)', TEXT_STYLES.BUTTON_SM).setOrigin(0.5);
     this.levelUpBtn.add(this.levelUpBtnText);
 
     const levelUpHitArea = new Phaser.Geom.Rectangle(-100, -18, 200, 36);
@@ -463,7 +475,7 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
     drawButton(this.sellBtnBg, 200, 36, COLORS.DANGER);
     this.sellBtn.add(this.sellBtnBg);
 
-    this.sellBtnText = this.scene.add.text(0, 0, 'Sell (-- DB)', TEXT_STYLES.BUTTON_SM).setOrigin(0.5);
+    this.sellBtnText = this.scene.add.text(0, 0, 'Sell [S] (-- DB)', TEXT_STYLES.BUTTON_SM).setOrigin(0.5);
     this.sellBtn.add(this.sellBtnText);
 
     const sellHitArea = new Phaser.Geom.Rectangle(-100, -18, 200, 36);
@@ -552,6 +564,13 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
   // ---------------------------------------------------------------------------
 
   /**
+   * Get the currently displayed tower, or null if none is selected.
+   */
+  public getCurrentTower(): Tower | null {
+    return this.currentTower;
+  }
+
+  /**
    * Show the panel for the given tower.
    */
   public show(tower: Tower): void {
@@ -615,6 +634,11 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
     const rangeInCells = tower.getRangeCells();
     this.rangeText.setText(`${rangeInCells.toFixed(1)} cells`);
 
+    this.killsText.setText(`${tower.killCount}`);
+    this.totalDmgText.setText(tower.totalDamageDealt >= 1000
+      ? `${(tower.totalDamageDealt / 1000).toFixed(1)}K`
+      : `${Math.round(tower.totalDamageDealt)}`);
+
     // Skill display
     const skillInfo = getSkillDisplay(tower.stats.effectType, tower.stats.effectChance);
     if (skillInfo) {
@@ -661,7 +685,7 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
 
     // Sell button
     const sellPrice = this.getSellPrice();
-    this.sellBtnText.setText(`Sell (+${sellPrice} DB)`);
+    this.sellBtnText.setText(`Sell [S] (+${sellPrice} DB)`);
 
     // Digivolve button - show only at max level with evolution paths
     const isMaxed = !canLevelUp(tower.level, maxLevel);
@@ -702,7 +726,7 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
     const cost = getLevelUpCost(tower.level, tower.stage);
     const canAfford = this.getDigibytes() >= cost;
 
-    this.levelUpBtnText.setText(`Level Up (${cost} DB)`);
+    this.levelUpBtnText.setText(`Level Up [U] (${cost} DB)`);
 
     if (canAfford) {
       drawButton(this.levelUpBtnBg, 200, 36, COLORS.SUCCESS);
@@ -904,7 +928,7 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
   private getSellPrice(): number {
     const tower = this.currentTower;
     if (!tower) return 0;
-    return tower.level * 25;
+    return calculateSellPrice(tower.level, tower.stage);
   }
 
   private onSell(): void {
@@ -998,6 +1022,8 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
     EventBus.off(GameEvents.TOWER_SELECTED, this.onTowerSelected, this);
     EventBus.off(GameEvents.TOWER_DESELECTED, this.onTowerDeselected, this);
     EventBus.off(GameEvents.DIGIBYTES_CHANGED, this.onDigibytesChanged, this);
+    EventBus.off(GameEvents.TOWER_SOLD_SHORTCUT, this.onSell, this);
+    EventBus.off(GameEvents.TOWER_LEVELUP_SHORTCUT, this.onLevelUp, this);
 
     if (this.escKey) {
       this.escKey.off('down', this.onEscPressed, this);

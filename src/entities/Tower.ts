@@ -25,6 +25,10 @@ export class Tower extends Phaser.GameObjects.Container {
   public targetPriority: TargetPriority;
   public attackCooldown: number;
 
+  // Combat tracking
+  public killCount: number = 0;
+  public totalDamageDealt: number = 0;
+
   // Boss debuffs
   public stunTimer: number = 0;
   public bonusEffects: BonusEffect[] = [];
@@ -310,6 +314,8 @@ export class Tower extends Phaser.GameObjects.Container {
       gridPosition: { col: this.gridCol, row: this.gridRow },
       targetPriority: this.targetPriority,
       bonusEffects: this.bonusEffects.length > 0 ? [...this.bonusEffects] : undefined,
+      killCount: this.killCount > 0 ? this.killCount : undefined,
+      totalDamageDealt: this.totalDamageDealt > 0 ? Math.round(this.totalDamageDealt) : undefined,
     };
   }
 

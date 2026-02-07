@@ -3,6 +3,7 @@ import { COLORS, TEXT_STYLES, FONTS } from '@/ui/UITheme';
 import { drawPanel, drawButton, drawSeparator, animateButtonHover, animateButtonPress, animateModalIn } from '@/ui/UIHelpers';
 import { AudioManager } from '@/managers/AudioManager';
 import { SaveManager } from '@/managers/SaveManager';
+import { HighScoreManager } from '@/managers/HighScoreManager';
 
 /**
  * Settings overlay scene with volume, mute, restart, and main menu options.
@@ -33,7 +34,7 @@ export class SettingsScene extends Phaser.Scene {
     // Panel
     const panelWidth = 310;
     const showGameButtons = this.callerScene !== 'MainMenuScene';
-    const panelHeight = showGameButtons ? 480 : 380;
+    const panelHeight = showGameButtons ? 520 : 420;
     const panelX = (width - panelWidth) / 2;
     const panelY = (height - panelHeight) / 2;
 
@@ -487,6 +488,46 @@ export class SettingsScene extends Phaser.Scene {
     }).setOrigin(0.5);
 
     controlY += 16;
+
+    // Clear High Scores button
+    if (HighScoreManager.hasHighScores()) {
+      const clearHsBtnW = 150;
+      const clearHsBtnH = 26;
+      const clearHsContainer = this.add.container(width / 2, controlY);
+      const clearHsBg = this.add.graphics();
+      drawButton(clearHsBg, clearHsBtnW, clearHsBtnH, COLORS.BG_PANEL_LIGHT);
+      clearHsContainer.add(clearHsBg);
+
+      const clearHsText = this.add.text(0, 0, 'Clear High Scores', {
+        fontFamily: FONTS.BODY,
+        fontSize: '11px',
+        color: '#ff6666',
+        fontStyle: 'bold',
+        resolution: 2,
+      }).setOrigin(0.5);
+      clearHsContainer.add(clearHsText);
+
+      const clearHsHitArea = new Phaser.Geom.Rectangle(-clearHsBtnW / 2, -clearHsBtnH / 2, clearHsBtnW, clearHsBtnH);
+      clearHsContainer.setInteractive(clearHsHitArea, Phaser.Geom.Rectangle.Contains);
+      clearHsContainer.input!.cursor = 'pointer';
+
+      clearHsContainer.on('pointerover', () => {
+        drawButton(clearHsBg, clearHsBtnW, clearHsBtnH, COLORS.DANGER, { glowRing: true });
+        animateButtonHover(this, clearHsContainer, true);
+      });
+      clearHsContainer.on('pointerout', () => {
+        drawButton(clearHsBg, clearHsBtnW, clearHsBtnH, COLORS.BG_PANEL_LIGHT);
+        animateButtonHover(this, clearHsContainer, false);
+      });
+      clearHsContainer.on('pointerdown', () => {
+        animateButtonPress(this, clearHsContainer);
+        HighScoreManager.clearHighScores();
+        clearHsText.setText('Cleared!').setColor('#44cc88');
+        clearHsContainer.removeInteractive();
+      });
+
+      controlY += 32;
+    }
 
     // Separator before action buttons
     const actionSep = this.add.graphics();

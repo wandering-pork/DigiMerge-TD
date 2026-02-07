@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { SaveManager } from '@/managers/SaveManager';
 import { AudioManager } from '@/managers/AudioManager';
+import { HighScoreManager } from '@/managers/HighScoreManager';
 import { COLORS, TEXT_STYLES, ANIM, FONTS } from '@/ui/UITheme';
 import { drawDigitalGrid, drawButton, drawPanel, createDigitalParticles, animateButtonHover, animateButtonPress, animateStaggeredEntrance } from '@/ui/UIHelpers';
 
@@ -127,6 +128,19 @@ export class MainMenuScene extends Phaser.Scene {
       },
     ));
     btnY += 68;
+
+    // High Scores button (only shown if high scores exist)
+    if (HighScoreManager.hasHighScores()) {
+      buttons.push(this.createMenuButton(
+        width / 2, btnY, 260, 50,
+        'High Scores',
+        COLORS.BG_PANEL_LIGHT, COLORS.BG_HOVER,
+        () => {
+          this.scene.start('HighScoresScene');
+        },
+      ));
+      btnY += 68;
+    }
 
     // Credits button
     buttons.push(this.createMenuButton(

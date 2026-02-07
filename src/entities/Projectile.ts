@@ -10,6 +10,7 @@ export interface ProjectileTarget {
   x: number;
   y: number;
   isAlive: boolean;
+  lastHitByTowerID?: string;
   takeDamage(amount: number): void;
   applyEffect?(effectType: string, sourceDamage: number): void;
 }
@@ -70,6 +71,9 @@ export class Projectile extends Phaser.GameObjects.Container {
 
   /** Attribute multiplier applied to this projectile's damage (for damage number coloring). */
   public attributeMultiplier: number = 1;
+
+  /** ID of the tower that fired this projectile (for kill/damage attribution). */
+  public sourceTowerID: string = '';
 
   /** Graphics object used to render a simple trailing line. */
   public trailGraphics: Phaser.GameObjects.Graphics;
@@ -184,14 +188,20 @@ export class Projectile extends Phaser.GameObjects.Container {
       // Spawn hit particles before any state changes
       this.spawnHitParticles();
 
+      // Attribute kill/damage to source tower
+      if (this.sourceTowerID) {
+        this.target.lastHitByTowerID = this.sourceTowerID;
+      }
+
       this.target.takeDamage(this.damage);
 
-      // Emit damage dealt event for floating damage numbers
+      // Emit damage dealt event for floating damage numbers and per-tower tracking
       EventBus.emit(GameEvents.DAMAGE_DEALT, {
         x: this.target.x,
         y: this.target.y,
         damage: this.damage,
         multiplier: this.attributeMultiplier,
+        sourceTowerID: this.sourceTowerID || undefined,
       });
 
       // Apply status effect if the projectile carries one
@@ -247,6 +257,11 @@ export class Projectile extends Phaser.GameObjects.Container {
       const dist = Math.sqrt(dx * dx + dy * dy);
 
       if (dist <= AOE_RADIUS) {
+        // Attribute kill/damage to source tower for AoE splash
+        if (this.sourceTowerID) {
+          enemy.lastHitByTowerID = this.sourceTowerID;
+        }
+
         enemy.takeDamage(splashDamage);
 
         EventBus.emit(GameEvents.DAMAGE_DEALT, {
@@ -254,6 +269,7 @@ export class Projectile extends Phaser.GameObjects.Container {
           y: enemy.y,
           damage: splashDamage,
           multiplier: this.attributeMultiplier,
+          sourceTowerID: this.sourceTowerID || undefined,
         });
 
         // Apply status effect to splash targets too

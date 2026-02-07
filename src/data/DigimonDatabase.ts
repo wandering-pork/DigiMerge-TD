@@ -2905,6 +2905,7 @@ const enemies = {
   },
   boss_greymon_evolved: {
     id: 'boss_greymon_evolved',
+    spriteKey: 'greymon',
     name: 'Greymon (Phase Boss)',
     stageTier: Stage.CHAMPION,
     attribute: Attribute.VACCINE,

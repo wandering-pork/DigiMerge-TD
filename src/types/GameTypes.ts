@@ -84,6 +84,8 @@ export interface TowerSaveData {
   gridPosition: GridPosition;
   targetPriority: TargetPriority;
   bonusEffects?: BonusEffect[];
+  killCount?: number;
+  totalDamageDealt?: number;
 }
 
 export interface BonusEffect {
@@ -98,6 +100,7 @@ export interface GameStatistics {
   digivolutionsPerformed: number;
   highestWave: number;
   totalDigibytesEarned: number;
+  playtimeSeconds: number;
 }
 
 export type HealthBarMode = 'all' | 'bosses' | 'off';

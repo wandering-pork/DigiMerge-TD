@@ -10,6 +10,7 @@ import { SettingsScene } from '@/scenes/SettingsScene';
 import { GameOverScene } from '@/scenes/GameOverScene';
 import { EncyclopediaScene } from '@/scenes/EncyclopediaScene';
 import { CreditsScene } from '@/scenes/CreditsScene';
+import { HighScoresScene } from '@/scenes/HighScoresScene';
 
 export const gameConfig: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
@@ -34,5 +35,6 @@ export const gameConfig: Phaser.Types.Core.GameConfig = {
     GameOverScene,
     EncyclopediaScene,
     CreditsScene,
+    HighScoresScene,
   ],
 };

@@ -45,4 +45,8 @@ export const GameEvents = {
 
   // Boss ability events
   BOSS_ABILITY_ACTIVATED: 'boss:abilityActivated',
+
+  // Keyboard shortcut events
+  TOWER_SOLD_SHORTCUT: 'tower:soldShortcut',
+  TOWER_LEVELUP_SHORTCUT: 'tower:levelUpShortcut',
 } as const;

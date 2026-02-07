@@ -14,6 +14,7 @@ function defaultStatistics(): GameStatistics {
     digivolutionsPerformed: 0,
     highestWave: 0,
     totalDigibytesEarned: 0,
+    playtimeSeconds: 0,
   };
 }
 

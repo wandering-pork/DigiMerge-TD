@@ -7,6 +7,7 @@ import {
   getLevelUpCost,
   calculateDamage,
   calculateMaxLevel,
+  getSellPrice,
   ATTRIBUTE_MULTIPLIERS,
   STAGE_CONFIG,
   SPAWN_COSTS,
@@ -196,6 +197,53 @@ describe('Constants', () => {
     it('higher stages cost more', () => {
       expect(SPAWN_COSTS[Stage.IN_TRAINING].random).toBeLessThan(SPAWN_COSTS[Stage.ROOKIE].random);
       expect(SPAWN_COSTS[Stage.ROOKIE].random).toBeLessThan(SPAWN_COSTS[Stage.CHAMPION].random);
+    });
+  });
+
+  describe('getSellPrice', () => {
+    it('level 1 returns minimum sell price of 25', () => {
+      // baseCost=50, levelUpInvestment=0, total=50, 50*0.5=25
+      expect(getSellPrice(1, Stage.IN_TRAINING)).toBe(25);
+    });
+
+    it('sell price increases with level', () => {
+      const priceLv1 = getSellPrice(1, Stage.ROOKIE);
+      const priceLv5 = getSellPrice(5, Stage.ROOKIE);
+      const priceLv10 = getSellPrice(10, Stage.ROOKIE);
+      expect(priceLv5).toBeGreaterThan(priceLv1);
+      expect(priceLv10).toBeGreaterThan(priceLv5);
+    });
+
+    it('higher stages return higher sell prices at the same level', () => {
+      const level = 10;
+      const priceInTraining = getSellPrice(level, Stage.IN_TRAINING);
+      const priceRookie = getSellPrice(level, Stage.ROOKIE);
+      const priceChampion = getSellPrice(level, Stage.CHAMPION);
+      expect(priceRookie).toBeGreaterThan(priceInTraining);
+      expect(priceChampion).toBeGreaterThan(priceRookie);
+    });
+
+    it('sell price is always at least 25', () => {
+      // Even at level 1 for the cheapest stage
+      for (let s = Stage.IN_TRAINING; s <= Stage.ULTRA; s++) {
+        expect(getSellPrice(1, s as Stage)).toBeGreaterThanOrEqual(25);
+      }
+    });
+
+    it('sell price at level 1 is floor of 50% of base cost', () => {
+      // baseCost=50, no level ups, floor(50*0.5)=25
+      expect(getSellPrice(1, Stage.CHAMPION)).toBe(25);
+    });
+
+    it('sell price accounts for stage multiplier in level-up costs', () => {
+      // Level 5, In-Training (mult 1): levelUp = ceil(3*1*1)+ceil(3*2*1)+ceil(3*3*1)+ceil(3*4*1) = 3+6+9+12=30
+      // total = 50+30=80, floor(80*0.5)=40
+      expect(getSellPrice(5, Stage.IN_TRAINING)).toBe(40);
+
+      // Level 5, Rookie (mult 1.5): levelUp = ceil(3*1*1.5)+ceil(3*2*1.5)+ceil(3*3*1.5)+ceil(3*4*1.5)
+      // = ceil(4.5)+ceil(9)+ceil(13.5)+ceil(18) = 5+9+14+18=46
+      // total = 50+46=96, floor(96*0.5)=48
+      expect(getSellPrice(5, Stage.ROOKIE)).toBe(48);
     });
   });
 });

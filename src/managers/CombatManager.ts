@@ -128,6 +128,7 @@ export class CombatManager {
           tower.attribute,
         );
         projectile.attributeMultiplier = attributeMult;
+        projectile.sourceTowerID = tower.towerID;
 
         // Only the first projectile rolls for status effects to avoid triple-proc
         if (isFirstProjectile) {

@@ -28,7 +28,7 @@ import { Enemy } from '@/entities/Enemy';
 import { canMerge, MergeCandidate } from '@/systems/MergeSystem';
 import { DIGIMON_DATABASE } from '@/data/DigimonDatabase';
 import { getWaveConfig } from '@/data/WaveData';
-import { Stage, TargetPriority, Attribute, ATTRIBUTE_NAMES, STAGE_NAMES, EnemyStats } from '@/types';
+import { Stage, TargetPriority, Attribute, ATTRIBUTE_NAMES, STAGE_NAMES, EnemyStats, GameStatistics } from '@/types';
 import { COLORS, TEXT_STYLES, FONTS, ANIM, ATTRIBUTE_COLORS_STR } from '@/ui/UITheme';
 import { drawPanel, drawButton, drawSeparator, drawDigitalGrid, animateButtonHover, animateButtonPress } from '@/ui/UIHelpers';
 import { BossAbilityAction, getCooldownProgress } from '@/systems/BossAbilitySystem';
@@ -76,6 +76,18 @@ export class GameScene extends Phaser.Scene {
   // Free first spawn
   private hasUsedFreeSpawn: boolean = false;
 
+  // Statistics tracking
+  private statistics: GameStatistics = {
+    enemiesKilled: 0,
+    towersPlaced: 0,
+    mergesPerformed: 0,
+    digivolutionsPerformed: 0,
+    highestWave: 0,
+    totalDigibytesEarned: 0,
+    playtimeSeconds: 0,
+  };
+  private playtimeMs: number = 0;
+
   // Merge mode state
   private isMergeMode: boolean = false;
   private mergeSourceTower: Tower | null = null;
@@ -119,6 +131,12 @@ export class GameScene extends Phaser.Scene {
   // Visibility change handler for auto-pause on tab blur
   private visibilityHandler: (() => void) | null = null;
 
+  // Low lives warning vignette
+  private dangerVignette: Phaser.GameObjects.Graphics | null = null;
+
+  // Boss incoming warning text
+  private bossWarningText: Phaser.GameObjects.Text | null = null;
+
   constructor() {
     super({ key: 'GameScene' });
   }
@@ -139,6 +157,18 @@ export class GameScene extends Phaser.Scene {
     this.autoStartWave = false;
     this.starterDisplayObjects = [];
     this.gameOverTriggered = false;
+    this.dangerVignette = null;
+    this.bossWarningText = null;
+    this.statistics = {
+      enemiesKilled: 0,
+      towersPlaced: 0,
+      mergesPerformed: 0,
+      digivolutionsPerformed: 0,
+      highestWave: 0,
+      totalDigibytesEarned: 0,
+      playtimeSeconds: 0,
+    };
+    this.playtimeMs = 0;
 
     // Bind shutdown to Phaser lifecycle to ensure EventBus cleanup
     this.events.on('shutdown', this.shutdown, this);
@@ -178,6 +208,16 @@ export class GameScene extends Phaser.Scene {
       this.input.keyboard.on('keydown-ONE', () => this.setGameSpeed(1));
       this.input.keyboard.on('keydown-TWO', () => this.setGameSpeed(2));
       this.input.keyboard.on('keydown-THREE', () => this.setGameSpeed(3));
+
+      // Tower action shortcuts
+      this.input.keyboard.on('keydown-S', () => this.handleSellShortcut());
+      this.input.keyboard.on('keydown-DELETE', () => this.handleSellShortcut());
+      this.input.keyboard.on('keydown-U', () => this.handleLevelUpShortcut());
+      this.input.keyboard.on('keydown-D', () => this.handleDeselectShortcut());
+      this.input.keyboard.on('keydown-TAB', (event: KeyboardEvent) => {
+        event.preventDefault();
+        this.handleCycleTowers();
+      });
     }
 
     // Initialize managers
@@ -239,6 +279,8 @@ export class GameScene extends Phaser.Scene {
     EventBus.on(GameEvents.TOWER_PLACED, this.onTowerPlaced, this);
     EventBus.on(GameEvents.TOWER_MERGED, this.onMergeCompleted, this);
     EventBus.on(GameEvents.DAMAGE_DEALT, this.onDamageDealt, this);
+    EventBus.on(GameEvents.TOWER_EVOLVED, this.onTowerEvolved, this);
+    EventBus.on(GameEvents.TOWER_SOLD, this.onTowerSold, this);
 
     // Setup ghost preview sprite (hidden by default)
     this.setupGhostPreview();
@@ -262,6 +304,10 @@ export class GameScene extends Phaser.Scene {
   update(time: number, delta: number) {
     // Cap delta to prevent enemy teleportation when tab loses focus
     const cappedDelta = Math.min(delta, 100); // Max 100ms (10fps minimum)
+
+    // Track real-time playtime (before speed scaling)
+    this.playtimeMs += cappedDelta;
+
     const scaledDelta = cappedDelta * this.gameSpeed;
 
     // Update wave spawning
@@ -294,6 +340,9 @@ export class GameScene extends Phaser.Scene {
     for (const tower of this.towerContainer.list) {
       (tower as Tower).rangeReductionPercent = 0;
     }
+
+    // Update danger vignette for low lives warning
+    this.updateDangerVignette();
   }
 
   shutdown() {
@@ -310,11 +359,23 @@ export class GameScene extends Phaser.Scene {
     EventBus.off(GameEvents.TOWER_PLACED, this.onTowerPlaced, this);
     EventBus.off(GameEvents.TOWER_MERGED, this.onMergeCompleted, this);
     EventBus.off(GameEvents.DAMAGE_DEALT, this.onDamageDealt, this);
+    EventBus.off(GameEvents.TOWER_EVOLVED, this.onTowerEvolved, this);
+    EventBus.off(GameEvents.TOWER_SOLD, this.onTowerSold, this);
 
     // Remove visibility change listener
     if (this.visibilityHandler) {
       document.removeEventListener('visibilitychange', this.visibilityHandler);
       this.visibilityHandler = null;
+    }
+
+    // Clean up warning overlays
+    if (this.dangerVignette) {
+      this.dangerVignette.destroy();
+      this.dangerVignette = null;
+    }
+    if (this.bossWarningText) {
+      this.bossWarningText.destroy();
+      this.bossWarningText = null;
     }
 
     this.waveManager.cleanup();
@@ -1216,6 +1277,10 @@ export class GameScene extends Phaser.Scene {
         hasUsedFreeSpawn: this.hasUsedFreeSpawn,
       },
       towers,
+      {
+        ...this.statistics,
+        playtimeSeconds: Math.floor(this.playtimeMs / 1000),
+      },
     );
   }
 
@@ -1247,6 +1312,12 @@ export class GameScene extends Phaser.Scene {
       this.registry.set('selectedStarters', starterIds.slice(0, 3));
     }
 
+    // Restore statistics from save
+    if (save.statistics) {
+      this.statistics = { ...this.statistics, ...save.statistics };
+      this.playtimeMs = (save.statistics.playtimeSeconds || 0) * 1000;
+    }
+
     // Restore towers from save data
     for (const towerData of save.towers) {
       try {
@@ -1261,6 +1332,8 @@ export class GameScene extends Phaser.Scene {
         tower.dp = towerData.dp;
         tower.targetPriority = towerData.targetPriority as TargetPriority;
         tower.bonusEffects = towerData.bonusEffects ?? [];
+        tower.killCount = towerData.killCount ?? 0;
+        tower.totalDamageDealt = towerData.totalDamageDealt ?? 0;
         this.towerContainer.add(tower);
       } catch {
         // Skip invalid tower data
@@ -1563,6 +1636,12 @@ export class GameScene extends Phaser.Scene {
     this.wavePreviewSprites = [];
     this.dismissWaveTooltip();
 
+    // Clean up old boss warning
+    if (this.bossWarningText) {
+      this.bossWarningText.destroy();
+      this.bossWarningText = null;
+    }
+
     const waveConfig = getWaveConfig(this.currentWave);
     if (!waveConfig) {
       this.wavePreviewText.setText('No data');
@@ -1597,7 +1676,7 @@ export class GameScene extends Phaser.Scene {
       const enemyStats = DIGIMON_DATABASE.enemies[entry.id];
       if (!enemyStats) continue;
 
-      const spriteKey = entry.id.replace(/^(enemy_|boss_)/, '');
+      const spriteKey = enemyStats.spriteKey ?? entry.id.replace(/^(enemy_|boss_)/, '');
       const rowY = previewBaseY + yOffset;
 
       // Small sprite
@@ -1657,7 +1736,7 @@ export class GameScene extends Phaser.Scene {
       const bossStats = DIGIMON_DATABASE.enemies[waveConfig.boss];
       if (bossStats) {
         const rowY = previewBaseY + yOffset;
-        const bossSpriteKey = waveConfig.boss.replace(/^boss_/, '');
+        const bossSpriteKey = bossStats.spriteKey ?? waveConfig.boss.replace(/^boss_/, '');
 
         if (this.textures.exists(bossSpriteKey)) {
           const sprite = this.add.image(previewX + 12, rowY + 8, bossSpriteKey);
@@ -1694,6 +1773,33 @@ export class GameScene extends Phaser.Scene {
         bossHitZone.on('pointerdown', () => this.showWaveTooltip(bossStats, bossHitZone.x, bossHitZone.y, true));
         this.wavePreviewSprites.push(bossHitZone);
       }
+    }
+
+    // Boss incoming warning banner
+    if (waveConfig.boss) {
+      this.bossWarningText = this.add.text(
+        GRID_OFFSET_X + (GRID.COLUMNS * GRID.CELL_SIZE) / 2,
+        GRID_OFFSET_Y + GRID.ROWS * GRID.CELL_SIZE + 6,
+        '!! BOSS INCOMING !!',
+        {
+          fontFamily: FONTS.MONO,
+          fontSize: '14px',
+          color: '#ff4444',
+          fontStyle: 'bold',
+          stroke: '#000000',
+          strokeThickness: 3,
+          resolution: 2,
+        }
+      ).setOrigin(0.5, 0).setDepth(10);
+
+      // Pulse animation
+      this.tweens.add({
+        targets: this.bossWarningText,
+        alpha: { from: 1, to: 0.4 },
+        duration: 800,
+        yoyo: true,
+        repeat: -1,
+      });
     }
   }
 
@@ -1747,7 +1853,7 @@ export class GameScene extends Phaser.Scene {
     container.add(bg);
 
     // Sprite (2x scale)
-    const spriteKey = enemy.id.replace(/^(enemy_|boss_)/, '');
+    const spriteKey = enemy.spriteKey ?? enemy.id.replace(/^(enemy_|boss_)/, '');
     let contentStartX = 12;
     if (this.textures.exists(spriteKey)) {
       const sprite = this.add.image(24, 24, spriteKey).setScale(2.5);
@@ -1881,13 +1987,73 @@ export class GameScene extends Phaser.Scene {
   }
 
   // ============================================================
+  // Low Lives Warning
+  // ============================================================
+
+  private flashLivesWarning(): void {
+    // Flash the lives text red/white 3 times
+    this.tweens.add({
+      targets: this.livesText,
+      alpha: { from: 1, to: 0.3 },
+      duration: 150,
+      yoyo: true,
+      repeat: 3,
+    });
+
+    // Play warning SFX
+    this.audioManager?.playInsufficientFunds();
+  }
+
+  private updateDangerVignette(): void {
+    if (this.lives < 3 && this.lives > 0) {
+      if (!this.dangerVignette) {
+        this.dangerVignette = this.add.graphics().setDepth(55);
+      }
+      this.dangerVignette.clear();
+
+      // Red border overlay that pulses
+      const alpha = 0.15 + 0.05 * Math.sin(this.time.now / 500);
+      const w = this.cameras.main.width;
+      const h = this.cameras.main.height;
+      const borderSize = 40;
+
+      this.dangerVignette.fillStyle(0xff0000, alpha);
+      // Top border
+      this.dangerVignette.fillRect(0, 0, w, borderSize);
+      // Bottom border
+      this.dangerVignette.fillRect(0, h - borderSize, w, borderSize);
+      // Left border
+      this.dangerVignette.fillRect(0, 0, borderSize, h);
+      // Right border
+      this.dangerVignette.fillRect(w - borderSize, 0, borderSize, h);
+    } else {
+      if (this.dangerVignette) {
+        this.dangerVignette.destroy();
+        this.dangerVignette = null;
+      }
+    }
+  }
+
+  // ============================================================
   // Event Handlers
   // ============================================================
 
-  private onEnemyDied(data: { reward: number }) {
+  private onEnemyDied(data: { reward: number; lastHitByTowerID?: string }) {
     this.digibytes += data.reward;
     this.digibytesText.setText(`${this.digibytes}`);
     EventBus.emit(GameEvents.DIGIBYTES_CHANGED, this.digibytes);
+
+    // Credit kill to the tower that dealt the killing blow
+    if (data.lastHitByTowerID) {
+      const tower = (this.towerContainer.list as Tower[]).find(t => t.towerID === data.lastHitByTowerID);
+      if (tower) {
+        tower.killCount++;
+      }
+    }
+
+    // Statistics tracking
+    this.statistics.enemiesKilled++;
+    this.statistics.totalDigibytesEarned += data.reward;
   }
 
   private onEnemyReachedBase() {
@@ -1895,11 +2061,34 @@ export class GameScene extends Phaser.Scene {
 
     this.lives -= 1;
     this.livesText.setText(`${this.lives}`);
+
+    // Low lives warning: flash HUD when lives <= 5
+    if (this.lives > 0 && this.lives <= 5) {
+      this.flashLivesWarning();
+    }
+
     if (this.lives <= 0) {
       this.gameOverTriggered = true;
       this.livesText.setText('0');
       EventBus.emit(GameEvents.GAME_OVER);
-      this.scene.start('GameOverScene', { wave: this.currentWave, won: false });
+
+      // Find the MVP tower (most kills)
+      const allTowers = this.towerManager.getAllTowers();
+      let mvpTower: { name: string; kills: number; damage: number } | undefined;
+      if (allTowers.length > 0) {
+        const mvp = allTowers.reduce((best, t) => t.killCount > best.killCount ? t : best, allTowers[0]);
+        if (mvp.killCount > 0) {
+          mvpTower = { name: mvp.stats.name, kills: mvp.killCount, damage: Math.round(mvp.totalDamageDealt) };
+        }
+      }
+
+      this.scene.start('GameOverScene', {
+        wave: this.currentWave,
+        won: false,
+        lives: 0,
+        statistics: { ...this.statistics, playtimeSeconds: Math.floor(this.playtimeMs / 1000) },
+        mvpTower,
+      });
     }
   }
 
@@ -1930,6 +2119,9 @@ export class GameScene extends Phaser.Scene {
     }
     // Hide starters display after first tower is placed
     this.hideStarterDisplay();
+
+    // Statistics tracking
+    this.statistics.towersPlaced++;
   }
 
   private onMergeCompleted(data: { survivorID: string }) {
@@ -1940,6 +2132,21 @@ export class GameScene extends Phaser.Scene {
         this.playMergeEffect(tower.x, tower.y);
         break;
       }
+    }
+
+    // Statistics tracking
+    this.statistics.mergesPerformed++;
+  }
+
+  private onTowerEvolved(): void {
+    this.statistics.digivolutionsPerformed++;
+  }
+
+  private onTowerSold(data: { sellPrice?: number; refund?: number }): void {
+    // TowerInfoPanel emits sellPrice, TowerManager emits refund
+    const amount = data.sellPrice ?? data.refund ?? 0;
+    if (amount > 0) {
+      this.statistics.totalDigibytesEarned += amount;
     }
   }
 
@@ -1992,7 +2199,15 @@ export class GameScene extends Phaser.Scene {
   // Damage Numbers
   // ============================================================
 
-  private onDamageDealt(data: { x: number; y: number; damage: number; multiplier: number }): void {
+  private onDamageDealt(data: { x: number; y: number; damage: number; multiplier: number; sourceTowerID?: string }): void {
+    // Track per-tower damage
+    if (data.sourceTowerID) {
+      const tower = (this.towerContainer.list as Tower[]).find(t => t.towerID === data.sourceTowerID);
+      if (tower) {
+        tower.totalDamageDealt += data.damage;
+      }
+    }
+
     if (this.registry.get('showDamageNumbers') === false) return;
 
     const worldX = GRID_OFFSET_X + data.x;
@@ -2051,13 +2266,34 @@ export class GameScene extends Phaser.Scene {
     this.digibytesText.setText(`${this.digibytes}`);
     EventBus.emit(GameEvents.DIGIBYTES_CHANGED, this.digibytes);
 
+    // Statistics tracking
+    this.statistics.totalDigibytesEarned += waveReward;
+    this.statistics.highestWave = Math.max(this.statistics.highestWave, data.wave);
+
     // Auto-save after each wave
     this.saveGame();
 
     // Check for victory (all MVP waves cleared)
     if (this.currentWave >= TOTAL_WAVES_MVP) {
       EventBus.emit(GameEvents.GAME_WON);
-      this.scene.start('GameOverScene', { wave: this.currentWave, won: true });
+
+      // Find the MVP tower (most kills)
+      const allTowers = this.towerManager.getAllTowers();
+      let mvpTower: { name: string; kills: number; damage: number } | undefined;
+      if (allTowers.length > 0) {
+        const mvp = allTowers.reduce((best, t) => t.killCount > best.killCount ? t : best, allTowers[0]);
+        if (mvp.killCount > 0) {
+          mvpTower = { name: mvp.stats.name, kills: mvp.killCount, damage: Math.round(mvp.totalDamageDealt) };
+        }
+      }
+
+      this.scene.start('GameOverScene', {
+        wave: this.currentWave,
+        won: true,
+        lives: this.lives,
+        statistics: { ...this.statistics, playtimeSeconds: Math.floor(this.playtimeMs / 1000) },
+        mvpTower,
+      });
       return;
     }
 
@@ -2081,5 +2317,44 @@ export class GameScene extends Phaser.Scene {
         }
       });
     }
+  }
+
+  // ============================================================
+  // Keyboard Shortcut Handlers
+  // ============================================================
+
+  private handleSellShortcut(): void {
+    if (this.towerInfoPanel.visible && this.towerInfoPanel.getCurrentTower()) {
+      EventBus.emit(GameEvents.TOWER_SOLD_SHORTCUT);
+    }
+  }
+
+  private handleLevelUpShortcut(): void {
+    if (this.towerInfoPanel.visible && this.towerInfoPanel.getCurrentTower()) {
+      EventBus.emit(GameEvents.TOWER_LEVELUP_SHORTCUT);
+    }
+  }
+
+  private handleDeselectShortcut(): void {
+    this.towerInfoPanel.hide();
+    this.spawnMenu.hide();
+  }
+
+  private handleCycleTowers(): void {
+    const towers = this.towerManager.getAllTowers();
+    if (towers.length === 0) return;
+
+    const currentTower = this.towerInfoPanel.getCurrentTower();
+
+    if (!currentTower) {
+      // Select first tower
+      EventBus.emit(GameEvents.TOWER_SELECTED, towers[0]);
+      return;
+    }
+
+    // Find current index and select next
+    const currentIdx = towers.findIndex(t => t.towerID === currentTower.towerID);
+    const nextIdx = (currentIdx + 1) % towers.length;
+    EventBus.emit(GameEvents.TOWER_SELECTED, towers[nextIdx]);
   }
 }

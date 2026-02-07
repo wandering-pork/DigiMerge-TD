@@ -48,6 +48,9 @@ export class Enemy extends Phaser.GameObjects.Container {
   public readonly isBoss: boolean;
   public isSplitChild: boolean = false;
 
+  // Kill attribution: ID of the tower that last hit this enemy
+  public lastHitByTowerID?: string;
+
   // Status effects
   public activeEffects: Map<string, ActiveEffect> = new Map();
 
@@ -102,8 +105,8 @@ export class Enemy extends Phaser.GameObjects.Container {
     }
 
     // Create sprite child
-    // Sprite key uses the base name without "enemy_" or "boss_" prefix
-    const spriteKey = digimonId.replace(/^(enemy_|boss_)/, '');
+    // Use explicit spriteKey from database if set, otherwise strip "enemy_"/"boss_" prefix
+    const spriteKey = dbStats.spriteKey ?? digimonId.replace(/^(enemy_|boss_)/, '');
     this.sprite = scene.add.sprite(0, 0, spriteKey);
     this.sprite.setOrigin(0.5, 0.5);
 
@@ -304,6 +307,7 @@ export class Enemy extends Phaser.GameObjects.Container {
       reward: this.reward,
       x: this.x,
       y: this.y,
+      lastHitByTowerID: this.lastHitByTowerID,
     });
 
     // Splitter enemies spawn copies on death (split children don't further split)

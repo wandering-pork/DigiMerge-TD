@@ -53,6 +53,7 @@ export interface BossAbility {
 
 export interface EnemyStats {
   id: string;
+  spriteKey?: string;
   name: string;
   stageTier: Stage;
   attribute: Attribute;
