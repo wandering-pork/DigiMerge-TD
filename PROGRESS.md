@@ -128,149 +128,179 @@ Live at: https://wandering-pork.github.io/DigiMerge-TD/
 
 ## Roadmap
 
-### Sprint 12D — Content Expansion (COMPLETE)
+### Sprint 20 — Bug Fixes & Effect Audit
 
-#### D1: Enemy Digimon as Towers (36 New Tower Entries)
-- [x] Identified 36 enemy Digimon with existing sprites repurposed as towers
-- [x] Added tower stats (damage, speed, range, effect) balanced by stage
-- [x] Created evolution paths as alternates within existing 21 starter lines
-- [x] No new starters needed — all new towers are alternate evolution paths
-- [x] Updated tests: 11 new tests (468 total, all passing)
-- **New towers by stage:** 8 Rookie, 10 Champion, 8 Ultimate, 10 Mega
-- **Files:** `DigimonDatabase.ts`, `EvolutionPaths.ts`
+#### 20A: Boss Sprite Fix
+- [ ] Wave 20 boss `boss_greymon_evolved` resolves to sprite key `greymon_evolved` which doesn't exist — falls back to missing texture
+- [ ] Decide: use existing `greymon` sprite, or find/add a distinct sprite (e.g. GeoGreymon, Greymon_X)
+- [ ] Verify all other boss sprite keys resolve correctly
 
----
+#### 20B: Tower Effect Audit
+- [ ] Playtest and verify all tower status effects work correctly:
+  - Burn (DoT, 5% HP/tick over 3s)
+  - Poison (DoT, 3% HP/tick over 4s, stacks x3)
+  - Slow (40% speed reduction, 2s)
+  - Freeze (full stop 1.5s + slow after thaw)
+  - Stun (full stop 1s)
+  - Armor Break (armor reduction, 3s)
+- [ ] Check proc rates feel correct across all towers with effects
+- [ ] Verify bonus effect inheritance works in practice (merge a tower with an effect, confirm the survivor gains it)
+- [ ] Check visual indicators (tint, particles) display for each effect
+- [ ] Fix any broken or unbalanced effects found during testing
 
-### Sprint 13 — Merge Ability Inheritance (COMPLETE)
+#### 20C: Statistics Activation
+- [ ] Wire up `GameStatistics` tracking in GameStateManager (interface already exists in SaveManager)
+- [ ] Increment `enemiesKilled` on enemy death event
+- [ ] Increment `towersPlaced` on tower spawn
+- [ ] Increment `mergesPerformed` on merge
+- [ ] Increment `digivolutionsPerformed` on evolution
+- [ ] Track `totalDigibytesEarned` (wave rewards + sell income)
+- [ ] Track `highestWave` on wave completion
+- [ ] Pass statistics to SaveManager on auto-save
+- [ ] Add playtime tracker (elapsed seconds, saved/restored)
 
-- [x] Add `bonusEffects` field to Tower class + BonusEffect interface in GameTypes
-- [x] Update MergeSystem: calculateMergeEffects (half proc chance, dedup, max 2, +5% stack)
-- [x] Update CombatManager to roll bonus effects on attack
-- [x] Update TowerInfoPanel to display bonus effects
-- [x] Update MergeModal to preview effect inheritance
-- [x] Update SaveManager to serialize/deserialize bonusEffects (Tower.toSaveData + GameScene restore)
-- [x] Add 11 tests for effect inheritance, stacking, max cap (479 total)
-- **Files:** `Tower.ts`, `GameTypes.ts`, `MergeSystem.ts`, `CombatManager.ts`, `TowerInfoPanel.ts`, `MergeModal.ts`, `GameScene.ts`
-
----
-
-### Sprint 14 — Wave Preview Interaction (COMPLETE)
-
-- [x] Wave preview enemy entries interactive (invisible hit zones with pointer events)
-- [x] Tooltip panel: sprite (2.5x), name (attribute-colored), stage, attribute, HP/speed/armor/type/weakness stats
-- [x] Hover shows tooltip (positioned left of preview, screen-clamped)
-- [x] Click pins tooltip (toggle, [x] indicator), dismissed on click elsewhere
-- [x] Boss tooltip includes ability name + description
-- [x] Tooltip positioned to avoid overlapping right panel (shows to the left)
-- **Files:** `GameScene.ts`
-
----
-
-### Sprint 15 — Audio & Save Export (COMPLETE)
-
-#### 15.1 Background Music
-- [x] 2 looping MP3 tracks: menu theme (kawaii dance), battle theme (j-rock anime)
-- [x] AudioManager extended: playMusic, stopMusic, playMenuMusic, playBattleMusic, setMusicVolume, getMusicVolume
-- [x] Music volume slider (gold-colored) in SettingsScene, separate from SFX
-- [x] Menu music plays in MainMenuScene, battle music in GameScene
-- **Files:** `AudioManager.ts`, `PreloadScene.ts`, `SettingsScene.ts`, `GameScene.ts`, `MainMenuScene.ts`
-
-#### 15.2 Sprite Sheets (DEFERRED)
-- Performance optimization, requires atlas tooling — deferred to later sprint
-
-#### 15.3 Save File Export/Import
-- [x] Export Save button (JSON file download with date-stamped filename)
-- [x] Import Save button (file picker, JSON validation, version check)
-- [x] Status feedback (success/error messages in SettingsScene)
-- **Files:** `SaveManager.ts`, `SettingsScene.ts`
+#### 20D: Sell Value Formula
+- [ ] Move sell price calculation from TowerInfoPanel (`level * 25`) to Constants.ts
+- [ ] Define clear refund formula based on total investment (spawn cost + level-up costs spent)
+- [ ] Display sell value prominently in TowerInfoPanel
 
 ---
 
-### Sprint 16 — Polish & Cleanup (PARTIAL)
+### Sprint 21 — Quality of Life & UX
 
-#### 16.1 Visual Effects
-- [x] Visual merge effect (16-particle burst + central flash at survivor position)
-- [x] Right-click to cancel (merge mode, tower selection, spawn menu) + context menu suppressed
-- [x] ESC already handled merge mode cancellation (existing)
+#### 21A: Range Preview on Placement
+- [ ] Show range circle when hovering over valid grid cells during tower placement
+- [ ] Preview tower sprite on hover (ghost/transparent) before committing
+- [ ] Show tower base stats in a tooltip during placement
 
-#### 16.2 Code Refactoring (DEFERRED)
-- Larger refactor — deferred to post-release
+#### 21B: SpawnMenu Tooltips & Info
+- [ ] Add attribute triangle diagram/tooltip in SpawnMenu (Vaccine > Virus > Data > Vaccine)
+- [ ] Add origin system explanation tooltip ("Spawn stage limits max evolution")
+- [ ] Show Digimon base stats on hover before spawning (damage, speed, range, effect)
+- [ ] Show evolution path preview (what this Digimon can evolve into)
 
-#### 16.3 Performance (DEFERRED)
-- Object pooling — deferred to post-release when perf issues are measured
+#### 21C: Warnings & Notifications
+- [ ] Low lives warning — flash HUD lives counter + play alert SFX when lives drop below threshold (e.g. 5)
+- [ ] Boss incoming warning — show "Boss incoming next wave!" in wave preview when next wave has a boss
+- [ ] Critical state indicator — tint screen edges red when lives < 3
 
-#### 16.4 More Content (DEFERRED)
-- DNA Digivolution, enemy expansion — deferred to future sprints
-
-**Files:** `GameScene.ts`
-
----
-
-### Sprint 17: Map Expansion
-
-- [ ] Map data architecture (multiple map configs, dynamic grid)
-- [ ] New maps: Wide Valley (12x14), Gauntlet (6x24), Crossroads (10x16, dual spawn)
-- [ ] Map select scene with thumbnails and difficulty ratings
-- [ ] Multi-spawn support for Crossroads map
+#### 21D: Keyboard Shortcuts
+- [ ] `S` or `Del` — sell selected tower
+- [ ] `U` — level up selected tower
+- [ ] `D` or `Click empty` — deselect current tower
+- [ ] `Tab` — cycle through placed towers
+- [ ] Display hotkey hints on buttons (e.g. "Sell (S)")
 
 ---
 
-### Sprint 18 — Public Release Prep (COMPLETE)
+### Sprint 22 — Statistics & Post-Game
 
-- [x] Credits scene: Game, Framework, Language, Sprites, Tileset, SFX, Music, Font, Built-with credits
-- [x] Fan-made disclaimer (non-commercial, not affiliated with Bandai Namco/Toei)
-- [x] Version number v1.0.0 on main menu
-- [x] Credits button added to MainMenuScene, CreditsScene registered in GameConfig
-- [ ] Final playtesting pass (manual — all 100 waves + endless, Chrome/Firefox/Edge)
-- [ ] Open Graph meta tags, release tag (v1.0.0)
-- **Files:** `CreditsScene.ts` (new), `MainMenuScene.ts`, `GameConfig.ts`
+#### 22A: Per-Tower Tracking
+- [ ] Add `killCount` to Tower class, increment in CombatManager on kill
+- [ ] Add `totalDamageDealt` to Tower class, increment on each hit
+- [ ] Display kill count and total damage in TowerInfoPanel
+- [ ] Highlight "MVP tower" (most kills) in post-game
 
----
+#### 22B: Post-Game Stats Screen
+- [ ] Redesign GameOverScene to show detailed run summary:
+  - Waves completed, playtime
+  - Total enemies killed, towers placed
+  - Merges performed, digivolutions performed
+  - Total DigiBytes earned
+  - MVP tower (name, kills, damage dealt)
+- [ ] Different layouts for victory vs defeat
+- [ ] "New Record!" highlight when beating previous best wave
 
-### Sprint 19 — Bug Fixes & UI Polish (COMPLETE)
-
-#### 19A: Critical Bug Fixes
-- [x] Fix SettingsScene restart crash (get GameScene ref before stopping self)
-- [x] Fix SettingsScene Main Menu crash (stop GameScene first, then navigate)
-- [x] Fix AudioManager EventBus cleanup (store handler refs, proper `off()` with fn+context)
-- [x] Add MainMenuScene `shutdown()` to prevent music accumulation
-- [x] Remove Daemon (missing sprite): deleted from PreloadScene, DigimonDatabase, EvolutionPaths, WaveData (7 refs replaced)
-
-#### 19B: Settings & UX Improvements
-- [x] Fix Settings panel layout overflow: increased panelHeight 580→640 (GameScene) / 460→520 (MainMenu)
-- [x] Repositioned save status text to flow naturally after Export/Import buttons
-- [x] Add Settings gear button to MainMenuScene (top-right corner, launches SettingsScene overlay)
-- [x] Conditional Settings buttons: hide Restart/Main Menu when opened from MainMenuScene
-- [x] Disclaimer popup on first visit (localStorage persistence, "I Understand" to dismiss)
-
-#### 19C: Volume Persistence
-- [x] AudioManager localStorage persistence (`digimerge_audio_settings` key)
-- [x] Static `loadSettings()` / instance `saveSettings()` for cross-scene volume state
-- [x] First-time defaults: sfxVolume=0.5, musicVolume=0.3, enabled=true (was 0/false/0.3)
-- [x] MainMenuScene reads persisted volume instead of hardcoded 0.3
-- [x] SettingsScene falls back to persisted settings when no AudioManager instance exists
-- [x] Volume, music volume, and mute state persist across MainMenu↔Game transitions
-
-#### 19D: UI Text Readability & Encyclopedia Fixes
-- [x] UITheme: PANEL_LABEL 12px→14px, PANEL_VALUE 13px→15px
-- [x] TowerInfoPanel: panel height 660→700, stat row height 24→26, skill name/chance 12→14px, skill desc 10→12px, bonus text 11→13px
-- [x] Encyclopedia detail: stat labels 12→14px, stat values 13→15px, row height 24→28px, evo names 9→11px
-- [x] Encyclopedia evolution chain: "From:"/"To:" labels moved above sprite rows, sprite spacing 70→85px
-- [x] Encyclopedia card heights: 480→540 (with evo), 380→420 (without), grid names 9→10px
-- [x] Added `resolution: 2` to all detail view and skill text for crisp rendering
-- [x] Removed "Enemies" filter from Encyclopedia, deduplicated "All" mode (prefer tower entries)
-- [x] Added Tower/Enemy toggle tabs in detail view when counterpart exists
-- **Files:** `SettingsScene.ts`, `AudioManager.ts`, `MainMenuScene.ts`, `PreloadScene.ts`, `DigimonDatabase.ts`, `EvolutionPaths.ts`, `WaveData.ts`, `EncyclopediaScene.ts`, `UITheme.ts`, `TowerInfoPanel.ts`, `DigimonDatabase.test.ts`
+#### 22C: Run History & High Scores
+- [ ] Save top 10 runs to localStorage (wave, time, date, score)
+- [ ] Score formula: waves cleared + kills + bonus for lives remaining
+- [ ] High scores viewable from MainMenuScene
+- [ ] Clear history button in settings
 
 ---
 
-## Future Ideas (Post-Release)
+### Sprint 23 — Performance Optimization
 
-- Achievements / Leaderboards
+#### 23A: Object Pooling
+- [ ] Projectile pool — reuse instead of create/destroy per shot
+- [ ] Enemy pool — reuse instead of create/destroy per wave
+- [ ] Particle pool — reuse for merge effects, hit particles, status effect visuals
+- [ ] Measure before/after FPS on late-game waves (80+) with many towers
+
+#### 23B: Sprite Sheet Atlases
+- [ ] Set up texture atlas tooling (TexturePacker or free alternative)
+- [ ] Pack tower sprites into atlas(es) by stage
+- [ ] Pack enemy sprites into atlas(es) by phase
+- [ ] Pack UI/effect sprites into atlas
+- [ ] Update PreloadScene to load atlases instead of individual PNGs
+- [ ] Measure load time improvement (currently ~149 individual sprite loads)
+
+---
+
+### Sprint 24 — Visual Polish
+
+#### 24A: Boss & Enemy Effects
+- [ ] Unique boss death animation (larger explosion, screen flash, reward popup)
+- [ ] Enemy death particles (small burst on kill, colored by attribute)
+- [ ] Tower attack animation (brief scale pulse or flash when firing)
+- [ ] Enhanced boss ability visual feedback (screen shake, overlays, area indicators)
+
+#### 24B: Evolution Path Preview
+- [ ] Show available evolution options in TowerInfoPanel (stat comparison before committing)
+- [ ] Preview next evolution's sprite, damage, speed, range, and ability
+- [ ] Dim/lock evolutions that require more DP
+
+---
+
+### Sprint 25 — Roster Expansion
+
+- [ ] Audit current roster: ~141 towers across 21 lines, identify gaps
+- [ ] Add more alternate evolution paths using available sprites (842 total, ~149 used)
+- [ ] Target: 150+ tower Digimon
+- [ ] Add new enemy variants for underrepresented types (flying, regen, splitter)
+- [ ] Balance new entries against existing towers at each stage
+- [ ] Update tests for new database entries
+
+---
+
+### Sprint 26 — DNA Digivolution (Ultra Tier)
+
+- [ ] Design DNA Digivolution system:
+  - Combine two specific Mega Digimon to create an Ultra
+  - Requires both at max level + DP threshold
+  - DNA pairs defined in evolution paths (e.g. WarGreymon + MetalGarurumon = Omnimon)
+- [ ] Add DNA fusion UI (select two compatible Megas, confirm fusion)
+- [ ] Add Ultra-tier tower stats and abilities
+- [ ] Define 8+ DNA fusion pairs (see `ROSTER_EXPANSION_PLAN.md`)
+- [ ] Update EvolutionPaths with DNA routes
+- [ ] Update Encyclopedia to display DNA requirements
+- [ ] Add tests for DNA merge validation, stat calculations
+
+---
+
+### Sprint 27 — Accessibility
+
+- [ ] Colorblind mode: add attribute icons/symbols alongside colors (e.g. shield=Vaccine, sword=Virus, circle=Data, star=Free)
+- [ ] Attribute icon display on tower sprites, enemy sprites, and all UI panels
+- [ ] High-contrast mode option for UI panels and text
+- [ ] Current game speed indicator (persistent HUD badge showing 1x/2x/3x)
+- [ ] Settings toggle for colorblind-friendly palette
+
+---
+
+## Future Ideas
+
+- Map expansion (multiple map layouts, map select scene)
+- Achievements system
 - Mobile touch optimization
 - Difficulty modes (Easy / Normal / Hard)
 - Challenge modes (limited towers, no merge, speed run)
+- Tower synergies (adjacent tower bonuses)
 - Localization (multi-language)
+- PWA support (installable web app, offline play)
+- Open Graph meta tags, release tag
+- Tower comparison UI (side-by-side stats)
+- Undo/refund grace period on tower placement
 
 ---
 

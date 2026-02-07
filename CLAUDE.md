@@ -521,19 +521,38 @@ cost = Math.ceil(3 * currentLevel * stageMultiplier);
 
 ### Remaining Work
 
-**Content:**
-- More Digimon roster expansion (~150+ target, currently ~141 tower Digimon)
-- DNA Digivolution system (Ultra tier)
+**Bug Fixes & Foundation (Sprint 20):**
+- Wave 20 boss `boss_greymon_evolved` has missing sprite (key `greymon_evolved` not loaded)
+- Tower effect audit — playtest all 6 status effects
+- Wire up statistics tracking (GameStatistics interface exists but never populated)
+- Move sell value formula to Constants.ts (currently hardcoded `level * 25` in TowerInfoPanel)
 
-**Performance & Maps:**
-- Object pooling for projectiles/enemies
-- Map expansion (multiple map configs, new layouts)
+**Quality of Life (Sprint 21):**
+- Range preview + tower ghost on placement hover
+- SpawnMenu tooltips (attribute triangle, origin system, Digimon stats preview)
+- Low lives warning, boss incoming warning, critical state indicator
+- Keyboard shortcuts (sell, level up, deselect, cycle towers)
 
-**Polish (Done in Sprint 19):**
-- ~~Visual merge effects~~ ✅, ~~background music~~ ✅, ~~merge ability inheritance~~ ✅
-- ~~Wave preview hover/click for enemy details~~ ✅
-- ~~Volume persistence across scenes~~ ✅, ~~UI text readability~~ ✅
-- ~~Settings panel layout fixes~~ ✅, ~~Encyclopedia detail view~~ ✅
+**Statistics & Post-Game (Sprint 22):**
+- Per-tower kill count and damage tracking
+- Post-game stats screen (run summary, MVP tower, records)
+- Run history and high scores (localStorage)
+
+**Performance (Sprint 23):**
+- Object pooling for projectiles, enemies, and particles
+- Sprite sheet atlases (pack ~149 individual PNGs into atlases)
+
+**Visual Polish (Sprint 24):**
+- Boss/enemy death effects, tower attack animations
+- Evolution path preview with stat comparison in TowerInfoPanel
+
+**Content (Sprints 25-26):**
+- Roster expansion (~141 → 150+ tower Digimon)
+- DNA Digivolution system (Ultra tier, combine two Megas)
+
+**Accessibility (Sprint 27):**
+- Colorblind mode with attribute icons/symbols
+- High-contrast option, persistent game speed indicator
 
 ---
 
