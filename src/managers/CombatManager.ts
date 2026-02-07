@@ -129,14 +129,33 @@ export class CombatManager {
         );
         projectile.attributeMultiplier = attributeMult;
 
-        // Only the first projectile rolls for status effect to avoid triple-proc
+        // Only the first projectile rolls for status effects to avoid triple-proc
         if (isFirstProjectile) {
+          // Roll primary effect
           const effectChance = tower.stats.effectChance ?? 0;
           if (effectType && effectChance > 0 && Math.random() < effectChance) {
             const baseEffect = getBaseEffectType(effectType);
             if (baseEffect) {
               projectile.effectType = effectType;
               projectile.sourceDamage = baseDamage;
+            }
+          }
+
+          // Roll bonus effects (from merge inheritance)
+          if (tower.bonusEffects && tower.bonusEffects.length > 0) {
+            for (const bonus of tower.bonusEffects) {
+              if (Math.random() < bonus.effectChance) {
+                const baseEffect = getBaseEffectType(bonus.effectType);
+                if (baseEffect) {
+                  // If no primary effect was applied, use the bonus as the projectile's effect
+                  if (!projectile.effectType) {
+                    projectile.effectType = bonus.effectType;
+                    projectile.sourceDamage = baseDamage;
+                  }
+                  // Note: only one effect per projectile; first successful roll wins
+                  break;
+                }
+              }
             }
           }
         }

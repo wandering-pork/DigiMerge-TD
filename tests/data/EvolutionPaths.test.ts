@@ -176,4 +176,71 @@ describe('EvolutionPaths', () => {
       expect(EVOLUTION_PATHS['saviorhackmon'].some(p => p.resultId === 'jesmon')).toBe(true);
     });
   });
+
+  describe('Sprint 12D alternate evolution paths', () => {
+    it('starters have alternate Rookie paths', () => {
+      expect(EVOLUTION_PATHS['gigimon'].some(p => p.resultId === 'goblimon_tower')).toBe(true);
+      expect(EVOLUTION_PATHS['gigimon'].some(p => p.resultId === 'impmon_tower')).toBe(true);
+      expect(EVOLUTION_PATHS['tsunomon'].some(p => p.resultId === 'elecmon_tower')).toBe(true);
+      expect(EVOLUTION_PATHS['tsunomon'].some(p => p.resultId === 'gotsumon_tower')).toBe(true);
+      expect(EVOLUTION_PATHS['pagumon'].some(p => p.resultId === 'gazimon_tower')).toBe(true);
+      expect(EVOLUTION_PATHS['pagumon'].some(p => p.resultId === 'betamon_tower')).toBe(true);
+      expect(EVOLUTION_PATHS['pagumon'].some(p => p.resultId === 'kunemon_tower')).toBe(true);
+      expect(EVOLUTION_PATHS['tanemon'].some(p => p.resultId === 'floramon_tower')).toBe(true);
+    });
+
+    it('alternate Rookies are not default paths', () => {
+      const altRookies = [
+        { from: 'gigimon', to: 'goblimon_tower' },
+        { from: 'gigimon', to: 'impmon_tower' },
+        { from: 'tsunomon', to: 'elecmon_tower' },
+        { from: 'tsunomon', to: 'gotsumon_tower' },
+        { from: 'pagumon', to: 'gazimon_tower' },
+        { from: 'pagumon', to: 'betamon_tower' },
+        { from: 'pagumon', to: 'kunemon_tower' },
+        { from: 'tanemon', to: 'floramon_tower' },
+      ];
+      for (const { from, to } of altRookies) {
+        const path = EVOLUTION_PATHS[from].find(p => p.resultId === to);
+        expect(path?.isDefault, `${from} → ${to} should not be default`).toBe(false);
+      }
+    });
+
+    it('all new tower entries have evolution paths', () => {
+      const newTowerPaths = [
+        'impmon_tower', 'elecmon_tower', 'gotsumon_tower', 'betamon_tower',
+        'kunemon_tower', 'gazimon_tower', 'goblimon_tower', 'floramon_tower',
+        'leomon_tower', 'seadramon_tower', 'ogremon_tower', 'monochromon_tower',
+        'darktyrannomon_tower', 'airdramon_tower', 'meramon_tower', 'kuwagamon_tower',
+        'numemon_tower', 'guardromon_tower',
+        'megaseadramon_tower', 'gigadramon_tower', 'warumonzaemon_tower', 'ladydevimon_tower',
+        'bluemeramon_tower', 'megadramon_tower', 'mamemon_tower', 'andromon_tower',
+      ];
+      for (const id of newTowerPaths) {
+        expect(EVOLUTION_PATHS[id], `${id} should have evolution paths`).toBeDefined();
+        expect(EVOLUTION_PATHS[id].length, `${id} should have at least 1 path`).toBeGreaterThan(0);
+      }
+    });
+
+    it('Elecmon alternate line reaches Mega', () => {
+      // tsunomon → elecmon_tower → leomon_tower → mamemon_tower → saberleomon_tower
+      expect(EVOLUTION_PATHS['elecmon_tower'].some(p => p.resultId === 'leomon_tower')).toBe(true);
+      expect(EVOLUTION_PATHS['leomon_tower'].some(p => p.resultId === 'mamemon_tower')).toBe(true);
+      expect(EVOLUTION_PATHS['mamemon_tower'].some(p => p.resultId === 'saberleomon_tower')).toBe(true);
+    });
+
+    it('Betamon alternate line reaches Mega', () => {
+      // pagumon → betamon_tower → seadramon_tower → megaseadramon_tower → metalseadramon_tower
+      expect(EVOLUTION_PATHS['betamon_tower'].some(p => p.resultId === 'seadramon_tower')).toBe(true);
+      expect(EVOLUTION_PATHS['seadramon_tower'].some(p => p.resultId === 'megaseadramon_tower')).toBe(true);
+      expect(EVOLUTION_PATHS['megaseadramon_tower'].some(p => p.resultId === 'metalseadramon_tower')).toBe(true);
+    });
+
+    it('Gazimon alternate line reaches Mega', () => {
+      // pagumon → gazimon_tower → ogremon_tower → gigadramon_tower → blackwargreymon_tower
+      expect(EVOLUTION_PATHS['gazimon_tower'].some(p => p.resultId === 'ogremon_tower')).toBe(true);
+      expect(EVOLUTION_PATHS['ogremon_tower'].some(p => p.resultId === 'gigadramon_tower')).toBe(true);
+      expect(EVOLUTION_PATHS['gigadramon_tower'].some(p => p.resultId === 'blackwargreymon_tower')).toBe(true);
+    });
+  });
 });

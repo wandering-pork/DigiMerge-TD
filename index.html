@@ -4,6 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DigiMerge TD</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@400;600;700&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet" />
   <style>
     @font-face {
       font-family: 'Pixel Digivolve';
@@ -13,8 +16,12 @@
       font-display: swap;
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: #0a0a18; overflow: hidden; }
+    body { background: #0f0a14; overflow: hidden; }
     #game-container { width: 100vw; height: 100vh; }
+    #game-container canvas {
+      /* Removed image-rendering: pixelated — it made text blocky when canvas is scaled.
+         Phaser pixelArt:true handles sprite NEAREST filtering internally. */
+    }
   </style>
 </head>
 <body>

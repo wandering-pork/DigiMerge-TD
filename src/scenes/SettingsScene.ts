@@ -2,16 +2,22 @@ import Phaser from 'phaser';
 import { COLORS, TEXT_STYLES, FONTS } from '@/ui/UITheme';
 import { drawPanel, drawButton, drawSeparator, animateButtonHover, animateButtonPress, animateModalIn } from '@/ui/UIHelpers';
 import { AudioManager } from '@/managers/AudioManager';
+import { SaveManager } from '@/managers/SaveManager';
 
 /**
  * Settings overlay scene with volume, mute, restart, and main menu options.
  */
 export class SettingsScene extends Phaser.Scene {
+  private callerScene: string = 'GameScene';
+
   constructor() {
     super({ key: 'SettingsScene' });
   }
 
-  create() {
+  create(data?: { from?: string }) {
+    if (data?.from) {
+      this.callerScene = data.from;
+    }
     const { width, height } = this.cameras.main;
 
     // Semi-transparent dark overlay
@@ -26,7 +32,8 @@ export class SettingsScene extends Phaser.Scene {
 
     // Panel
     const panelWidth = 310;
-    const panelHeight = 380;
+    const showGameButtons = this.callerScene !== 'MainMenuScene';
+    const panelHeight = showGameButtons ? 480 : 380;
     const panelX = (width - panelWidth) / 2;
     const panelY = (height - panelHeight) / 2;
 
@@ -50,6 +57,7 @@ export class SettingsScene extends Phaser.Scene {
 
     // ---- Volume Control ----
     const audioManager: AudioManager | undefined = this.registry.get('audioManager');
+    const persistedSettings = AudioManager.loadSettings();
     const controlX = panelX + 24;
     const contentWidth = panelWidth - 48;
     let controlY = panelY + 62;
@@ -64,17 +72,18 @@ export class SettingsScene extends Phaser.Scene {
 
     controlY += 18;
 
-    const currentVolume = audioManager ? audioManager.getVolume() : 0.05;
-    const isMuted = audioManager ? !audioManager.isEnabled() : false;
+    const currentVolume = audioManager ? audioManager.getVolume() : persistedSettings.sfxVolume;
+    const isMuted = audioManager ? !audioManager.isEnabled() : !persistedSettings.enabled;
 
     // Slider track
     const sliderWidth = contentWidth - 80; // room for percentage + mute
     const sliderHeight = 6;
+    const volumeSliderY = controlY; // Capture Y for closures
     const sliderTrack = this.add.graphics();
     sliderTrack.fillStyle(COLORS.BG_DEEPEST, 1);
-    sliderTrack.fillRoundedRect(controlX, controlY, sliderWidth, sliderHeight, 3);
+    sliderTrack.fillRoundedRect(controlX, volumeSliderY, sliderWidth, sliderHeight, 3);
     sliderTrack.lineStyle(1, COLORS.CYAN_DIM, 0.3);
-    sliderTrack.strokeRoundedRect(controlX, controlY, sliderWidth, sliderHeight, 3);
+    sliderTrack.strokeRoundedRect(controlX, volumeSliderY, sliderWidth, sliderHeight, 3);
 
     // Slider fill
     const sliderFill = this.add.graphics();
@@ -82,7 +91,7 @@ export class SettingsScene extends Phaser.Scene {
       sliderFill.clear();
       sliderFill.fillStyle(COLORS.CYAN, 0.7);
       const fillW = Math.max(3, sliderWidth * vol);
-      sliderFill.fillRoundedRect(controlX, controlY, fillW, sliderHeight, 3);
+      sliderFill.fillRoundedRect(controlX, volumeSliderY, fillW, sliderHeight, 3);
     };
     drawSliderFill(isMuted ? 0 : currentVolume);
 
@@ -94,7 +103,7 @@ export class SettingsScene extends Phaser.Scene {
     const drawHandle = (vol: number) => {
       handle.clear();
       const hx = controlX + sliderWidth * vol - handleSize / 2;
-      const hy = controlY + sliderHeight / 2 - handleSize / 2;
+      const hy = volumeSliderY + sliderHeight / 2 - handleSize / 2;
       handle.fillStyle(0x000000, 0.3);
       handle.fillRoundedRect(hx + 1, hy + 1, handleSize, handleSize, 4);
       handle.fillStyle(0xffffff, 1);
@@ -105,7 +114,7 @@ export class SettingsScene extends Phaser.Scene {
     drawHandle(isMuted ? 0 : volume);
 
     // Volume percentage text (inline right of slider)
-    const volPercText = this.add.text(controlX + sliderWidth + 8, controlY - 3, `${Math.round((isMuted ? 0 : volume) * 100)}%`, {
+    const volPercText = this.add.text(controlX + sliderWidth + 8, volumeSliderY - 3, `${Math.round((isMuted ? 0 : volume) * 100)}%`, {
       fontFamily: FONTS.MONO,
       fontSize: '12px',
       color: COLORS.TEXT_WHITE,
@@ -113,7 +122,7 @@ export class SettingsScene extends Phaser.Scene {
     });
 
     // Draggable zone over slider
-    const sliderZone = this.add.zone(controlX + sliderWidth / 2, controlY + 3, sliderWidth + handleSize, 24)
+    const sliderZone = this.add.zone(controlX + sliderWidth / 2, volumeSliderY + 3, sliderWidth + handleSize, 24)
       .setInteractive({ useHandCursor: true });
 
     let isDragging = false;
@@ -127,6 +136,14 @@ export class SettingsScene extends Phaser.Scene {
       if (audioManager) {
         audioManager.setVolume(volume);
         if (volume > 0) audioManager.setEnabled(true);
+      } else {
+        // Persist directly when no AudioManager instance exists (e.g., MainMenu)
+        try {
+          const s = AudioManager.loadSettings();
+          s.sfxVolume = volume;
+          if (volume > 0) s.enabled = true;
+          localStorage.setItem('digimerge_audio_settings', JSON.stringify(s));
+        } catch { /* ignore */ }
       }
       // Update mute button state
       updateMuteVisual();
@@ -147,7 +164,7 @@ export class SettingsScene extends Phaser.Scene {
     const muteBtnW = 26;
     const muteBtnH = 22;
     const muteBtnX = panelX + panelWidth - 34;
-    const muteContainer = this.add.container(muteBtnX, controlY + 1);
+    const muteContainer = this.add.container(muteBtnX, volumeSliderY + 1);
     const muteBtnBg = this.add.graphics();
     const muteIcon = this.add.text(0, 0, '', {
       fontFamily: FONTS.BODY,
@@ -157,7 +174,7 @@ export class SettingsScene extends Phaser.Scene {
     }).setOrigin(0.5);
 
     const updateMuteVisual = () => {
-      const muted = audioManager ? !audioManager.isEnabled() : false;
+      const muted = audioManager ? !audioManager.isEnabled() : !AudioManager.loadSettings().enabled;
       drawButton(muteBtnBg, muteBtnW, muteBtnH, muted ? COLORS.DANGER : COLORS.BG_PANEL_LIGHT);
       muteIcon.setText(muted ? '\u2716' : '\u266A');
     };
@@ -184,15 +201,127 @@ export class SettingsScene extends Phaser.Scene {
           volPercText.setText(`${Math.round(volume * 100)}%`);
         }
         updateMuteVisual();
+      } else {
+        // Persist mute toggle directly when no AudioManager instance
+        try {
+          const s = AudioManager.loadSettings();
+          s.enabled = !s.enabled;
+          localStorage.setItem('digimerge_audio_settings', JSON.stringify(s));
+          if (!s.enabled) {
+            drawSliderFill(0);
+            drawHandle(0);
+            volPercText.setText('0%');
+            // Stop menu music
+            this.sound.stopAll();
+          } else {
+            drawSliderFill(volume);
+            drawHandle(volume);
+            volPercText.setText(`${Math.round(volume * 100)}%`);
+          }
+          updateMuteVisual();
+        } catch { /* ignore */ }
       }
     });
 
-    controlY += 24;
+    controlY += 28;
+
+    // ---- Music Volume ----
+    this.add.text(controlX, controlY, 'MUSIC', {
+      fontFamily: FONTS.BODY,
+      fontSize: '11px',
+      color: '#7788aa',
+      letterSpacing: 2,
+      resolution: 2,
+    });
+    controlY += 18;
+
+    // Get current music volume from AudioManager or persisted settings
+    let musicVol = audioManager?.getMusicVolume() ?? persistedSettings.musicVolume;
+    const musicSliderY = controlY; // Capture Y for closures
+
+    const musicSliderTrack = this.add.graphics();
+    musicSliderTrack.fillStyle(COLORS.BG_DEEPEST, 1);
+    musicSliderTrack.fillRoundedRect(controlX, musicSliderY, sliderWidth, sliderHeight, 3);
+    musicSliderTrack.lineStyle(1, COLORS.GOLD_DIM, 0.3);
+    musicSliderTrack.strokeRoundedRect(controlX, musicSliderY, sliderWidth, sliderHeight, 3);
+
+    const musicSliderFill = this.add.graphics();
+    const drawMusicFill = (vol: number) => {
+      musicSliderFill.clear();
+      musicSliderFill.fillStyle(COLORS.GOLD, 0.7);
+      const fillW = Math.max(3, sliderWidth * vol);
+      musicSliderFill.fillRoundedRect(controlX, musicSliderY, fillW, sliderHeight, 3);
+    };
+    drawMusicFill(musicVol);
+
+    const musicHandle = this.add.graphics();
+    const drawMusicHandle = (vol: number) => {
+      musicHandle.clear();
+      const hx = controlX + sliderWidth * vol - handleSize / 2;
+      const hy = musicSliderY + sliderHeight / 2 - handleSize / 2;
+      musicHandle.fillStyle(0x000000, 0.3);
+      musicHandle.fillRoundedRect(hx + 1, hy + 1, handleSize, handleSize, 4);
+      musicHandle.fillStyle(0xffffff, 1);
+      musicHandle.fillRoundedRect(hx, hy, handleSize, handleSize, 4);
+      musicHandle.lineStyle(1.5, COLORS.GOLD, 0.6);
+      musicHandle.strokeRoundedRect(hx, hy, handleSize, handleSize, 4);
+    };
+    drawMusicHandle(musicVol);
+
+    const musicPercText = this.add.text(controlX + sliderWidth + 8, musicSliderY - 3, `${Math.round(musicVol * 100)}%`, {
+      fontFamily: FONTS.MONO,
+      fontSize: '12px',
+      color: COLORS.TEXT_WHITE,
+      resolution: 2,
+    });
+
+    const musicSliderZone = this.add.zone(controlX + sliderWidth / 2, musicSliderY + 3, sliderWidth + handleSize, 24)
+      .setInteractive({ useHandCursor: true });
+
+    let isMusicDragging = false;
+
+    const updateMusicVolume = (pointerX: number) => {
+      const localX = pointerX - controlX;
+      musicVol = Phaser.Math.Clamp(localX / sliderWidth, 0, 1);
+      drawMusicFill(musicVol);
+      drawMusicHandle(musicVol);
+      musicPercText.setText(`${Math.round(musicVol * 100)}%`);
+      if (audioManager) {
+        audioManager.setMusicVolume(musicVol);
+      } else {
+        // Persist directly when no AudioManager instance exists (e.g., MainMenu)
+        try {
+          const s = AudioManager.loadSettings();
+          s.musicVolume = musicVol;
+          localStorage.setItem('digimerge_audio_settings', JSON.stringify(s));
+        } catch { /* ignore */ }
+      }
+      // Also update menu music playing directly via Phaser (not through AudioManager)
+      for (const key of ['music_menu', 'music_battle']) {
+        const sounds = this.sound.getAll(key);
+        for (const s of sounds) {
+          (s as any).volume = musicVol;
+        }
+      }
+    };
+
+    musicSliderZone.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+      isMusicDragging = true;
+      updateMusicVolume(pointer.x);
+    });
+
+    this.input.on('pointermove', (pointer: Phaser.Input.Pointer) => {
+      if (isMusicDragging) updateMusicVolume(pointer.x);
+    });
+
+    this.input.on('pointerup', () => { isMusicDragging = false; });
+
+    controlY += 28;
 
     // Separator
     const optionsSep = this.add.graphics();
     drawSeparator(optionsSep, panelX + 20, controlY, panelX + panelWidth - 20);
-    controlY += 14;
+    controlY += 12;
 
     // ---- Display Options ----
     this.add.text(controlX, controlY, 'DISPLAY', {
@@ -244,7 +373,7 @@ export class SettingsScene extends Phaser.Scene {
     });
 
     dmgRow.add(dmgBtnContainer);
-    controlY += 30;
+    controlY += 26;
 
     // Health Bar Mode Toggle
     const HEALTH_MODES: Array<'all' | 'bosses' | 'off'> = ['all', 'bosses', 'off'];
@@ -288,12 +417,81 @@ export class SettingsScene extends Phaser.Scene {
     });
 
     hpRow.add(hpBtnContainer);
-    controlY += 30;
+    controlY += 26;
+
+    // Separator before save section
+    const saveSep = this.add.graphics();
+    drawSeparator(saveSep, panelX + 20, controlY, panelX + panelWidth - 20);
+    controlY += 12;
+
+    // ---- Save Export/Import ----
+    this.add.text(controlX, controlY, 'SAVE DATA', {
+      fontFamily: FONTS.BODY,
+      fontSize: '11px',
+      color: '#7788aa',
+      letterSpacing: 2,
+      resolution: 2,
+    });
+    controlY += 24;
+
+    const halfBtnW = 82;
+    // Export button
+    this.createActionButton(width / 2 - halfBtnW / 2 - 6, controlY, halfBtnW, 28, 'Export', COLORS.MERGE, COLORS.MERGE_HOVER, () => {
+      const exported = SaveManager.exportSave();
+      if (exported) {
+        saveStatusText.setText('Save exported!').setColor('#44cc88');
+      } else {
+        saveStatusText.setText('No save to export').setColor('#ff6666');
+      }
+      this.time.delayedCall(3000, () => saveStatusText.setText(''));
+    });
+
+    // Import button
+    this.createActionButton(width / 2 + halfBtnW / 2 + 6, controlY, halfBtnW, 28, 'Import', COLORS.SPECIAL, COLORS.SPECIAL_HOVER, () => {
+      // Create a hidden file input
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.json';
+      input.onchange = () => {
+        const file = input.files?.[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+          const result = SaveManager.validateImport(reader.result as string);
+          if (typeof result === 'string') {
+            saveStatusText.setText(result).setColor('#ff6666');
+            this.time.delayedCall(4000, () => saveStatusText.setText(''));
+          } else {
+            SaveManager.importSave(result);
+            saveStatusText.setText('Save imported! Restart to apply.').setColor('#44cc88');
+            this.time.delayedCall(4000, () => saveStatusText.setText(''));
+          }
+        };
+        reader.onerror = () => {
+          saveStatusText.setText('Failed to read file').setColor('#ff6666');
+          this.time.delayedCall(3000, () => saveStatusText.setText(''));
+        };
+        reader.readAsText(file);
+      };
+      input.click();
+    });
+
+    controlY += 32;
+
+    // Status text for import feedback (below Export/Import buttons)
+    const saveStatusText = this.add.text(width / 2, controlY, '', {
+      fontFamily: FONTS.MONO,
+      fontSize: '10px',
+      color: '#44cc88',
+      resolution: 2,
+    }).setOrigin(0.5);
+
+    controlY += 16;
 
     // Separator before action buttons
     const actionSep = this.add.graphics();
     drawSeparator(actionSep, panelX + 20, controlY, panelX + panelWidth - 20);
-    controlY += 18;
+    controlY += 14;
 
     // ---- Action Buttons ----
     const btnW = 180;
@@ -304,22 +502,26 @@ export class SettingsScene extends Phaser.Scene {
     this.createActionButton(btnCenterX, controlY, btnW, btnH, 'Close', COLORS.PRIMARY, COLORS.PRIMARY_HOVER, () => {
       this.scene.stop();
     });
-    controlY += 42;
+    controlY += 38;
 
-    // Restart button
-    this.createActionButton(btnCenterX, controlY, btnW, btnH, 'Restart', COLORS.SPECIAL, COLORS.SPECIAL_HOVER, () => {
-      this.scene.stop('GameScene');
-      this.scene.stop();
-      this.scene.start('GameScene');
-    });
-    controlY += 42;
+    if (showGameButtons) {
+      // Restart button
+      this.createActionButton(btnCenterX, controlY, btnW, btnH, 'Restart', COLORS.SPECIAL, COLORS.SPECIAL_HOVER, () => {
+        const gameScene = this.scene.get('GameScene');
+        this.scene.stop();
+        if (gameScene) {
+          gameScene.scene.restart();
+        }
+      });
+      controlY += 38;
 
-    // Main Menu button
-    this.createActionButton(btnCenterX, controlY, btnW, btnH, 'Main Menu', COLORS.DANGER, COLORS.DANGER_HOVER, () => {
-      this.scene.stop('GameScene');
-      this.scene.stop();
-      this.scene.start('MainMenuScene');
-    });
+      // Main Menu button
+      this.createActionButton(btnCenterX, controlY, btnW, btnH, 'Main Menu', COLORS.DANGER, COLORS.DANGER_HOVER, () => {
+        this.scene.stop('GameScene');
+        this.scene.stop();
+        this.scene.start('MainMenuScene');
+      });
+    }
 
     // Panel entrance animation
     animateModalIn(this, panelContainer);

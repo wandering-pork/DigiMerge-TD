@@ -19,8 +19,8 @@ describe('GridUtils', () => {
 
     it('converts grid (2,3) correctly', () => {
       const pos = gridToPixel(2, 3);
-      expect(pos.x).toBe(64);  // (2-1) * 64
-      expect(pos.y).toBe(128); // (3-1) * 64
+      expect(pos.x).toBe(GRID.CELL_SIZE);      // (2-1) * CELL_SIZE
+      expect(pos.y).toBe(2 * GRID.CELL_SIZE);   // (3-1) * CELL_SIZE
     });
 
     it('converts grid (8,18) to bottom-right area', () => {
@@ -33,14 +33,16 @@ describe('GridUtils', () => {
   describe('gridToPixelCenter', () => {
     it('returns center of cell (1,1)', () => {
       const center = gridToPixelCenter(1, 1);
-      expect(center.x).toBe(32); // 0 + 32
-      expect(center.y).toBe(32); // 0 + 32
+      const half = GRID.CELL_SIZE / 2;
+      expect(center.x).toBe(half);
+      expect(center.y).toBe(half);
     });
 
     it('returns center of cell (3,5)', () => {
       const center = gridToPixelCenter(3, 5);
-      expect(center.x).toBe(2 * 64 + 32); // 160
-      expect(center.y).toBe(4 * 64 + 32); // 288
+      const half = GRID.CELL_SIZE / 2;
+      expect(center.x).toBe(2 * GRID.CELL_SIZE + half);
+      expect(center.y).toBe(4 * GRID.CELL_SIZE + half);
     });
   });
 
@@ -52,19 +54,20 @@ describe('GridUtils', () => {
     });
 
     it('converts pixel center of (2,3) back correctly', () => {
-      const grid = pixelToGrid(96, 160); // center of (2,3)
+      const half = GRID.CELL_SIZE / 2;
+      const grid = pixelToGrid(GRID.CELL_SIZE + half, 2 * GRID.CELL_SIZE + half); // center of (2,3)
       expect(grid.col).toBe(2);
       expect(grid.row).toBe(3);
     });
 
     it('converts pixel at edge of cell correctly', () => {
-      const grid = pixelToGrid(63, 63); // still in cell (1,1)
+      const grid = pixelToGrid(GRID.CELL_SIZE - 1, GRID.CELL_SIZE - 1); // still in cell (1,1)
       expect(grid.col).toBe(1);
       expect(grid.row).toBe(1);
     });
 
     it('converts pixel at start of next cell', () => {
-      const grid = pixelToGrid(64, 64); // cell (2,2)
+      const grid = pixelToGrid(GRID.CELL_SIZE, GRID.CELL_SIZE); // cell (2,2)
       expect(grid.col).toBe(2);
       expect(grid.row).toBe(2);
     });

@@ -36,12 +36,12 @@ const TUTORIAL_STEPS: TutorialStep[] = [
   {
     text: 'Earn DigiBytes by defeating enemies.\nUse them to level up your towers!',
     highlightArea: {
-      x: GRID_OFFSET_X + GRID.COLUMNS * GRID.CELL_SIZE + 15,
+      x: 15,
       y: 0,
-      w: 270,
+      w: 290,
       h: 140,
     },
-    arrowDir: 'right',
+    arrowDir: 'left',
   },
   {
     text: 'Open the Spawn Menu to deploy\nmore Digimon on empty slots.',

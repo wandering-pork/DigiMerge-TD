@@ -1,86 +1,98 @@
 // =============================================================================
-// UITheme.ts — Centralized design tokens for the "Digital World Interface" aesthetic
+// UITheme.ts — Centralized design tokens for the "Digital Sunrise" aesthetic
+// Warm amber/teal palette with deep indigo backgrounds
 // =============================================================================
 
 // COLOR PALETTE
 export const COLORS = {
-  // Backgrounds (dark layers with blue-purple undertone)
-  BG_DEEPEST: 0x060614,
-  BG_DARK: 0x0a0a1e,
-  BG_PANEL: 0x101030,
-  BG_PANEL_LIGHT: 0x181848,
-  BG_HOVER: 0x222266,
-  BG_CARD: 0x141438,
+  // Backgrounds (deep indigo-charcoal)
+  BG_DEEPEST: 0x0f0a14,
+  BG_DARK: 0x1a1020,
+  BG_PANEL: 0x1e1428,
+  BG_PANEL_LIGHT: 0x2a1e36,
+  BG_HOVER: 0x3a2848,
+  BG_CARD: 0x221830,
 
-  // Primary accent (cyan)
-  CYAN: 0x00ddff,
-  CYAN_DIM: 0x0088aa,
-  CYAN_GLOW: 0x00eeff,
-  CYAN_BRIGHT: 0x66f0ff,
+  // Primary accent (warm amber)
+  AMBER: 0xff9944,
+  AMBER_DIM: 0xbb6622,
+  AMBER_GLOW: 0xffaa55,
+  AMBER_BRIGHT: 0xffbb66,
 
-  // Secondary accent (gold/amber)
+  // Legacy CYAN aliases → now amber (for backward compat in code)
+  CYAN: 0xff9944,
+  CYAN_DIM: 0xbb6622,
+  CYAN_GLOW: 0xffaa55,
+  CYAN_BRIGHT: 0xffbb66,
+
+  // Secondary accent (cool teal)
+  TEAL: 0x44ccbb,
+  TEAL_DIM: 0x338899,
+  TEAL_BRIGHT: 0x66eedd,
+
+  // Tertiary accent (gold — keep for special highlights)
   GOLD: 0xffc844,
   GOLD_DIM: 0xaa8833,
   GOLD_BRIGHT: 0xffdd66,
 
-  // Attribute colors (hex number for Graphics)
+  // Attribute colors (keep distinctive for gameplay clarity)
   VACCINE: 0x33ee77,
-  DATA: 0x00bbff,
+  DATA: 0x44aaff,
   VIRUS: 0xff44cc,
   FREE: 0xffcc33,
 
   // Attribute colors (hex string for Text)
   VACCINE_STR: '#33ee77',
-  DATA_STR: '#00bbff',
+  DATA_STR: '#44aaff',
   VIRUS_STR: '#ff44cc',
   FREE_STR: '#ffcc33',
 
-  // Functional colors — richer palette with better depth
-  SUCCESS: 0x22aa55,
-  SUCCESS_HOVER: 0x33cc66,
-  SUCCESS_PRESS: 0x1a884a,
-  SUCCESS_GLOW: 0x44ee88,
-  DANGER: 0xcc3344,
-  DANGER_HOVER: 0xee4455,
-  DANGER_PRESS: 0x992233,
-  DANGER_GLOW: 0xff6677,
-  SPECIAL: 0x7744cc,
-  SPECIAL_HOVER: 0x9955ee,
-  SPECIAL_PRESS: 0x553399,
-  SPECIAL_GLOW: 0xbb88ff,
-  PRIMARY: 0x2255bb,
-  PRIMARY_HOVER: 0x3377dd,
-  PRIMARY_PRESS: 0x1a4499,
-  PRIMARY_GLOW: 0x4499ff,
-  MERGE: 0x228899,
-  MERGE_HOVER: 0x33bbdd,
-  MERGE_PRESS: 0x1a6677,
-  MERGE_GLOW: 0x44ddff,
-  DISABLED: 0x161622,
-  DISABLED_TEXT: '#444466',
+  // Functional colors — warmer palette
+  SUCCESS: 0x33aa55,
+  SUCCESS_HOVER: 0x44cc66,
+  SUCCESS_PRESS: 0x228844,
+  SUCCESS_GLOW: 0x55ee88,
+  DANGER: 0xcc4444,
+  DANGER_HOVER: 0xee5555,
+  DANGER_PRESS: 0x993333,
+  DANGER_GLOW: 0xff7777,
+  SPECIAL: 0x8844cc,
+  SPECIAL_HOVER: 0xaa55ee,
+  SPECIAL_PRESS: 0x663399,
+  SPECIAL_GLOW: 0xcc88ff,
+  PRIMARY: 0x3355bb,
+  PRIMARY_HOVER: 0x4477dd,
+  PRIMARY_PRESS: 0x224499,
+  PRIMARY_GLOW: 0x5599ff,
+  MERGE: 0x339988,
+  MERGE_HOVER: 0x44bbcc,
+  MERGE_PRESS: 0x227766,
+  MERGE_GLOW: 0x55ddee,
+  DISABLED: 0x1a1422,
+  DISABLED_TEXT: '#554466',
 
-  // Text
-  TEXT_WHITE: '#ffffff',
-  TEXT_DIM: '#7788aa',
-  TEXT_LABEL: '#8899bb',
-  TEXT_VALUE: '#ffffff',
+  // Text — warm whites and warm grays
+  TEXT_WHITE: '#fff8f0',
+  TEXT_DIM: '#aa9988',
+  TEXT_LABEL: '#ccaa88',
+  TEXT_VALUE: '#fff8f0',
   TEXT_GOLD: '#ffcc44',
   TEXT_LIVES: '#ff6666',
   TEXT_CURRENCY: '#ffdd44',
 
-  // Grid
+  // Grid — warm earth tones
   GRID_PATH: 0x2a1a10,
   GRID_SLOT: 0x0e1e0e,
   GRID_SLOT_BORDER: 0x1a2a1a,
-  GRID_SLOT_DOT: 0x00ccff,
+  GRID_SLOT_DOT: 0xff9944,
   GRID_SPAWN: 0x00aa44,
   GRID_BASE: 0xaa2222,
   PATH_LINE: 0x886633,
 
-  // Borders & separators
-  BORDER_PANEL: 0x00ccff,
-  BORDER_BUTTON: 0x4466aa,
-  SEPARATOR: 0x00ccff,
+  // Borders & separators — amber tinted
+  BORDER_PANEL: 0xff9944,
+  BORDER_BUTTON: 0x664422,
+  SEPARATOR: 0xff9944,
 
   // Overlay
   OVERLAY_BLACK: 0x000000,
@@ -103,43 +115,43 @@ export const ATTRIBUTE_COLORS_STR: Record<number, string> = {
   3: COLORS.FREE_STR,
 };
 
-// TYPOGRAPHY — distinctive choices for a Digital World aesthetic
-// Georgia for elegant display text, Consolas for data readability
+// TYPOGRAPHY — Digital Sunrise aesthetic
+// Playfair Display for elegant display, Inter for clean body, Fira Code for data
 export const FONTS = {
-  DISPLAY: '"Pixel Digivolve", Georgia, "Palatino Linotype", "Book Antiqua", serif',
-  BODY: '"Segoe UI", Tahoma, Geneva, sans-serif',
-  MONO: 'Consolas, "Lucida Console", "Courier New", monospace',
+  DISPLAY: '"Pixel Digivolve", "Playfair Display", Georgia, serif',
+  BODY: 'Inter, "Segoe UI", Tahoma, sans-serif',
+  MONO: '"Fira Code", Consolas, "Courier New", monospace',
 };
 
 export const TEXT_STYLES = {
   SCENE_TITLE: {
     fontFamily: FONTS.DISPLAY,
     fontSize: '48px',
-    color: '#00ddff',
+    color: '#ff9944',
     fontStyle: 'bold',
-    stroke: '#002233',
+    stroke: '#221100',
     strokeThickness: 5,
-    shadow: { offsetX: 0, offsetY: 3, color: '#001122', blur: 8, fill: true },
+    shadow: { offsetX: 0, offsetY: 3, color: '#110800', blur: 8, fill: true },
     resolution: 2,
   } as Phaser.Types.GameObjects.Text.TextStyle,
   SCENE_SUBTITLE: {
     fontFamily: FONTS.BODY,
     fontSize: '17px',
-    color: '#8899bb',
+    color: '#ccaa88',
     shadow: { offsetX: 0, offsetY: 1, color: '#000000', blur: 4, fill: true },
     resolution: 2,
   } as Phaser.Types.GameObjects.Text.TextStyle,
   HUD_LABEL: {
     fontFamily: FONTS.BODY,
     fontSize: '12px',
-    color: '#7788aa',
+    color: '#ccaa88',
     letterSpacing: 2,
     resolution: 2,
   } as Phaser.Types.GameObjects.Text.TextStyle,
   HUD_VALUE: {
     fontFamily: FONTS.MONO,
     fontSize: '20px',
-    color: '#ffffff',
+    color: '#fff8f0',
     fontStyle: 'bold',
     shadow: { offsetX: 0, offsetY: 1, color: '#000000', blur: 3, fill: true },
     resolution: 2,
@@ -147,26 +159,26 @@ export const TEXT_STYLES = {
   PANEL_TITLE: {
     fontFamily: FONTS.DISPLAY,
     fontSize: '17px',
-    color: '#00ddff',
+    color: '#ff9944',
     fontStyle: 'bold',
     resolution: 2,
   } as Phaser.Types.GameObjects.Text.TextStyle,
   PANEL_LABEL: {
     fontFamily: FONTS.BODY,
-    fontSize: '12px',
-    color: '#8899bb',
+    fontSize: '14px',
+    color: '#ccaa88',
     resolution: 2,
   } as Phaser.Types.GameObjects.Text.TextStyle,
   PANEL_VALUE: {
     fontFamily: FONTS.MONO,
-    fontSize: '13px',
-    color: '#ffffff',
+    fontSize: '15px',
+    color: '#fff8f0',
     resolution: 2,
   } as Phaser.Types.GameObjects.Text.TextStyle,
   BUTTON: {
     fontFamily: FONTS.BODY,
     fontSize: '16px',
-    color: '#ffffff',
+    color: '#fff8f0',
     fontStyle: 'bold',
     shadow: { offsetX: 0, offsetY: 1, color: '#000000', blur: 2, fill: true },
     resolution: 2,
@@ -174,14 +186,14 @@ export const TEXT_STYLES = {
   BUTTON_SM: {
     fontFamily: FONTS.BODY,
     fontSize: '13px',
-    color: '#ffffff',
+    color: '#fff8f0',
     fontStyle: 'bold',
     resolution: 2,
   } as Phaser.Types.GameObjects.Text.TextStyle,
   MODAL_TITLE: {
     fontFamily: FONTS.DISPLAY,
     fontSize: '26px',
-    color: '#ffdd44',
+    color: '#ffcc44',
     fontStyle: 'bold',
     stroke: '#332200',
     strokeThickness: 3,
@@ -191,12 +203,12 @@ export const TEXT_STYLES = {
   VERSION: {
     fontFamily: FONTS.MONO,
     fontSize: '11px',
-    color: '#445566',
+    color: '#665544',
     resolution: 2,
   } as Phaser.Types.GameObjects.Text.TextStyle,
 };
 
-// ANIMATION CONFIGS — slightly refined timings for better feel
+// ANIMATION CONFIGS
 export const ANIM = {
   PANEL_SLIDE_MS: 300,
   PANEL_SLIDE_EASE: 'Cubic.easeOut',
@@ -206,6 +218,6 @@ export const ANIM = {
   BUTTON_PRESS_MS: 80,
   GLOW_PULSE_MS: 1500,
   FADE_IN_MS: 500,
-  STAGGER_MS: 60,         // Delay between staggered items
-  ENTRANCE_OFFSET: 40,    // Pixels to slide in from
+  STAGGER_MS: 60,
+  ENTRANCE_OFFSET: 40,
 };

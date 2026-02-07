@@ -56,7 +56,7 @@ export class StarterSelectScene extends Phaser.Scene {
     this.cardBgs.clear();
 
     // Background
-    this.cameras.main.setBackgroundColor('#060614');
+    this.cameras.main.setBackgroundColor('#0f0a14');
     const gridGfx = this.add.graphics();
     drawDigitalGrid(gridGfx, width, height, 50, COLORS.CYAN, 0.02);
 
@@ -75,12 +75,12 @@ export class StarterSelectScene extends Phaser.Scene {
       fontSize: '15px',
     }).setOrigin(0.5);
 
-    // Starter grid: 7 columns x 3 rows
+    // Starter grid: 7 columns x 3 rows (landscape-optimized)
     const cols = 7;
-    const cellWidth = 115;
-    const cellHeight = 145;
+    const cellWidth = 155;
+    const cellHeight = 130;
     const gridStartX = (width - cols * cellWidth) / 2 + cellWidth / 2;
-    const gridStartY = 165;
+    const gridStartY = 170;
 
     this.starters.forEach((starter, index) => {
       const col = index % cols;
@@ -101,6 +101,7 @@ export class StarterSelectScene extends Phaser.Scene {
         duration: 350,
         ease: 'Cubic.easeOut',
         delay: index * 30,
+        onComplete: () => { container.setAlpha(1); },
       });
     });
 
@@ -198,9 +199,9 @@ export class StarterSelectScene extends Phaser.Scene {
     container.add(highlight);
     this.cardHighlights.set(starter.key, highlight);
 
-    // Sprite
+    // Sprite (Kyokyomon sprite is very faint/tiny — boost its scale)
     const sprite = this.add.image(0, -18, starter.key);
-    sprite.setScale(2.5);
+    sprite.setScale(starter.key === 'kyokyomon' ? 3.5 : 2.5);
     container.add(sprite);
 
     // Name label

@@ -19,19 +19,19 @@ export function drawPanel(
   const fa = opts?.fillAlpha ?? 0.97;
   g.clear();
   // Layer 1: outer glow (larger, low alpha)
-  g.fillStyle(bc, 0.05);
+  g.fillStyle(bc, 0.08);
   g.fillRoundedRect(x - 6, y - 6, w + 12, h + 12, r + 4);
   // Layer 2: dark edge
   g.fillStyle(COLORS.BG_DARK, 1);
   g.fillRoundedRect(x - 1, y - 1, w + 2, h + 2, r);
-  // Layer 3: inner fill with subtle gradient effect (two-tone)
+  // Layer 3: inner fill
   g.fillStyle(COLORS.BG_PANEL, fa);
   g.fillRoundedRect(x, y, w, h, r);
-  // Layer 3b: slight top highlight for depth
-  g.fillStyle(0xffffff, 0.02);
+  // Layer 3b: warm top highlight for depth
+  g.fillStyle(0xffddaa, 0.02);
   g.fillRoundedRect(x + 2, y + 2, w - 4, h / 3, { tl: r - 2, tr: r - 2, bl: 0, br: 0 });
-  // Layer 4: bright border
-  g.lineStyle(1.5, bc, ba);
+  // Layer 4: amber border
+  g.lineStyle(2, bc, ba);
   g.strokeRoundedRect(x, y, w, h, r);
 }
 

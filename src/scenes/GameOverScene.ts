@@ -17,7 +17,7 @@ export class GameOverScene extends Phaser.Scene {
     const { width, height } = this.cameras.main;
 
     // Background
-    this.cameras.main.setBackgroundColor('#060614');
+    this.cameras.main.setBackgroundColor('#0f0a14');
 
     // Determine if victory or defeat
     const isVictory: boolean = this.gameData.won;

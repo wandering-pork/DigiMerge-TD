@@ -4,16 +4,16 @@ import { Stage } from '@/types';
 export const GRID = {
   COLUMNS: 8,
   ROWS: 18,
-  CELL_SIZE: 64,
+  CELL_SIZE: 36,
   SPAWN: { col: 1, row: 2 },
   BASE: { col: 8, row: 15 },
 } as const;
 
-// Game Area - portrait layout to fit 8x18 grid at 64px cells
-export const GAME_WIDTH = 900;
-export const GAME_HEIGHT = 1200;
-export const GRID_OFFSET_X = 32;
-export const GRID_OFFSET_Y = 30;
+// Game Area - landscape layout (1280x720) with Left HUD | Center Grid | Right HUD
+export const GAME_WIDTH = 1280;
+export const GAME_HEIGHT = 720;
+export const GRID_OFFSET_X = 315;
+export const GRID_OFFSET_Y = 36;
 
 // Spawn Costs
 export const SPAWN_COSTS = {

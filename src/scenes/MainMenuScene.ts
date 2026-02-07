@@ -1,7 +1,8 @@
 import Phaser from 'phaser';
 import { SaveManager } from '@/managers/SaveManager';
+import { AudioManager } from '@/managers/AudioManager';
 import { COLORS, TEXT_STYLES, ANIM, FONTS } from '@/ui/UITheme';
-import { drawDigitalGrid, drawButton, createDigitalParticles, animateButtonHover, animateButtonPress, animateStaggeredEntrance } from '@/ui/UIHelpers';
+import { drawDigitalGrid, drawButton, drawPanel, createDigitalParticles, animateButtonHover, animateButtonPress, animateStaggeredEntrance } from '@/ui/UIHelpers';
 
 export class MainMenuScene extends Phaser.Scene {
   constructor() {
@@ -12,7 +13,16 @@ export class MainMenuScene extends Phaser.Scene {
     const { width, height } = this.cameras.main;
 
     // Background
-    this.cameras.main.setBackgroundColor('#060614');
+    this.cameras.main.setBackgroundColor('#0f0a14');
+
+    // Play menu music (stop any existing music first)
+    this.sound.stopAll();
+    try {
+      const audioSettings = AudioManager.loadSettings();
+      if (this.cache.audio.exists('music_menu') && audioSettings.enabled) {
+        this.sound.play('music_menu', { loop: true, volume: audioSettings.musicVolume });
+      }
+    } catch { /* Audio not available */ }
 
     // Digital grid texture (very subtle)
     const gridGfx = this.add.graphics();
@@ -116,16 +126,58 @@ export class MainMenuScene extends Phaser.Scene {
         this.scene.start('EncyclopediaScene');
       },
     ));
+    btnY += 68;
+
+    // Credits button
+    buttons.push(this.createMenuButton(
+      width / 2, btnY, 260, 50,
+      'Credits',
+      COLORS.BG_PANEL_LIGHT, COLORS.BG_HOVER,
+      () => {
+        this.scene.start('CreditsScene');
+      },
+    ));
 
     // Staggered button entrance animation
     animateStaggeredEntrance(this, buttons, 'up');
 
     // Version text
-    this.add.text(width / 2, height - 30, 'v0.1.0', TEXT_STYLES.VERSION)
+    this.add.text(width / 2, height - 30, 'v1.0.0', TEXT_STYLES.VERSION)
       .setOrigin(0.5);
+
+    // Settings gear button (top-right)
+    const gearBtn = this.add.container(width - 45, 35);
+    const gearBg = this.add.graphics();
+    drawButton(gearBg, 38, 38, COLORS.BG_PANEL_LIGHT);
+    gearBtn.add(gearBg);
+    gearBtn.add(this.add.text(0, 0, '\u2699', {
+      fontFamily: FONTS.BODY,
+      fontSize: '22px',
+      color: '#8899bb',
+    }).setOrigin(0.5));
+    const gearHitArea = new Phaser.Geom.Rectangle(-19, -19, 38, 38);
+    gearBtn.setInteractive(gearHitArea, Phaser.Geom.Rectangle.Contains);
+    gearBtn.input!.cursor = 'pointer';
+    gearBtn.on('pointerover', () => {
+      drawButton(gearBg, 38, 38, COLORS.BG_HOVER, { glowRing: true });
+      animateButtonHover(this, gearBtn, true);
+    });
+    gearBtn.on('pointerout', () => {
+      drawButton(gearBg, 38, 38, COLORS.BG_PANEL_LIGHT);
+      animateButtonHover(this, gearBtn, false);
+    });
+    gearBtn.on('pointerdown', () => {
+      animateButtonPress(this, gearBtn);
+      this.scene.launch('SettingsScene', { from: 'MainMenuScene' });
+    });
 
     // Scene entrance fade
     this.cameras.main.fadeIn(ANIM.FADE_IN_MS, 6, 6, 20);
+
+    // Disclaimer popup (first visit only)
+    if (!localStorage.getItem('digimerge_disclaimer_accepted')) {
+      this.showDisclaimer(width, height);
+    }
   }
 
   private drawCornerAccents(w: number, h: number): void {
@@ -195,5 +247,81 @@ export class MainMenuScene extends Phaser.Scene {
     });
 
     return container;
+  }
+
+  shutdown() {
+    this.sound.stopAll();
+  }
+
+  private showDisclaimer(width: number, height: number): void {
+    const container = this.add.container(0, 0).setDepth(100);
+
+    // Dark overlay
+    const overlay = this.add.graphics();
+    overlay.fillStyle(0x000000, 0.8);
+    overlay.fillRect(0, 0, width, height);
+    overlay.setInteractive(
+      new Phaser.Geom.Rectangle(0, 0, width, height),
+      Phaser.Geom.Rectangle.Contains,
+    );
+    container.add(overlay);
+
+    const panelW = 420;
+    const panelH = 260;
+    const panelX = (width - panelW) / 2;
+    const panelY = (height - panelH) / 2;
+
+    const panel = this.add.graphics();
+    drawPanel(panel, panelX, panelY, panelW, panelH, { borderColor: COLORS.GOLD_DIM });
+    container.add(panel);
+
+    container.add(this.add.text(width / 2, panelY + 28, 'Disclaimer', {
+      ...TEXT_STYLES.SCENE_TITLE,
+      fontSize: '22px',
+    }).setOrigin(0.5));
+
+    const disclaimerText =
+      'This is a fan-made project for educational purposes only. ' +
+      'Not affiliated with, endorsed by, or associated with Bandai Namco, ' +
+      'Toei Animation, or the Digimon franchise. All Digimon names and ' +
+      'likenesses are trademarks of their respective owners.';
+
+    container.add(this.add.text(width / 2, panelY + 60, disclaimerText, {
+      fontFamily: FONTS.BODY,
+      fontSize: '13px',
+      color: '#aabbcc',
+      wordWrap: { width: panelW - 50 },
+      align: 'center',
+      lineSpacing: 4,
+    }).setOrigin(0.5, 0));
+
+    // "I Understand" button
+    const btnContainer = this.add.container(width / 2, panelY + panelH - 45);
+    const btnBg = this.add.graphics();
+    drawButton(btnBg, 180, 40, COLORS.SUCCESS);
+    btnContainer.add(btnBg);
+    btnContainer.add(this.add.text(0, 0, 'I Understand', {
+      fontFamily: FONTS.BODY,
+      fontSize: '16px',
+      color: '#ffffff',
+      fontStyle: 'bold',
+    }).setOrigin(0.5));
+    const btnHit = new Phaser.Geom.Rectangle(-90, -20, 180, 40);
+    btnContainer.setInteractive(btnHit, Phaser.Geom.Rectangle.Contains);
+    btnContainer.input!.cursor = 'pointer';
+    btnContainer.on('pointerover', () => {
+      drawButton(btnBg, 180, 40, COLORS.SUCCESS_HOVER, { glowRing: true });
+      animateButtonHover(this, btnContainer, true);
+    });
+    btnContainer.on('pointerout', () => {
+      drawButton(btnBg, 180, 40, COLORS.SUCCESS);
+      animateButtonHover(this, btnContainer, false);
+    });
+    btnContainer.on('pointerdown', () => {
+      animateButtonPress(this, btnContainer);
+      localStorage.setItem('digimerge_disclaimer_accepted', 'true');
+      container.destroy();
+    });
+    container.add(btnContainer);
   }
 }

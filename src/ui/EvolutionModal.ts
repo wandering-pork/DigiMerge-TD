@@ -26,6 +26,8 @@ export class EvolutionModal extends Phaser.GameObjects.Container {
   private getDigibytes: () => number;
   private spendDigibytes: (amount: number) => boolean;
   private addDigibytes: (amount: number) => void;
+  private currentEvolutions: EvolutionPath[] = [];
+  private currentCost: number = 0;
 
   private static readonly PANEL_WIDTH = 500;
   private static readonly PANEL_HEIGHT = 400;
@@ -47,6 +49,9 @@ export class EvolutionModal extends Phaser.GameObjects.Container {
     this.setDepth(50);
 
     scene.add.existing(this);
+
+    // Refresh options when currency changes so "Need DB" updates in real-time
+    EventBus.on(GameEvents.DIGIBYTES_CHANGED, this.onDigibytesChanged, this);
   }
 
   // ---------------------------------------------------------------------------
@@ -130,13 +135,13 @@ export class EvolutionModal extends Phaser.GameObjects.Container {
   public show(tower: Tower): void {
     this.currentTower = tower;
 
-    const evolutions = getEvolutions(tower.digimonId, tower.dp);
-    const cost = this.getDigivolveCost(tower.stage);
+    this.currentEvolutions = getEvolutions(tower.digimonId, tower.dp);
+    this.currentCost = this.getDigivolveCost(tower.stage);
 
     this.titleText.setText(`Digivolve ${tower.stats.name}`);
-    this.costText.setText(`Cost: ${cost} DB`);
+    this.costText.setText(`Cost: ${this.currentCost} DB`);
 
-    this.buildOptions(evolutions, cost);
+    this.buildOptions(this.currentEvolutions, this.currentCost);
     this.setVisible(true);
 
     // Fade in overlay
@@ -319,5 +324,16 @@ export class EvolutionModal extends Phaser.GameObjects.Container {
       return DIGIVOLVE_COSTS[currentStage];
     }
     return DIGIVOLVE_COSTS[DIGIVOLVE_COSTS.length - 1];
+  }
+
+  private onDigibytesChanged(): void {
+    if (this.visible && this.currentTower && this.currentEvolutions.length > 0) {
+      this.buildOptions(this.currentEvolutions, this.currentCost);
+    }
+  }
+
+  public destroy(fromScene?: boolean): void {
+    EventBus.off(GameEvents.DIGIBYTES_CHANGED, this.onDigibytesChanged, this);
+    super.destroy(fromScene);
   }
 }

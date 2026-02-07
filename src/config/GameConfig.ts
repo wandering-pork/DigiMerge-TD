@@ -9,13 +9,14 @@ import { PauseScene } from '@/scenes/PauseScene';
 import { SettingsScene } from '@/scenes/SettingsScene';
 import { GameOverScene } from '@/scenes/GameOverScene';
 import { EncyclopediaScene } from '@/scenes/EncyclopediaScene';
+import { CreditsScene } from '@/scenes/CreditsScene';
 
 export const gameConfig: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
   width: GAME_WIDTH,
   height: GAME_HEIGHT,
   parent: 'game-container',
-  backgroundColor: '#0a0a18',
+  backgroundColor: '#0f0a14',
   pixelArt: true,
   roundPixels: true,
   scale: {
@@ -32,5 +33,6 @@ export const gameConfig: Phaser.Types.Core.GameConfig = {
     SettingsScene,
     GameOverScene,
     EncyclopediaScene,
+    CreditsScene,
   ],
 };

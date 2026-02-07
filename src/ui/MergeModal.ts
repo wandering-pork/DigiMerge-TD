@@ -55,6 +55,7 @@ export class MergeModal extends Phaser.GameObjects.Container {
   private resultHeader!: Phaser.GameObjects.Text;
   private resultDPText!: Phaser.GameObjects.Text;
   private resultLevelText!: Phaser.GameObjects.Text;
+  private resultEffectText!: Phaser.GameObjects.Text;
 
   // Buttons
   private confirmBtn!: Phaser.GameObjects.Container;
@@ -71,7 +72,7 @@ export class MergeModal extends Phaser.GameObjects.Container {
 
   // Panel dimensions
   private static readonly PANEL_WIDTH = 450;
-  private static readonly PANEL_HEIGHT = 350;
+  private static readonly PANEL_HEIGHT = 370;
 
   constructor(scene: Phaser.Scene) {
     super(scene, 0, 0);
@@ -283,6 +284,14 @@ export class MergeModal extends Phaser.GameObjects.Container {
     }).setOrigin(0.5, 0);
     this.panelContainer.add(this.resultLevelText);
 
+    this.resultEffectText = this.scene.add.text(centerX, resultY + 42, '', {
+      fontFamily: FONTS.MONO,
+      fontSize: '12px',
+      color: '#88ddaa',
+    }).setOrigin(0.5, 0);
+    this.resultEffectText.setVisible(false);
+    this.panelContainer.add(this.resultEffectText);
+
     // =====================================================================
     // Buttons
     // =====================================================================
@@ -371,6 +380,18 @@ export class MergeModal extends Phaser.GameObjects.Container {
 
     this.resultDPText.setText(`DP: ${result.survivorDP}`);
     this.resultLevelText.setText(`Level: ${result.survivorLevel}`);
+
+    // Effect inheritance preview
+    const sacrificeEffect = towerB.stats.effectType;
+    const sacrificeChance = towerB.stats.effectChance;
+    if (sacrificeEffect && sacrificeChance && sacrificeChance > 0) {
+      const halvedChance = Math.round((sacrificeChance / 2) * 100);
+      this.resultEffectText.setText(`Inherits: ${sacrificeEffect} (${halvedChance}%)`);
+      this.resultEffectText.setVisible(true);
+    } else {
+      this.resultEffectText.setText('');
+      this.resultEffectText.setVisible(false);
+    }
 
     this.setVisible(true);
 

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { canMerge, getMergeResult, MergeCandidate } from '@/systems/MergeSystem';
-import { Attribute, Stage } from '@/types';
+import { canMerge, getMergeResult, calculateMergeEffects, MergeCandidate } from '@/systems/MergeSystem';
+import { Attribute, Stage, BonusEffect } from '@/types';
 
 describe('MergeSystem', () => {
   // ----------------------------------------------------------------
@@ -126,6 +126,101 @@ describe('MergeSystem', () => {
       const result = getMergeResult(a, b);
       expect(result.survivorLevel).toBe(50);
       expect(result.survivorDP).toBe(11);
+    });
+  });
+
+  // ----------------------------------------------------------------
+  // calculateMergeEffects (effect inheritance)
+  // ----------------------------------------------------------------
+  describe('calculateMergeEffects', () => {
+    it('transfers sacrifice effect at half proc chance', () => {
+      const result = calculateMergeEffects([], 'burn', 0.3);
+      expect(result).toHaveLength(1);
+      expect(result[0].effectType).toBe('burn');
+      expect(result[0].effectChance).toBe(0.15);
+    });
+
+    it('returns empty array when sacrifice has no effect', () => {
+      const result = calculateMergeEffects([], undefined, undefined);
+      expect(result).toHaveLength(0);
+    });
+
+    it('returns empty array when sacrifice effect chance is 0', () => {
+      const result = calculateMergeEffects([], 'burn', 0);
+      expect(result).toHaveLength(0);
+    });
+
+    it('preserves existing bonus effects', () => {
+      const existing: BonusEffect[] = [{ effectType: 'slow', effectChance: 0.1 }];
+      const result = calculateMergeEffects(existing, 'burn', 0.3);
+      expect(result).toHaveLength(2);
+      expect(result[0].effectType).toBe('slow');
+      expect(result[0].effectChance).toBe(0.1);
+      expect(result[1].effectType).toBe('burn');
+      expect(result[1].effectChance).toBe(0.15);
+    });
+
+    it('stacks same effect type with +5% bonus instead of adding duplicate', () => {
+      const existing: BonusEffect[] = [{ effectType: 'burn', effectChance: 0.15 }];
+      const result = calculateMergeEffects(existing, 'burn', 0.4);
+      expect(result).toHaveLength(1);
+      expect(result[0].effectType).toBe('burn');
+      expect(result[0].effectChance).toBe(0.2); // 0.15 + 0.05
+    });
+
+    it('caps stacked effect chance at 1.0', () => {
+      const existing: BonusEffect[] = [{ effectType: 'burn', effectChance: 0.98 }];
+      const result = calculateMergeEffects(existing, 'burn', 0.3);
+      expect(result).toHaveLength(1);
+      expect(result[0].effectChance).toBe(1.0);
+    });
+
+    it('enforces max 2 bonus effects', () => {
+      const existing: BonusEffect[] = [
+        { effectType: 'slow', effectChance: 0.1 },
+        { effectType: 'burn', effectChance: 0.15 },
+      ];
+      const result = calculateMergeEffects(existing, 'poison', 0.3);
+      expect(result).toHaveLength(2);
+      // New effect should NOT be added (already at max)
+      expect(result.find(e => e.effectType === 'poison')).toBeUndefined();
+    });
+
+    it('allows stacking even when at max effects', () => {
+      const existing: BonusEffect[] = [
+        { effectType: 'slow', effectChance: 0.1 },
+        { effectType: 'burn', effectChance: 0.15 },
+      ];
+      const result = calculateMergeEffects(existing, 'burn', 0.3);
+      expect(result).toHaveLength(2);
+      expect(result[1].effectChance).toBe(0.2); // 0.15 + 0.05
+    });
+
+    it('does not mutate the input array', () => {
+      const existing: BonusEffect[] = [{ effectType: 'slow', effectChance: 0.1 }];
+      calculateMergeEffects(existing, 'burn', 0.3);
+      expect(existing).toHaveLength(1); // Original unchanged
+    });
+  });
+
+  // ----------------------------------------------------------------
+  // getMergeResult with effects
+  // ----------------------------------------------------------------
+  describe('getMergeResult with effects', () => {
+    it('includes bonusEffects in merge result', () => {
+      const a: MergeCandidate = { level: 5, dp: 2, attribute: Attribute.VACCINE, stage: Stage.CHAMPION, bonusEffects: [] };
+      const b: MergeCandidate = { level: 3, dp: 1, attribute: Attribute.VACCINE, stage: Stage.CHAMPION, effectType: 'burn', effectChance: 0.3 };
+      const result = getMergeResult(a, b);
+      expect(result.bonusEffects).toHaveLength(1);
+      expect(result.bonusEffects[0].effectType).toBe('burn');
+      expect(result.bonusEffects[0].effectChance).toBe(0.15);
+    });
+
+    it('returns empty bonusEffects when sacrifice has no effect', () => {
+      const a: MergeCandidate = { level: 5, dp: 2, attribute: Attribute.VACCINE, stage: Stage.CHAMPION };
+      const b: MergeCandidate = { level: 3, dp: 1, attribute: Attribute.VACCINE, stage: Stage.CHAMPION };
+      const result = getMergeResult(a, b);
+      expect(result.bonusEffects).toHaveLength(0);
     });
   });
 });

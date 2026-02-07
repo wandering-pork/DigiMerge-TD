@@ -59,6 +59,8 @@ export const EVOLUTION_PATHS: Record<string, EvolutionPath[]> = {
 
   tsunomon: [
     { resultId: 'gabumon', minDP: 0, maxDP: 999, isDefault: true },
+    { resultId: 'elecmon_tower', minDP: 3, maxDP: 5, isDefault: false },
+    { resultId: 'gotsumon_tower', minDP: 6, maxDP: 8, isDefault: false },
   ],
 
   gabumon: [
@@ -102,6 +104,8 @@ export const EVOLUTION_PATHS: Record<string, EvolutionPath[]> = {
 
   gigimon: [
     { resultId: 'guilmon', minDP: 0, maxDP: 999, isDefault: true },
+    { resultId: 'goblimon_tower', minDP: 3, maxDP: 4, isDefault: false },
+    { resultId: 'impmon_tower', minDP: 5, maxDP: 7, isDefault: false },
   ],
 
   guilmon: [
@@ -124,6 +128,7 @@ export const EVOLUTION_PATHS: Record<string, EvolutionPath[]> = {
 
   tanemon: [
     { resultId: 'palmon', minDP: 0, maxDP: 999, isDefault: true },
+    { resultId: 'floramon_tower', minDP: 6, maxDP: 8, isDefault: false },
   ],
 
   palmon: [
@@ -167,6 +172,9 @@ export const EVOLUTION_PATHS: Record<string, EvolutionPath[]> = {
 
   pagumon: [
     { resultId: 'demidevimon', minDP: 0, maxDP: 999, isDefault: true },
+    { resultId: 'gazimon_tower', minDP: 3, maxDP: 4, isDefault: false },
+    { resultId: 'betamon_tower', minDP: 5, maxDP: 7, isDefault: false },
+    { resultId: 'kunemon_tower', minDP: 8, maxDP: 10, isDefault: false },
   ],
 
   demidevimon: [
@@ -463,6 +471,136 @@ export const EVOLUTION_PATHS: Record<string, EvolutionPath[]> = {
 
   saviorhackmon: [
     { resultId: 'jesmon', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  // ========================================
+  // New Rookie → Champion Paths (Expanded Roster)
+  // ========================================
+
+  impmon_tower: [
+    { resultId: 'darktyrannomon_tower', minDP: 0, maxDP: 3, isDefault: true },
+    { resultId: 'airdramon_tower', minDP: 4, maxDP: 999, isDefault: false },
+  ],
+
+  elecmon_tower: [
+    { resultId: 'leomon_tower', minDP: 0, maxDP: 3, isDefault: true },
+    { resultId: 'meramon_tower', minDP: 4, maxDP: 999, isDefault: false },
+  ],
+
+  gotsumon_tower: [
+    { resultId: 'monochromon_tower', minDP: 0, maxDP: 3, isDefault: true },
+    { resultId: 'guardromon_tower', minDP: 4, maxDP: 999, isDefault: false },
+  ],
+
+  betamon_tower: [
+    { resultId: 'seadramon_tower', minDP: 0, maxDP: 3, isDefault: true },
+    { resultId: 'numemon_tower', minDP: 4, maxDP: 999, isDefault: false },
+  ],
+
+  kunemon_tower: [
+    { resultId: 'kuwagamon_tower', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  gazimon_tower: [
+    { resultId: 'ogremon_tower', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  goblimon_tower: [
+    { resultId: 'darktyrannomon_tower', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  floramon_tower: [
+    { resultId: 'meramon_tower', minDP: 0, maxDP: 3, isDefault: true },
+    { resultId: 'seadramon_tower', minDP: 4, maxDP: 999, isDefault: false },
+  ],
+
+  // ========================================
+  // New Champion → Ultimate Paths (Expanded Roster)
+  // ========================================
+
+  leomon_tower: [
+    { resultId: 'mamemon_tower', minDP: 0, maxDP: 3, isDefault: true },
+    { resultId: 'andromon_tower', minDP: 4, maxDP: 999, isDefault: false },
+  ],
+
+  seadramon_tower: [
+    { resultId: 'megaseadramon_tower', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  ogremon_tower: [
+    { resultId: 'gigadramon_tower', minDP: 0, maxDP: 3, isDefault: true },
+    { resultId: 'warumonzaemon_tower', minDP: 4, maxDP: 999, isDefault: false },
+  ],
+
+  monochromon_tower: [
+    { resultId: 'megaseadramon_tower', minDP: 0, maxDP: 3, isDefault: true },
+    { resultId: 'andromon_tower', minDP: 4, maxDP: 999, isDefault: false },
+  ],
+
+  darktyrannomon_tower: [
+    { resultId: 'gigadramon_tower', minDP: 0, maxDP: 3, isDefault: true },
+    { resultId: 'megadramon_tower', minDP: 4, maxDP: 999, isDefault: false },
+  ],
+
+  airdramon_tower: [
+    { resultId: 'megadramon_tower', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  meramon_tower: [
+    { resultId: 'bluemeramon_tower', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  kuwagamon_tower: [
+    { resultId: 'ladydevimon_tower', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  numemon_tower: [
+    { resultId: 'warumonzaemon_tower', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  guardromon_tower: [
+    { resultId: 'andromon_tower', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  // ========================================
+  // New Ultimate → Mega Paths (Expanded Roster)
+  // ========================================
+
+  megaseadramon_tower: [
+    { resultId: 'metalseadramon_tower', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  gigadramon_tower: [
+    { resultId: 'blackwargreymon_tower', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  warumonzaemon_tower: [
+    { resultId: 'piedmon_tower', minDP: 0, maxDP: 3, isDefault: true },
+    { resultId: 'leviamon_tower', minDP: 4, maxDP: 999, isDefault: false },
+  ],
+
+  ladydevimon_tower: [
+    { resultId: 'piedmon_tower', minDP: 0, maxDP: 3, isDefault: true },
+    { resultId: 'puppetmon_tower', minDP: 4, maxDP: 999, isDefault: false },
+  ],
+
+  bluemeramon_tower: [
+    { resultId: 'boltmon_tower', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  megadramon_tower: [
+    { resultId: 'blackwargreymon_tower', minDP: 0, maxDP: 3, isDefault: true },
+    { resultId: 'diaboromon_tower', minDP: 4, maxDP: 999, isDefault: false },
+  ],
+
+  mamemon_tower: [
+    { resultId: 'saberleomon_tower', minDP: 0, maxDP: 3, isDefault: true },
+    { resultId: 'metalmamemon_tower', minDP: 4, maxDP: 999, isDefault: false },
+  ],
+
+  andromon_tower: [
+    { resultId: 'metalseadramon_tower', minDP: 0, maxDP: 3, isDefault: true },
+    { resultId: 'boltmon_tower', minDP: 4, maxDP: 999, isDefault: false },
   ],
 };
 

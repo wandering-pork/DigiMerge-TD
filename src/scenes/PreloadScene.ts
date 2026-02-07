@@ -12,7 +12,7 @@ export class PreloadScene extends Phaser.Scene {
     const { width, height } = this.cameras.main;
 
     // Background
-    this.cameras.main.setBackgroundColor('#060614');
+    this.cameras.main.setBackgroundColor('#0f0a14');
     const gridGfx = this.add.graphics();
     drawDigitalGrid(gridGfx, width, height, 50, COLORS.CYAN, 0.02);
 
@@ -260,7 +260,6 @@ export class PreloadScene extends Phaser.Scene {
       // Phase 4 Mega enemies
       piedmon: 'Piemon.png',
       machinedramon: 'Mugendramon.png',
-      daemon: 'Daemon.png',
       blackwargreymon: 'BlackWarGreymon.png',
       leviamon: 'Leviamon.png',
       boltmon: 'Boltmon.png',
@@ -308,6 +307,10 @@ export class PreloadScene extends Phaser.Scene {
       this.load.audio(name, `assets/sfx/${name}.wav`);
     }
 
+    // -- Load Music --
+    this.load.audio('music_menu', 'assets/music/menu_theme.mp3');
+    this.load.audio('music_battle', 'assets/music/battle_theme.mp3');
+
     // -- Load Tileset sprites --
     this.load.spritesheet('tiles_grass', 'assets/tiles/grass.png', {
       frameWidth: 16, frameHeight: 16,
@@ -324,6 +327,14 @@ export class PreloadScene extends Phaser.Scene {
   }
 
   create() {
+    // Set NEAREST filtering on all loaded sprite/tile textures to keep pixel art crisp,
+    // while allowing text to use default LINEAR filtering (smooth/readable).
+    this.textures.each((texture: Phaser.Textures.Texture) => {
+      if (texture.key !== '__DEFAULT' && texture.key !== '__MISSING') {
+        texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
+      }
+    }, this);
+
     this.scene.start('MainMenuScene');
   }
 }

@@ -71,7 +71,7 @@ function getSkillDisplay(effectType?: string, effectChance?: number): { name: st
     description = 'Buffs all nearby + holy dmg';
   }
 
-  const chance = `${Math.round(effectChance * 100)}%`;
+  const chance = `${Math.round(effectChance * 100)}% chance`;
 
   // Build a detailed description from runtime config
   const parts0 = effectType.split('_');
@@ -80,20 +80,22 @@ function getSkillDisplay(effectType?: string, effectChance?: number): { name: st
   if (config) {
     const details: string[] = [];
     if (baseKey === 'burn') {
-      details.push(`${Math.round(config.strength * 100)}% tower dmg/tick`);
+      details.push(`${Math.round(config.strength * 100)}% of atk as fire/tick`);
     } else if (baseKey === 'poison') {
-      details.push(`${Math.round(config.strength * 100)}% max HP/tick`);
+      details.push(`${Math.round(config.strength * 100)}% enemy max HP/tick`);
       if (config.maxStacks) details.push(`stacks ${config.maxStacks}x`);
     } else if (baseKey === 'slow') {
-      details.push(`-${Math.round(config.strength * 100)}% speed`);
+      details.push(`-${Math.round(config.strength * 100)}% move speed`);
     } else if (baseKey === 'freeze') {
-      details.push('Stun + slow after thaw');
+      details.push('Stun then -40% speed');
     } else if (baseKey === 'stun') {
       details.push('Cannot move');
     } else if (baseKey === 'armorBreak') {
       details.push(`-${Math.round(config.strength * 100)}% armor`);
     }
     if (config.duration) details.push(`${config.duration}s`);
+    // Add AoE note if applicable
+    if (modifiers.includes('aoe')) details.push('splash nearby');
     if (details.length > 0) description = details.join(', ');
   }
 
@@ -142,9 +144,9 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
   private spendDigibytes: (amount: number) => boolean;
   private addDigibytes: (amount: number) => void;
 
-  // Panel dimensions
-  private static readonly PANEL_WIDTH = 260;
-  private static readonly PANEL_HEIGHT = 660;
+  // Panel dimensions (right of grid)
+  private static readonly PANEL_WIDTH = 300;
+  private static readonly PANEL_HEIGHT = 680;
 
   // Panel position X (saved for animations)
   private panelBaseX: number;
@@ -203,6 +205,9 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
   private mergeBtnBg!: Phaser.GameObjects.Graphics;
   private mergeBtnText!: Phaser.GameObjects.Text;
 
+  // Bonus effects from merge inheritance
+  private bonusEffectTexts: Phaser.GameObjects.Text[] = [];
+
   // Keyboard listener
   private escKey: Phaser.Input.Keyboard.Key | null = null;
 
@@ -212,8 +217,9 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
     spendDigibytes: (amount: number) => boolean,
     addDigibytes: (amount: number) => void,
   ) {
-    const panelX = GRID_OFFSET_X + GRID.COLUMNS * GRID.CELL_SIZE + 20;
-    super(scene, panelX, 100);
+    // Position to the right of the grid
+    const panelX = GRID_OFFSET_X + GRID.COLUMNS * GRID.CELL_SIZE + 15;
+    super(scene, panelX, 20);
 
     this.panelBaseX = panelX;
     this.getDigibytes = getDigibytes;
@@ -281,7 +287,7 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
     const statsX = 15;
     const statsValueX = w - 15;
     let statsY = 82;
-    const lineH = 24;
+    const lineH = 26;
 
     this.levelText = this.createStatRow('Level', statsX, statsValueX, statsY);
     statsY += lineH;
@@ -314,24 +320,27 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
     this.skillNameText = this.scene.add.text(statsX, statsY, '', {
       ...TEXT_STYLES.PANEL_LABEL,
       color: '#ffaa44',
-      fontSize: '12px',
+      fontSize: '13px',
+      resolution: 2,
     });
     this.add(this.skillNameText);
 
     this.skillChanceText = this.scene.add.text(statsValueX, statsY, '', {
       ...TEXT_STYLES.PANEL_VALUE,
       color: '#ffaa44',
-      fontSize: '12px',
+      fontSize: '13px',
+      resolution: 2,
     }).setOrigin(1, 0);
     this.add(this.skillChanceText);
-    statsY += lineH - 6;
+    statsY += 18;
 
     // Skill description (below skill name row)
     this.skillDescText = this.scene.add.text(statsX, statsY, '', {
       ...TEXT_STYLES.PANEL_LABEL,
       color: '#bbaa77',
-      fontSize: '10px',
+      fontSize: '11px',
       wordWrap: { width: w - 30 },
+      resolution: 2,
     });
     this.add(this.skillDescText);
     statsY += 18;
@@ -419,6 +428,7 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
       fontSize: '16px',
       color: COLORS.TEXT_LABEL,
       fontStyle: 'bold',
+      resolution: 2,
     }).setOrigin(0.5);
     this.priorityBtn.add(leftArrow);
 
@@ -427,6 +437,7 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
       fontSize: '16px',
       color: COLORS.TEXT_LABEL,
       fontStyle: 'bold',
+      resolution: 2,
     }).setOrigin(0.5);
     this.priorityBtn.add(rightArrow);
 
@@ -619,6 +630,28 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
       this.skillDescText.setVisible(false);
     }
 
+    // Bonus effects display (from merge inheritance)
+    if (this.bonusEffectTexts) {
+      for (const t of this.bonusEffectTexts) t.destroy();
+    }
+    this.bonusEffectTexts = [];
+    if (tower.bonusEffects && tower.bonusEffects.length > 0) {
+      let bonusY = (skillInfo ? this.skillDescText.y + 18 : this.skillNameText.y);
+      for (const bonus of tower.bonusEffects) {
+        const bonusInfo = getSkillDisplay(bonus.effectType, bonus.effectChance);
+        if (bonusInfo) {
+          const bonusText = this.scene.add.text(
+            10, bonusY,
+            `+ ${bonusInfo.name} (${bonusInfo.chance})`,
+            { fontFamily: 'monospace', fontSize: '13px', color: '#88ddaa', resolution: 2 }
+          );
+          this.add(bonusText);
+          this.bonusEffectTexts.push(bonusText);
+          bonusY += 16;
+        }
+      }
+    }
+
     // Level Up buttons
     this.refreshLevelUpButton(maxLevel);
     this.refreshMultiLevelButtons(maxLevel);
@@ -640,6 +673,11 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
     }
 
     // Merge button - show if there are valid merge candidates nearby
+    // Reposition merge button based on whether digivolve button is visible
+    const mergeY = this.digivolveBtn.visible
+      ? this.digivolveBtn.y + 44
+      : this.sellBtn.y + 44;
+    this.mergeBtn.y = mergeY;
     this.mergeBtn.setVisible(true);
     this.mergeBtnText.setText('Merge...');
   }

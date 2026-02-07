@@ -104,8 +104,8 @@ export class SpawnMenu extends Phaser.GameObjects.Container {
   private getDigibytes: () => number;
   private spendDigibytes: (amount: number) => boolean;
 
-  // Panel dimensions
-  private static readonly PANEL_WIDTH = 260;
+  // Panel dimensions (right of grid)
+  private static readonly PANEL_WIDTH = 300;
   private static readonly PANEL_HEIGHT = 600;
 
   // Panel position X (saved for animations)
@@ -116,8 +116,9 @@ export class SpawnMenu extends Phaser.GameObjects.Container {
     getDigibytes: () => number,
     spendDigibytes: (amount: number) => boolean,
   ) {
-    const panelX = GRID_OFFSET_X + GRID.COLUMNS * GRID.CELL_SIZE + 20;
-    const panelY = 320;
+    // Position to the right of the grid
+    const panelX = GRID_OFFSET_X + GRID.COLUMNS * GRID.CELL_SIZE + 15;
+    const panelY = 20;
     super(scene, panelX, panelY);
 
     this.panelBaseX = panelX;

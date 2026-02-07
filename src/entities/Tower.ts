@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { DigimonStats, Stage, Attribute, TargetPriority, TowerSaveData } from '@/types';
+import { DigimonStats, Stage, Attribute, TargetPriority, TowerSaveData, BonusEffect } from '@/types';
 import { DIGIMON_DATABASE } from '@/data/DigimonDatabase';
 import { STAGE_CONFIG, GRID } from '@/config/Constants';
 import { gridToPixelCenter } from '@/utils/GridUtils';
@@ -27,6 +27,7 @@ export class Tower extends Phaser.GameObjects.Container {
 
   // Boss debuffs
   public stunTimer: number = 0;
+  public bonusEffects: BonusEffect[] = [];
   public rangeReductionPercent: number = 0;
 
   // Selection state
@@ -98,13 +99,13 @@ export class Tower extends Phaser.GameObjects.Container {
     this.add(this.rangeCircle);
 
     // Digimon sprite (offset upward slightly to make room for level text)
-    this.sprite = scene.add.sprite(0, -8, dbStats.spriteKey ?? digimonId);
+    this.sprite = scene.add.sprite(0, -4, dbStats.spriteKey ?? digimonId);
     this.sprite.setScale(this.getSpriteScale());
     this.add(this.sprite);
 
     // Level text below sprite
-    this.levelText = scene.add.text(0, 20, `Lv.${this.level}`, {
-      fontSize: '10px',
+    this.levelText = scene.add.text(0, 12, `Lv.${this.level}`, {
+      fontSize: '8px',
       fontFamily: 'monospace',
       color: '#ffffff',
       stroke: '#000000',
@@ -254,8 +255,8 @@ export class Tower extends Phaser.GameObjects.Container {
 
   private showStunVisual(): void {
     if (!this.stunIndicator) {
-      this.stunIndicator = this.scene.add.text(0, -30, '!', {
-        fontSize: '18px',
+      this.stunIndicator = this.scene.add.text(0, -18, '!', {
+        fontSize: '14px',
         color: '#ff4444',
         fontStyle: 'bold',
         stroke: '#000000',
@@ -308,6 +309,7 @@ export class Tower extends Phaser.GameObjects.Container {
       originStage: this.originStage,
       gridPosition: { col: this.gridCol, row: this.gridRow },
       targetPriority: this.targetPriority,
+      bonusEffects: this.bonusEffects.length > 0 ? [...this.bonusEffects] : undefined,
     };
   }
 
@@ -317,11 +319,11 @@ export class Tower extends Phaser.GameObjects.Container {
 
   /**
    * Determine sprite scale so small pixel art (~16px) fits nicely in the cell.
-   * Target visual size is ~48px, so scale = 48 / nativeSize.
-   * Falls back to 3x if the texture dimensions are unknown.
+   * Target visual size is ~28px (fits 36px cells), so scale = 28 / nativeSize.
+   * Falls back to 1.75x if the texture dimensions are unknown.
    */
   private getSpriteScale(): number {
-    const targetSize = 48;
+    const targetSize = GRID.CELL_SIZE * 0.78; // ~28px for 36px cells
     const texture = this.scene.textures.get(this.digimonId);
     if (texture && texture.source.length > 0) {
       const frame = texture.get();

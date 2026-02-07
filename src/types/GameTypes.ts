@@ -83,6 +83,12 @@ export interface TowerSaveData {
   originStage: Stage;
   gridPosition: GridPosition;
   targetPriority: TargetPriority;
+  bonusEffects?: BonusEffect[];
+}
+
+export interface BonusEffect {
+  effectType: string;
+  effectChance: number;
 }
 
 export interface GameStatistics {

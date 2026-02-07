@@ -703,7 +703,7 @@ export const WAVE_DATA: Record<number, WaveConfig> = {
       { id: 'enemy_wargreymon', count: 7 },
       { id: 'enemy_metalgarurumon', count: 7 },
       { id: 'enemy_machinedramon', count: 7 },
-      { id: 'enemy_daemon', count: 7 },
+      { id: 'enemy_boltmon', count: 7 },
       { id: 'enemy_piedmon', count: 7 },
     ],
     spawnInterval: 1000,
@@ -720,7 +720,7 @@ export const WAVE_DATA: Record<number, WaveConfig> = {
   67: {
     enemies: [
       { id: 'enemy_machinedramon', count: 10 },
-      { id: 'enemy_daemon', count: 10 },
+      { id: 'enemy_piedmon', count: 10 },
       { id: 'enemy_leviamon', count: 7 },
       { id: 'enemy_cherubimon', count: 7 },
     ],
@@ -753,7 +753,7 @@ export const WAVE_DATA: Record<number, WaveConfig> = {
       { id: 'enemy_wargreymon', count: 8 },
       { id: 'enemy_metalgarurumon', count: 8 },
       { id: 'enemy_machinedramon', count: 7 },
-      { id: 'enemy_daemon', count: 6 },
+      { id: 'enemy_saberleomon', count: 6 },
       { id: 'enemy_phoenixmon', count: 6 },
     ],
     spawnInterval: 1000,
@@ -798,7 +798,7 @@ export const WAVE_DATA: Record<number, WaveConfig> = {
   74: {
     enemies: [
       { id: 'enemy_machinedramon', count: 9 },
-      { id: 'enemy_daemon', count: 9 },
+      { id: 'enemy_puppetmon', count: 9 },
       { id: 'enemy_leviamon', count: 9 },
       { id: 'enemy_blackwargreymon', count: 8 },
       { id: 'enemy_cherubimon', count: 7 },
@@ -833,7 +833,7 @@ export const WAVE_DATA: Record<number, WaveConfig> = {
     enemies: [
       { id: 'enemy_wargreymon', count: 9 },
       { id: 'enemy_machinedramon', count: 9 },
-      { id: 'enemy_daemon', count: 9 },
+      { id: 'enemy_saberleomon', count: 9 },
       { id: 'enemy_omegamon', count: 8 },
       { id: 'enemy_omegamon_zwart', count: 8 },
     ],
@@ -886,7 +886,7 @@ export const WAVE_DATA: Record<number, WaveConfig> = {
       { id: 'enemy_machinedramon', count: 9 },
       { id: 'enemy_omegamon', count: 8 },
       { id: 'enemy_omegamon_zwart', count: 8 },
-      { id: 'enemy_daemon', count: 8 },
+      { id: 'enemy_boltmon', count: 8 },
     ],
     spawnInterval: 800,
   },
@@ -1121,7 +1121,7 @@ const ENDLESS_ENEMY_POOL = [
   'enemy_wargreymon',
   'enemy_metalgarurumon',
   'enemy_machinedramon',
-  'enemy_daemon',
+  'enemy_boltmon',
   'enemy_diaboromon',
   'enemy_saberleomon',
   'enemy_beelzemon',

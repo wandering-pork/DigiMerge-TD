@@ -96,6 +96,70 @@ describe('DigimonDatabase', () => {
         expect(validAttrs, `${key} has invalid attribute`).toContain(tower.attribute);
       }
     });
+
+    it('should have alternate Rookie tower entries (Sprint 12D)', () => {
+      const altRookies = [
+        'impmon_tower', 'elecmon_tower', 'gotsumon_tower', 'betamon_tower',
+        'kunemon_tower', 'gazimon_tower', 'floramon_tower', 'goblimon_tower',
+      ];
+      for (const id of altRookies) {
+        expect(towers[id], `Missing alt rookie tower: ${id}`).toBeDefined();
+        expect(towers[id].stageTier).toBe(Stage.ROOKIE);
+      }
+    });
+
+    it('should have alternate Champion tower entries (Sprint 12D)', () => {
+      const altChampions = [
+        'leomon_tower', 'seadramon_tower', 'ogremon_tower', 'monochromon_tower',
+        'darktyrannomon_tower', 'airdramon_tower', 'meramon_tower', 'kuwagamon_tower',
+        'numemon_tower', 'guardromon_tower',
+      ];
+      for (const id of altChampions) {
+        expect(towers[id], `Missing alt champion tower: ${id}`).toBeDefined();
+        expect(towers[id].stageTier).toBe(Stage.CHAMPION);
+      }
+    });
+
+    it('should have alternate Ultimate tower entries (Sprint 12D)', () => {
+      const altUltimates = [
+        'megaseadramon_tower', 'gigadramon_tower', 'warumonzaemon_tower', 'ladydevimon_tower',
+        'bluemeramon_tower', 'megadramon_tower', 'mamemon_tower', 'andromon_tower',
+      ];
+      for (const id of altUltimates) {
+        expect(towers[id], `Missing alt ultimate tower: ${id}`).toBeDefined();
+        expect(towers[id].stageTier).toBe(Stage.ULTIMATE);
+      }
+    });
+
+    it('should have alternate Mega tower entries (Sprint 12D)', () => {
+      const altMegas = [
+        'piedmon_tower', 'blackwargreymon_tower', 'leviamon_tower',
+        'boltmon_tower', 'saberleomon_tower', 'puppetmon_tower', 'metalseadramon_tower',
+        'diaboromon_tower', 'metalmamemon_tower',
+      ];
+      for (const id of altMegas) {
+        expect(towers[id], `Missing alt mega tower: ${id}`).toBeDefined();
+        expect(towers[id].stageTier).toBe(Stage.MEGA);
+      }
+    });
+
+    it('all Sprint 12D towers should have spriteKey', () => {
+      const sprint12dTowers = [
+        'impmon_tower', 'elecmon_tower', 'gotsumon_tower', 'betamon_tower',
+        'kunemon_tower', 'gazimon_tower', 'floramon_tower', 'goblimon_tower',
+        'leomon_tower', 'seadramon_tower', 'ogremon_tower', 'monochromon_tower',
+        'darktyrannomon_tower', 'airdramon_tower', 'meramon_tower', 'kuwagamon_tower',
+        'numemon_tower', 'guardromon_tower',
+        'megaseadramon_tower', 'gigadramon_tower', 'warumonzaemon_tower', 'ladydevimon_tower',
+        'bluemeramon_tower', 'megadramon_tower', 'mamemon_tower', 'andromon_tower',
+        'piedmon_tower', 'blackwargreymon_tower', 'leviamon_tower',
+        'boltmon_tower', 'saberleomon_tower', 'puppetmon_tower', 'metalseadramon_tower',
+        'diaboromon_tower', 'metalmamemon_tower',
+      ];
+      for (const id of sprint12dTowers) {
+        expect(towers[id].spriteKey, `${id} should have spriteKey`).toBeDefined();
+      }
+    });
   });
 
   describe('enemies', () => {

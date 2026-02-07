@@ -59,7 +59,7 @@ digimerge-td/
 │   │   ├── WaveManager.ts         # Enemy spawning
 │   │   ├── CombatManager.ts       # Damage, effects
 │   │   ├── TowerManager.ts        # Tower placement, selection
-│   │   ├── AudioManager.ts        # Sound effects (volume/mute via registry)
+│   │   ├── AudioManager.ts        # Sound effects + music (localStorage volume persistence)
 │   │   └── SaveManager.ts         # LocalStorage save/load
 │   ├── data/
 │   │   ├── DigimonDatabase.ts     # All Digimon stats
@@ -144,7 +144,7 @@ A `/phaser` skill is available for Phaser 3 API questions, game development patt
 | `GAME_DESIGN_DOCUMENT.md` | Complete game mechanics, systems, UI/UX |
 | `ENEMY_SPAWN_DESIGN.md` | Wave compositions, enemy types, bosses |
 | `DIGIMON_STATS_DATABASE.md` | All Digimon stats, evolution paths |
-| `IMPLEMENTATION_PLAN.md` | Sprint planning, task breakdown (Sprints 0-15) |
+| `PROGRESS.md` | Implementation progress, completed work, roadmap |
 | `PROGRESS.md` | Current implementation status, completed sprints, test summary |
 
 ---
@@ -502,7 +502,7 @@ cost = Math.ceil(3 * currentLevel * stageMultiplier);
 | Sound effects | ✅ | All 17 SFX + volume control |
 | Save/Load | ✅ | LocalStorage + auto-save |
 | UI Theme System | ✅ | UITheme.ts tokens + UIHelpers.ts components |
-| Volume Control | ✅ | Slider + mute in SettingsScene |
+| Volume Control | ✅ | Slider + mute in SettingsScene, persists via localStorage |
 | Game Speed | ✅ | 1x/2x/3x toggle + keyboard shortcuts |
 | Sprout Lands Tileset | ✅ | Grass, dirt, water tiles + decorations |
 | GitHub Pages Deploy | ✅ | Auto-deploy via GitHub Actions |
@@ -521,11 +521,18 @@ cost = Math.ceil(3 * currentLevel * stageMultiplier);
 ### Remaining Work
 
 **Content:**
-- More Digimon roster expansion (~150+ target, currently ~105 tower Digimon)
+- More Digimon roster expansion (~150+ target, currently ~141 tower Digimon)
 - DNA Digivolution system (Ultra tier)
 
-**UX & Polish:**
-- Drag-and-drop merge, visual merge effects, object pooling, background music
+**Performance & Maps:**
+- Object pooling for projectiles/enemies
+- Map expansion (multiple map configs, new layouts)
+
+**Polish (Done in Sprint 19):**
+- ~~Visual merge effects~~ ✅, ~~background music~~ ✅, ~~merge ability inheritance~~ ✅
+- ~~Wave preview hover/click for enemy details~~ ✅
+- ~~Volume persistence across scenes~~ ✅, ~~UI text readability~~ ✅
+- ~~Settings panel layout fixes~~ ✅, ~~Encyclopedia detail view~~ ✅
 
 ---
 

@@ -39,6 +39,8 @@ const DEFAULT_SPEED = 300; // pixels per second
 const BODY_RADIUS = 6;
 const HIT_DISTANCE = 10; // px – close enough to count as a hit
 const MAX_TRAIL_POINTS = 6;
+const AOE_RADIUS = 50; // px – splash radius for AoE effects
+const AOE_DAMAGE_RATIO = 0.5; // AoE splash deals 50% damage to nearby enemies
 
 // ---------------------------------------------------------------------------
 // Projectile
@@ -196,6 +198,11 @@ export class Projectile extends Phaser.GameObjects.Container {
       if (this.effectType && this.target.applyEffect) {
         this.target.applyEffect(this.effectType, this.sourceDamage);
       }
+
+      // AoE splash damage: hit nearby enemies for reduced damage
+      if (this.effectType && this.effectType.includes('aoe')) {
+        this.applyAoeSplash();
+      }
     }
 
     this.isActive = false;
@@ -213,6 +220,48 @@ export class Projectile extends Phaser.GameObjects.Container {
         this.cleanup();
       },
     });
+  }
+
+  /**
+   * Apply AoE splash damage to nearby enemies within AOE_RADIUS.
+   * Deals reduced damage and applies the status effect to each.
+   */
+  private applyAoeSplash(): void {
+    if (!this.target) return;
+
+    const hitX = this.target.x;
+    const hitY = this.target.y;
+    const splashDamage = this.damage * AOE_DAMAGE_RATIO;
+
+    // Access enemy container from the GameScene
+    const gameScene = this.scene as any;
+    const enemyContainer = gameScene.enemyContainer as Phaser.GameObjects.Container | undefined;
+    if (!enemyContainer) return;
+
+    for (const child of enemyContainer.list) {
+      const enemy = child as unknown as ProjectileTarget & { x: number; y: number };
+      if (!enemy.isAlive || enemy === this.target) continue;
+
+      const dx = enemy.x - hitX;
+      const dy = enemy.y - hitY;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+
+      if (dist <= AOE_RADIUS) {
+        enemy.takeDamage(splashDamage);
+
+        EventBus.emit(GameEvents.DAMAGE_DEALT, {
+          x: enemy.x,
+          y: enemy.y,
+          damage: splashDamage,
+          multiplier: this.attributeMultiplier,
+        });
+
+        // Apply status effect to splash targets too
+        if (this.effectType && enemy.applyEffect) {
+          enemy.applyEffect(this.effectType, this.sourceDamage);
+        }
+      }
+    }
   }
 
   // -------------------------------------------------------------------------

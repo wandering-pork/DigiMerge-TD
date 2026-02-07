@@ -24,37 +24,82 @@ const SFX = {
   WAVE_START: 'wave_start',
 } as const;
 
+const MUSIC = {
+  MENU: 'music_menu',
+  BATTLE: 'music_battle',
+} as const;
+
 /**
  * AudioManager listens to EventBus events and plays appropriate SFX.
  * Centralized audio so individual systems don't need Phaser sound access.
  */
 export class AudioManager {
+  private static readonly STORAGE_KEY = 'digimerge_audio_settings';
+
   private scene: Phaser.Scene;
-  private sfxVolume: number = 0;
-  private enabled: boolean = false;
+  private sfxVolume: number;
+  private enabled: boolean;
+  private musicVolume: number;
+  private currentMusic: Phaser.Sound.BaseSound | null = null;
+  private currentMusicKey: string = '';
 
   constructor(scene: Phaser.Scene) {
     this.scene = scene;
+    const settings = AudioManager.loadSettings();
+    this.sfxVolume = settings.sfxVolume;
+    this.musicVolume = settings.musicVolume;
+    this.enabled = settings.enabled;
     this.bindEvents();
+  }
+
+  // ---------------------------------------------------------------------------
+  // Persistence
+  // ---------------------------------------------------------------------------
+
+  public static loadSettings(): { sfxVolume: number; musicVolume: number; enabled: boolean } {
+    try {
+      const saved = localStorage.getItem(AudioManager.STORAGE_KEY);
+      if (saved) return JSON.parse(saved);
+    } catch { /* ignore */ }
+    return { sfxVolume: 0.5, musicVolume: 0.3, enabled: true };
+  }
+
+  private saveSettings(): void {
+    try {
+      localStorage.setItem(AudioManager.STORAGE_KEY, JSON.stringify({
+        sfxVolume: this.sfxVolume,
+        musicVolume: this.musicVolume,
+        enabled: this.enabled,
+      }));
+    } catch { /* ignore */ }
   }
 
   // ---------------------------------------------------------------------------
   // Event Bindings
   // ---------------------------------------------------------------------------
 
+  // Bound handler references for proper cleanup
+  private handlers: Array<{ event: string; fn: () => void }> = [];
+
   private bindEvents(): void {
-    EventBus.on(GameEvents.TOWER_PLACED, () => this.play(SFX.TOWER_SPAWN));
-    EventBus.on(GameEvents.TOWER_LEVELED, () => this.play(SFX.TOWER_LEVEL_UP));
-    EventBus.on(GameEvents.TOWER_SOLD, () => this.play(SFX.TOWER_SELL));
-    EventBus.on(GameEvents.TOWER_EVOLVED, () => this.play(SFX.TOWER_EVOLVE));
-    EventBus.on(GameEvents.TOWER_MERGED, () => this.play(SFX.MERGE_SUCCESS));
-    EventBus.on(GameEvents.ENEMY_DIED, () => this.play(SFX.ENEMY_DEATH));
-    EventBus.on(GameEvents.ENEMY_REACHED_BASE, () => this.play(SFX.ENEMY_ESCAPE));
-    EventBus.on(GameEvents.BOSS_SPAWNED, () => this.play(SFX.BOSS_SPAWN));
-    EventBus.on(GameEvents.WAVE_STARTED, () => this.play(SFX.WAVE_START));
-    EventBus.on(GameEvents.WAVE_COMPLETED, () => this.play(SFX.WAVE_COMPLETE));
-    EventBus.on(GameEvents.GAME_OVER, () => this.play(SFX.GAME_OVER));
-    EventBus.on(GameEvents.GAME_WON, () => this.play(SFX.VICTORY));
+    const bind = (event: string, sfx: string) => {
+      const fn = () => this.play(sfx);
+      this.handlers.push({ event, fn });
+      EventBus.on(event, fn, this);
+    };
+
+    bind(GameEvents.TOWER_PLACED, SFX.TOWER_SPAWN);
+    bind(GameEvents.TOWER_LEVELED, SFX.TOWER_LEVEL_UP);
+    bind(GameEvents.TOWER_SOLD, SFX.TOWER_SELL);
+    bind(GameEvents.TOWER_EVOLVED, SFX.TOWER_EVOLVE);
+    bind(GameEvents.TOWER_MERGED, SFX.MERGE_SUCCESS);
+    bind(GameEvents.ENEMY_DIED, SFX.ENEMY_DEATH);
+    bind(GameEvents.ENEMY_REACHED_BASE, SFX.ENEMY_ESCAPE);
+    bind(GameEvents.BOSS_SPAWNED, SFX.BOSS_SPAWN);
+    bind(GameEvents.WAVE_STARTED, SFX.WAVE_START);
+    bind(GameEvents.WAVE_COMPLETED, SFX.WAVE_COMPLETE);
+    bind(GameEvents.GAME_OVER, SFX.GAME_OVER);
+    bind(GameEvents.GAME_WON, SFX.VICTORY);
   }
 
   // ---------------------------------------------------------------------------
@@ -95,6 +140,7 @@ export class AudioManager {
 
   public setVolume(volume: number): void {
     this.sfxVolume = Math.max(0, Math.min(1, volume));
+    this.saveSettings();
   }
 
   public getVolume(): number {
@@ -103,6 +149,10 @@ export class AudioManager {
 
   public setEnabled(enabled: boolean): void {
     this.enabled = enabled;
+    this.saveSettings();
+    if (!enabled) {
+      this.stopMusic();
+    }
   }
 
   public isEnabled(): boolean {
@@ -110,21 +160,64 @@ export class AudioManager {
   }
 
   // ---------------------------------------------------------------------------
+  // Music
+  // ---------------------------------------------------------------------------
+
+  public playMusic(key: string): void {
+    if (this.currentMusicKey === key && this.currentMusic?.isPlaying) return;
+
+    this.stopMusic();
+
+    try {
+      this.currentMusic = this.scene.sound.add(key, {
+        volume: this.musicVolume,
+        loop: true,
+      });
+      this.currentMusic.play();
+      this.currentMusicKey = key;
+    } catch {
+      // Audio might not be available
+    }
+  }
+
+  public stopMusic(): void {
+    if (this.currentMusic) {
+      this.currentMusic.stop();
+      this.currentMusic.destroy();
+      this.currentMusic = null;
+      this.currentMusicKey = '';
+    }
+  }
+
+  public playMenuMusic(): void {
+    this.playMusic(MUSIC.MENU);
+  }
+
+  public playBattleMusic(): void {
+    this.playMusic(MUSIC.BATTLE);
+  }
+
+  public setMusicVolume(volume: number): void {
+    this.musicVolume = Math.max(0, Math.min(1, volume));
+    this.saveSettings();
+    if (this.currentMusic && 'volume' in this.currentMusic) {
+      (this.currentMusic as any).volume = this.musicVolume;
+    }
+  }
+
+  public getMusicVolume(): number {
+    return this.musicVolume;
+  }
+
+  // ---------------------------------------------------------------------------
   // Cleanup
   // ---------------------------------------------------------------------------
 
   public cleanup(): void {
-    EventBus.off(GameEvents.TOWER_PLACED);
-    EventBus.off(GameEvents.TOWER_LEVELED);
-    EventBus.off(GameEvents.TOWER_SOLD);
-    EventBus.off(GameEvents.TOWER_EVOLVED);
-    EventBus.off(GameEvents.TOWER_MERGED);
-    EventBus.off(GameEvents.ENEMY_DIED);
-    EventBus.off(GameEvents.ENEMY_REACHED_BASE);
-    EventBus.off(GameEvents.BOSS_SPAWNED);
-    EventBus.off(GameEvents.WAVE_STARTED);
-    EventBus.off(GameEvents.WAVE_COMPLETED);
-    EventBus.off(GameEvents.GAME_OVER);
-    EventBus.off(GameEvents.GAME_WON);
+    this.stopMusic();
+    for (const { event, fn } of this.handlers) {
+      EventBus.off(event, fn, this);
+    }
+    this.handlers = [];
   }
 }

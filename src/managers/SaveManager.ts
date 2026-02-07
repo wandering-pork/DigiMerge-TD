@@ -130,6 +130,64 @@ export class SaveManager {
     return defaultSettings();
   }
 
+  // ---------------------------------------------------------------------------
+  // Export / Import
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Export the current save as a JSON file download.
+   * Returns true if a save was exported, false if no save exists.
+   */
+  public static exportSave(): boolean {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (!raw) return false;
+
+    const blob = new Blob([raw], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `digimerge-td-save-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    return true;
+  }
+
+  /**
+   * Validate an imported save JSON string.
+   * Returns the parsed SaveData if valid, or an error message string.
+   */
+  public static validateImport(jsonString: string): SaveData | string {
+    try {
+      const data = JSON.parse(jsonString) as SaveData;
+
+      if (!data.version) return 'Missing save version';
+      if (data.version !== SAVE_VERSION) return `Incompatible version: ${data.version} (expected ${SAVE_VERSION})`;
+      if (!data.gameState) return 'Missing game state';
+      if (typeof data.gameState.digibytes !== 'number') return 'Invalid game state: missing digibytes';
+      if (typeof data.gameState.lives !== 'number') return 'Invalid game state: missing lives';
+      if (typeof data.gameState.currentWave !== 'number') return 'Invalid game state: missing wave';
+      if (!Array.isArray(data.towers)) return 'Invalid towers data';
+
+      return data;
+    } catch {
+      return 'Invalid JSON format';
+    }
+  }
+
+  /**
+   * Import a validated SaveData, replacing the current save.
+   */
+  public static importSave(data: SaveData): boolean {
+    try {
+      localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   /**
    * Save only settings (without overwriting game state).
    */

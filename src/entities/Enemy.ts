@@ -61,10 +61,10 @@ export class Enemy extends Phaser.GameObjects.Container {
   private healthBarFill: Phaser.GameObjects.Graphics;
   private effectIndicators: Phaser.GameObjects.Graphics;
 
-  // Health bar dimensions
-  private static readonly HEALTH_BAR_WIDTH = 40;
-  private static readonly HEALTH_BAR_HEIGHT = 5;
-  private static readonly HEALTH_BAR_Y = -28;
+  // Health bar dimensions (scaled for 36px cells)
+  private static readonly HEALTH_BAR_WIDTH = 28;
+  private static readonly HEALTH_BAR_HEIGHT = 4;
+  private static readonly HEALTH_BAR_Y = -18;
 
   constructor(scene: Phaser.Scene, digimonId: string, waveScaling?: number) {
     super(scene, 0, 0);
@@ -107,8 +107,8 @@ export class Enemy extends Phaser.GameObjects.Container {
     this.sprite = scene.add.sprite(0, 0, spriteKey);
     this.sprite.setOrigin(0.5, 0.5);
 
-    // Scale 16px sprites to ~36px for enemies (slightly smaller than tower 40px)
-    const targetSize = 36;
+    // Scale 16px sprites to ~24px for enemies (fits in 36px cells)
+    const targetSize = 24;
     const currentWidth = this.sprite.width || 16;
     const scaleFactor = targetSize / currentWidth;
     this.sprite.setScale(scaleFactor);

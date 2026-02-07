@@ -28,8 +28,8 @@ import { Enemy } from '@/entities/Enemy';
 import { canMerge, MergeCandidate } from '@/systems/MergeSystem';
 import { DIGIMON_DATABASE } from '@/data/DigimonDatabase';
 import { getWaveConfig } from '@/data/WaveData';
-import { Stage, TargetPriority } from '@/types';
-import { COLORS, TEXT_STYLES, FONTS, ANIM } from '@/ui/UITheme';
+import { Stage, TargetPriority, Attribute, ATTRIBUTE_NAMES, STAGE_NAMES, EnemyStats } from '@/types';
+import { COLORS, TEXT_STYLES, FONTS, ANIM, ATTRIBUTE_COLORS_STR } from '@/ui/UITheme';
 import { drawPanel, drawButton, drawSeparator, drawDigitalGrid, animateButtonHover, animateButtonPress } from '@/ui/UIHelpers';
 import { BossAbilityAction, getCooldownProgress } from '@/systems/BossAbilitySystem';
 import { Projectile } from '@/entities/Projectile';
@@ -71,6 +71,7 @@ export class GameScene extends Phaser.Scene {
   private lives: number = STARTING_LIVES;
   private digibytes: number = STARTING_DIGIBYTES;
   private isWaveActive: boolean = false;
+  private gameOverTriggered: boolean = false;
 
   // Free first spawn
   private hasUsedFreeSpawn: boolean = false;
@@ -103,6 +104,10 @@ export class GameScene extends Phaser.Scene {
   private wavePreviewText: Phaser.GameObjects.Text | null = null;
   private wavePreviewSprites: Phaser.GameObjects.GameObject[] = [];
 
+  // Wave preview tooltip
+  private waveTooltip: Phaser.GameObjects.Container | null = null;
+  private waveTooltipPinned: boolean = false;
+
   // Auto-start wave
   private autoStartWave: boolean = false;
   private autoStartBtnBg!: Phaser.GameObjects.Graphics;
@@ -119,7 +124,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   create() {
-    this.cameras.main.setBackgroundColor('#060614');
+    this.cameras.main.setBackgroundColor('#0f0a14');
 
     this.currentWave = 1;
     this.lives = STARTING_LIVES;
@@ -133,6 +138,11 @@ export class GameScene extends Phaser.Scene {
     this.speedBtnTexts = [];
     this.autoStartWave = false;
     this.starterDisplayObjects = [];
+    this.gameOverTriggered = false;
+
+    // Bind shutdown to Phaser lifecycle to ensure EventBus cleanup
+    this.events.on('shutdown', this.shutdown, this);
+    this.events.on('destroy', this.shutdown, this);
 
     // Initialize free spawn flag in registry for SpawnMenu access
     this.registry.set('hasUsedFreeSpawn', false);
@@ -182,6 +192,10 @@ export class GameScene extends Phaser.Scene {
     this.audioManager = new AudioManager(this);
     this.registry.set('audioManager', this.audioManager);
 
+    // Stop menu music and start battle music
+    this.sound.stopAll();
+    this.audioManager.playBattleMusic();
+
     // Shared currency callbacks
     const getDigibytes = () => this.digibytes;
     const spendDigibytes = (amount: number) => {
@@ -223,6 +237,7 @@ export class GameScene extends Phaser.Scene {
     EventBus.on(GameEvents.DIGIVOLVE_INITIATED, this.onDigivolveInitiated, this);
     EventBus.on(GameEvents.BOSS_SPAWNED, this.onBossSpawned, this);
     EventBus.on(GameEvents.TOWER_PLACED, this.onTowerPlaced, this);
+    EventBus.on(GameEvents.TOWER_MERGED, this.onMergeCompleted, this);
     EventBus.on(GameEvents.DAMAGE_DEALT, this.onDamageDealt, this);
 
     // Setup ghost preview sprite (hidden by default)
@@ -293,6 +308,7 @@ export class GameScene extends Phaser.Scene {
     EventBus.off(GameEvents.DIGIVOLVE_INITIATED, this.onDigivolveInitiated, this);
     EventBus.off(GameEvents.BOSS_SPAWNED, this.onBossSpawned, this);
     EventBus.off(GameEvents.TOWER_PLACED, this.onTowerPlaced, this);
+    EventBus.off(GameEvents.TOWER_MERGED, this.onMergeCompleted, this);
     EventBus.off(GameEvents.DAMAGE_DEALT, this.onDamageDealt, this);
 
     // Remove visibility change listener
@@ -316,7 +332,7 @@ export class GameScene extends Phaser.Scene {
     this.gridGraphics.setDepth(0);
 
     const cellSize = GRID.CELL_SIZE;
-    const tileScale = cellSize / 16; // 16px tiles scaled to fill 64px cells
+    const tileScale = cellSize / 16; // 16px tiles scaled to fill cells (2.25x for 36px)
 
     // 100% opaque tile frames (verified via pixel analysis)
     // Grass: 176x112, 11 cols. Rows 5-6 are fully opaque textured fills
@@ -346,10 +362,21 @@ export class GameScene extends Phaser.Scene {
 
     // --- Layer 1: Solid color base fills (eliminates all black gaps) ---
 
-    // Water base covers the full screen left of HUD
-    const gridRight = GRID_OFFSET_X + GRID.COLUMNS * cellSize;
+    const gridRight = GRID_OFFSET_X + GRID.COLUMNS * cellSize;  // 603
+    const gridBottom = GRID_OFFSET_Y + GRID.ROWS * cellSize;    // 684
+    const leftPanelRight = 305;  // left panel ends here
+    const rightPanelLeft = gridRight + 15; // 618, right panel starts here
+
+    // Water base: fill narrow strips between panels and grid
     this.gridGraphics.fillStyle(WATER_BASE, 1);
-    this.gridGraphics.fillRect(0, 0, gridRight + 20, GAME_HEIGHT);
+    // Left water strip (between left panel and grid)
+    this.gridGraphics.fillRect(leftPanelRight, 0, GRID_OFFSET_X - leftPanelRight, GAME_HEIGHT);
+    // Right water strip (between grid and right panel)
+    this.gridGraphics.fillRect(gridRight, 0, rightPanelLeft - gridRight, GAME_HEIGHT);
+    // Top water strip (above grid, within grid columns)
+    this.gridGraphics.fillRect(GRID_OFFSET_X, 0, GRID.COLUMNS * cellSize, GRID_OFFSET_Y);
+    // Bottom water strip (below grid, within grid columns)
+    this.gridGraphics.fillRect(GRID_OFFSET_X, gridBottom, GRID.COLUMNS * cellSize, GAME_HEIGHT - gridBottom);
 
     // Grass base covers the grid area
     this.gridGraphics.fillStyle(GRASS_BASE, 1);
@@ -372,30 +399,33 @@ export class GameScene extends Phaser.Scene {
 
     // --- Layer 2: Water tiles on border areas for texture ---
     if (hasWater) {
-      const gridBottom = GRID_OFFSET_Y + GRID.ROWS * cellSize;
-      // Left strip
-      for (let wy = 0; wy < gridBottom + cellSize; wy += cellSize) {
-        for (let wx = 0; wx < GRID_OFFSET_X; wx += cellSize) {
+      // Left strip (between left panel and grid)
+      for (let wy = 0; wy < GAME_HEIGHT; wy += cellSize) {
+        for (let wx = leftPanelRight; wx < GRID_OFFSET_X; wx += cellSize) {
           this.add.image(wx + cellSize / 2, wy + cellSize / 2, 'tiles_water', WATER_FRAME)
             .setScale(tileScale).setDepth(0);
         }
       }
-      // Right strip
-      for (let wy = 0; wy < gridBottom + cellSize; wy += cellSize) {
-        this.add.image(gridRight + cellSize / 2, wy + cellSize / 2, 'tiles_water', WATER_FRAME)
-          .setScale(tileScale).setDepth(0);
+      // Right strip (between grid and right panel)
+      for (let wy = 0; wy < GAME_HEIGHT; wy += cellSize) {
+        for (let wx = gridRight; wx < rightPanelLeft; wx += cellSize) {
+          this.add.image(wx + cellSize / 2, wy + cellSize / 2, 'tiles_water', WATER_FRAME)
+            .setScale(tileScale).setDepth(0);
+        }
       }
-      // Top strip
+      // Top strip (above grid, within grid columns)
       for (let wx = GRID_OFFSET_X; wx < gridRight; wx += cellSize) {
         for (let wy = 0; wy < GRID_OFFSET_Y; wy += cellSize) {
           this.add.image(wx + cellSize / 2, wy + cellSize / 2, 'tiles_water', WATER_FRAME)
             .setScale(tileScale).setDepth(0);
         }
       }
-      // Bottom strip
+      // Bottom strip (below grid, within grid columns)
       for (let wx = GRID_OFFSET_X; wx < gridRight; wx += cellSize) {
-        this.add.image(wx + cellSize / 2, GRID_OFFSET_Y + GRID.ROWS * cellSize + cellSize / 2, 'tiles_water', WATER_FRAME)
-          .setScale(tileScale).setDepth(0);
+        for (let wy = gridBottom; wy < GAME_HEIGHT; wy += cellSize) {
+          this.add.image(wx + cellSize / 2, wy + cellSize / 2, 'tiles_water', WATER_FRAME)
+            .setScale(tileScale).setDepth(0);
+        }
       }
     }
 
@@ -443,8 +473,8 @@ export class GameScene extends Phaser.Scene {
     this.gridGraphics.lineStyle(2, 0x00ff44, 0.6);
     this.gridGraphics.strokeRect(spawnX, spawnY, cellSize, cellSize);
     this.add.text(spawnX + cellSize / 2, spawnY + cellSize / 2, 'S', {
-      fontSize: '16px', color: '#00ff44', fontStyle: 'bold',
-      stroke: '#003300', strokeThickness: 2,
+      fontSize: '11px', color: '#00ff44', fontStyle: 'bold',
+      stroke: '#003300', strokeThickness: 2, resolution: 2,
     }).setOrigin(0.5).setDepth(1);
 
     const baseX = GRID_OFFSET_X + (GRID.BASE.col - 1) * cellSize;
@@ -454,8 +484,8 @@ export class GameScene extends Phaser.Scene {
     this.gridGraphics.lineStyle(2, 0xff4444, 0.6);
     this.gridGraphics.strokeRect(baseX, baseY, cellSize, cellSize);
     this.add.text(baseX + cellSize / 2, baseY + cellSize / 2, 'B', {
-      fontSize: '16px', color: '#ff4444', fontStyle: 'bold',
-      stroke: '#330000', strokeThickness: 2,
+      fontSize: '11px', color: '#ff4444', fontStyle: 'bold',
+      stroke: '#330000', strokeThickness: 2, resolution: 2,
     }).setOrigin(0.5).setDepth(1);
   }
 
@@ -493,6 +523,11 @@ export class GameScene extends Phaser.Scene {
   private setupGridInteraction(): void {
     // Click detection on the grid area
     this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+      // Dismiss pinned wave tooltip on any non-tooltip click
+      if (this.waveTooltipPinned) {
+        this.dismissWaveTooltip();
+      }
+
       const gridX = pointer.x - GRID_OFFSET_X;
       const gridY = pointer.y - GRID_OFFSET_Y;
 
@@ -526,6 +561,20 @@ export class GameScene extends Phaser.Scene {
     this.input.on('pointermove', (pointer: Phaser.Input.Pointer) => {
       this.updateGhostPreview(pointer.x, pointer.y);
     });
+
+    // Right-click to cancel (merge mode, tower selection, spawn menu)
+    this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+      if (pointer.rightButtonDown()) {
+        if (this.isMergeMode) {
+          this.exitMergeMode();
+        } else {
+          this.spawnMenu.hide();
+          this.towerInfoPanel.hide();
+        }
+      }
+    });
+    // Prevent context menu on right-click over the game canvas
+    this.game.canvas.addEventListener('contextmenu', (e) => e.preventDefault());
   }
 
   /**
@@ -569,8 +618,8 @@ export class GameScene extends Phaser.Scene {
       const starters: string[] = this.registry.get('selectedStarters') || [];
       if (starters.length > 0 && this.textures.exists(starters[0])) {
         this.ghostSprite.setTexture(starters[0]);
-        this.ghostSprite.setScale(3);
-        this.ghostSprite.setPosition(cellX, cellY - 8);
+        this.ghostSprite.setScale(1.75);
+        this.ghostSprite.setPosition(cellX, cellY - 4);
         this.ghostSprite.setVisible(true);
       } else {
         this.hideGhostPreview();
@@ -627,6 +676,7 @@ export class GameScene extends Phaser.Scene {
         fontSize: '14px',
         color: candidates.length > 0 ? '#44ccff' : '#ff6666',
         fontStyle: 'bold',
+        resolution: 2,
       },
     ).setOrigin(0.5).setDepth(15);
 
@@ -730,11 +780,12 @@ export class GameScene extends Phaser.Scene {
       GRID_OFFSET_Y + (GRID.ROWS * GRID.CELL_SIZE) / 2,
       `BOSS: ${bossName}!`,
       {
-        fontSize: '36px',
+        fontSize: '24px',
         color: '#ff4444',
         fontStyle: 'bold',
         stroke: '#000000',
         strokeThickness: 4,
+        resolution: 2,
       },
     ).setOrigin(0.5).setDepth(60).setAlpha(0);
 
@@ -767,7 +818,7 @@ export class GameScene extends Phaser.Scene {
     const barWidth = GRID.COLUMNS * GRID.CELL_SIZE - 20;
     const barHeight = 14;
     const barX = GRID_OFFSET_X + 10;
-    const barY = 6;
+    const barY = 24;
 
     // Dark background panel for the boss bar area
     this.bossBarBg = this.add.graphics();
@@ -824,7 +875,7 @@ export class GameScene extends Phaser.Scene {
     const barWidth = GRID.COLUMNS * GRID.CELL_SIZE - 20;
     const barHeight = 14;
     const barX = GRID_OFFSET_X + 10;
-    const barY = 6;
+    const barY = 24;
     const hpPercent = Math.max(0, this.bossEnemy.hp / this.bossEnemy.maxHp);
 
     this.bossBarFill.clear();
@@ -912,7 +963,7 @@ export class GameScene extends Phaser.Scene {
           // Floating drain indicator near DB display
           const drainText = this.add.text(
             this.digibytesText.x + 40, this.digibytesText.y,
-            `-${drain}`, { fontFamily: FONTS.MONO, fontSize: '12px', color: '#ff4444', fontStyle: 'bold' },
+            `-${drain}`, { fontFamily: FONTS.MONO, fontSize: '12px', color: '#ff4444', fontStyle: 'bold', resolution: 2 },
           ).setDepth(15);
           this.tweens.add({
             targets: drainText, y: drainText.y - 20, alpha: 0,
@@ -1042,7 +1093,7 @@ export class GameScene extends Phaser.Scene {
     bgStrip.setDepth(54);
 
     const popup = this.add.text(popupX, popupY, text, {
-      fontSize: '22px',
+      fontSize: '16px',
       color: '#ffaa00',
       fontStyle: 'bold',
       stroke: '#000000',
@@ -1067,26 +1118,23 @@ export class GameScene extends Phaser.Scene {
     for (const obj of this.bossHudObjects) obj.destroy();
     this.bossHudObjects = [];
 
-    const rightPanelX = GRID_OFFSET_X + GRID.COLUMNS * GRID.CELL_SIZE + 30;
-    const panelW = 270;
-    const hudY = 10;
-    // Position below the speed controls
-    const bossInfoY = hudY + 390;
+    const bossX = 35; // leftColX
+    const bossInfoY = GAME_HEIGHT - 90;
 
     // Separator
     const sep = this.add.graphics().setDepth(10);
-    drawSeparator(sep, rightPanelX - 10, bossInfoY, rightPanelX + panelW - 30);
+    drawSeparator(sep, bossX - 5, bossInfoY, bossX + 245);
     this.bossHudObjects.push(sep);
 
     // "BOSS" label
-    const label = this.add.text(rightPanelX, bossInfoY + 8, 'ACTIVE BOSS', {
+    const label = this.add.text(bossX, bossInfoY + 8, 'ACTIVE BOSS', {
       ...TEXT_STYLES.HUD_LABEL,
       color: '#ff6666',
     }).setDepth(10);
     this.bossHudObjects.push(label);
 
     // Boss name
-    const nameText = this.add.text(rightPanelX, bossInfoY + 24, bossName, {
+    const nameText = this.add.text(bossX, bossInfoY + 24, bossName, {
       fontFamily: FONTS.MONO,
       fontSize: '14px',
       color: '#ff8844',
@@ -1097,7 +1145,7 @@ export class GameScene extends Phaser.Scene {
 
     // Ability info
     if (bossStats?.bossAbility) {
-      const abilityLabel = this.add.text(rightPanelX, bossInfoY + 44, 'Ability:', {
+      const abilityLabel = this.add.text(bossX, bossInfoY + 44, 'Ability:', {
         fontFamily: FONTS.BODY,
         fontSize: '10px',
         color: '#7788aa',
@@ -1105,7 +1153,7 @@ export class GameScene extends Phaser.Scene {
       }).setDepth(10);
       this.bossHudObjects.push(abilityLabel);
 
-      const abilityName = this.add.text(rightPanelX + 42, bossInfoY + 44, bossStats.bossAbility.name, {
+      const abilityName = this.add.text(bossX + 42, bossInfoY + 44, bossStats.bossAbility.name, {
         fontFamily: FONTS.MONO,
         fontSize: '11px',
         color: '#ffcc66',
@@ -1120,7 +1168,7 @@ export class GameScene extends Phaser.Scene {
         : triggerType === 'passive' ? 'Passive'
         : triggerType === 'hp_threshold' ? `At ${(bossStats.bossAbility.hpThreshold ?? 0) * 100}% HP`
         : triggerType;
-      const triggerText = this.add.text(rightPanelX, bossInfoY + 58, triggerLabel, {
+      const triggerText = this.add.text(bossX, bossInfoY + 58, triggerLabel, {
         fontFamily: FONTS.MONO,
         fontSize: '10px',
         color: '#667799',
@@ -1212,6 +1260,7 @@ export class GameScene extends Phaser.Scene {
         tower.setLevel(towerData.level);
         tower.dp = towerData.dp;
         tower.targetPriority = towerData.targetPriority as TargetPriority;
+        tower.bonusEffects = towerData.bonusEffects ?? [];
         this.towerContainer.add(tower);
       } catch {
         // Skip invalid tower data
@@ -1224,77 +1273,97 @@ export class GameScene extends Phaser.Scene {
   // ============================================================
 
   private createHUD(): void {
-    const hudY = 10;
-    const rightPanelX = GRID_OFFSET_X + GRID.COLUMNS * GRID.CELL_SIZE + 30;
-    const panelW = 270;
+    // === 3-zone layout: Left HUD | Center Grid | Right HUD ===
+    // Left panel: game controls (wave, lives, DB, buttons, speed, wave preview)
+    // Right panel: tower info panel / spawn menu (managed separately)
+    const leftPanelX = 20;
+    const leftPanelW = 280;
+    const leftColX = leftPanelX + 15; // 35
+    const contentW = leftPanelW - 30;  // 250
+    const hudY = 8;
+    const btnCenterX = leftPanelX + leftPanelW / 2; // 160
 
-    // HUD panel background
+    // Full-height left HUD panel background
     const hudPanelBg = this.add.graphics();
-    drawPanel(hudPanelBg, rightPanelX - 15, 0, panelW, GAME_HEIGHT, {
+    drawPanel(hudPanelBg, leftPanelX - 5, 0, leftPanelW + 10, GAME_HEIGHT, {
       borderColor: COLORS.CYAN_DIM, borderAlpha: 0.3,
     });
     hudPanelBg.setDepth(9);
 
-    // Stat cards - small grouped backgrounds for visual hierarchy
+    // Full-height right panel background (behind TowerInfoPanel / SpawnMenu)
+    const rightPanelStartX = GRID_OFFSET_X + GRID.COLUMNS * GRID.CELL_SIZE + 15; // 618
+    const rightPanelBg = this.add.graphics();
+    drawPanel(rightPanelBg, rightPanelStartX - 5, 0, GAME_WIDTH - rightPanelStartX + 5, GAME_HEIGHT, {
+      borderColor: COLORS.CYAN_DIM, borderAlpha: 0.3,
+    });
+    rightPanelBg.setDepth(9);
+
+    // Stat cards
     const statCardGfx = this.add.graphics().setDepth(9);
 
     // Wave stat card
     statCardGfx.fillStyle(COLORS.BG_CARD, 0.6);
-    statCardGfx.fillRoundedRect(rightPanelX - 5, hudY, panelW - 20, 40, 4);
+    statCardGfx.fillRoundedRect(leftColX - 5, hudY, contentW, 36, 4);
 
-    // Lives + DB stat card
+    // Lives + DB stat card (side by side)
+    const halfW = (contentW - 10) / 2;
     statCardGfx.fillStyle(COLORS.BG_CARD, 0.6);
-    statCardGfx.fillRoundedRect(rightPanelX - 5, hudY + 46, (panelW - 25) / 2, 40, 4);
-    statCardGfx.fillRoundedRect(rightPanelX - 5 + (panelW - 25) / 2 + 5, hudY + 46, (panelW - 25) / 2, 40, 4);
+    statCardGfx.fillRoundedRect(leftColX - 5, hudY + 40, halfW, 36, 4);
+    statCardGfx.fillRoundedRect(leftColX - 5 + halfW + 10, hudY + 40, halfW, 36, 4);
 
     // Wave label + value
-    this.add.text(rightPanelX + 4, hudY + 4, 'WAVE', TEXT_STYLES.HUD_LABEL).setDepth(10);
-    this.waveText = this.add.text(rightPanelX + 4, hudY + 18, `${this.currentWave} / ${TOTAL_WAVES_MVP}`, TEXT_STYLES.HUD_VALUE)
-      .setDepth(10);
-
-    // Lives label + value (left half)
-    this.add.text(rightPanelX + 4, hudY + 50, 'LIVES', TEXT_STYLES.HUD_LABEL).setDepth(10);
-    this.livesText = this.add.text(rightPanelX + 4, hudY + 64, `${this.lives}`, {
-      ...TEXT_STYLES.HUD_VALUE, color: COLORS.TEXT_LIVES,
+    this.add.text(leftColX + 4, hudY + 3, 'WAVE', TEXT_STYLES.HUD_LABEL).setDepth(10);
+    this.waveText = this.add.text(leftColX + 4, hudY + 16, `${this.currentWave} / ${TOTAL_WAVES_MVP}`, {
+      ...TEXT_STYLES.HUD_VALUE, fontSize: '16px',
     }).setDepth(10);
 
-    // DigiBytes label + value (right half)
-    const dbX = rightPanelX + (panelW - 25) / 2 + 4;
-    this.add.text(dbX, hudY + 50, 'DB', TEXT_STYLES.HUD_LABEL).setDepth(10);
-    this.digibytesText = this.add.text(dbX, hudY + 64, `${this.digibytes}`, {
-      ...TEXT_STYLES.HUD_VALUE, color: COLORS.TEXT_CURRENCY,
+    // Lives
+    this.add.text(leftColX + 4, hudY + 43, 'LIVES', TEXT_STYLES.HUD_LABEL).setDepth(10);
+    this.livesText = this.add.text(leftColX + 4, hudY + 56, `${this.lives}`, {
+      ...TEXT_STYLES.HUD_VALUE, fontSize: '16px', color: COLORS.TEXT_LIVES,
+    }).setDepth(10);
+
+    // DigiBytes
+    const dbX = leftColX + halfW + 14;
+    this.add.text(dbX, hudY + 43, 'DB', TEXT_STYLES.HUD_LABEL).setDepth(10);
+    this.digibytesText = this.add.text(dbX, hudY + 56, `${this.digibytes}`, {
+      ...TEXT_STYLES.HUD_VALUE, fontSize: '16px', color: COLORS.TEXT_CURRENCY,
     }).setDepth(10);
 
     // Separator
     const sepGfx = this.add.graphics().setDepth(10);
-    drawSeparator(sepGfx, rightPanelX - 10, hudY + 95, rightPanelX + panelW - 30);
+    drawSeparator(sepGfx, leftColX - 5, hudY + 82, leftColX + contentW - 5);
 
     // Selected starters display (hidden after first tower placement)
     const selectedStarters: string[] = this.registry.get('selectedStarters') || [];
     if (selectedStarters.length > 0) {
-      const starterLabel = this.add.text(rightPanelX, hudY + 107, 'Starters:', TEXT_STYLES.HUD_LABEL).setDepth(10);
+      const starterLabel = this.add.text(leftColX, hudY + 90, 'Starters:', {
+        ...TEXT_STYLES.HUD_LABEL, fontSize: '10px',
+      }).setDepth(10);
       this.starterDisplayObjects.push(starterLabel);
 
       selectedStarters.forEach((key, index) => {
         if (this.textures.exists(key)) {
           const starterSprite = this.add.image(
-            rightPanelX + 20 + index * 50, hudY + 148, key,
+            leftColX + 18 + index * 36, hudY + 118, key,
           );
-          starterSprite.setScale(2.5).setDepth(10);
+          starterSprite.setScale(1.8).setDepth(10);
           this.starterDisplayObjects.push(starterSprite);
         }
       });
     }
 
-    // Start Wave button (Container + Graphics)
-    const btnW = 220;
-    const btnH = 44;
-    this.startWaveBtn = this.add.container(rightPanelX + panelW / 2 - 15, hudY + 200);
+    // Start Wave button
+    const btnW = 200;
+    const btnH = 36;
+    this.startWaveBtn = this.add.container(btnCenterX, hudY + 155);
     this.startWaveBtnBg = this.add.graphics();
     drawButton(this.startWaveBtnBg, btnW, btnH, COLORS.PRIMARY);
     this.startWaveBtn.add(this.startWaveBtnBg);
 
-    this.startWaveBtnText = this.add.text(0, 0, 'Start Wave', TEXT_STYLES.BUTTON).setOrigin(0.5);
+    this.startWaveBtnText = this.add.text(0, 0, 'Start Wave', {
+      ...TEXT_STYLES.BUTTON, fontSize: '14px',
+    }).setOrigin(0.5);
     this.startWaveBtn.add(this.startWaveBtnText);
 
     const startHitArea = new Phaser.Geom.Rectangle(-btnW / 2, -btnH / 2, btnW, btnH);
@@ -1321,17 +1390,16 @@ export class GameScene extends Phaser.Scene {
       }
     });
 
-    // Auto-start toggle (below start wave button)
-    const autoW = 220;
-    const autoH = 28;
-    const autoContainer = this.add.container(rightPanelX + panelW / 2 - 15, hudY + 250);
+    // Auto-start toggle
+    const autoW = 200;
+    const autoH = 24;
+    const autoContainer = this.add.container(btnCenterX, hudY + 192);
     this.autoStartBtnBg = this.add.graphics();
     drawButton(this.autoStartBtnBg, autoW, autoH, COLORS.BG_PANEL_LIGHT);
     autoContainer.add(this.autoStartBtnBg);
 
     this.autoStartBtnText = this.add.text(0, 0, 'Auto Start: OFF', {
-      ...TEXT_STYLES.BUTTON_SM,
-      fontSize: '12px',
+      ...TEXT_STYLES.BUTTON_SM, fontSize: '11px',
     }).setOrigin(0.5);
     autoContainer.add(this.autoStartBtnText);
 
@@ -1353,18 +1421,19 @@ export class GameScene extends Phaser.Scene {
     });
 
     // Pause & Settings buttons side by side
-    const smallBtnW = 105;
-    const smallBtnH = 36;
-    const btnRowY = hudY + 290;
-    const btnRowCenterX = rightPanelX + panelW / 2 - 15;
+    const smallBtnW = 95;
+    const smallBtnH = 30;
+    const btnRowY = hudY + 228;
 
     // Pause button (left)
-    const pauseContainer = this.add.container(btnRowCenterX - smallBtnW / 2 - 8, btnRowY);
+    const pauseContainer = this.add.container(btnCenterX - smallBtnW / 2 - 6, btnRowY);
     const pauseBtnBg = this.add.graphics();
     drawButton(pauseBtnBg, smallBtnW, smallBtnH, COLORS.PRIMARY);
     pauseContainer.add(pauseBtnBg);
 
-    const pauseBtnText = this.add.text(0, 0, '|| Pause', TEXT_STYLES.BUTTON_SM).setOrigin(0.5);
+    const pauseBtnText = this.add.text(0, 0, '|| Pause', {
+      ...TEXT_STYLES.BUTTON_SM, fontSize: '12px',
+    }).setOrigin(0.5);
     pauseContainer.add(pauseBtnText);
 
     const pauseHitArea = new Phaser.Geom.Rectangle(-smallBtnW / 2, -smallBtnH / 2, smallBtnW, smallBtnH);
@@ -1386,13 +1455,15 @@ export class GameScene extends Phaser.Scene {
       this.scene.pause();
     });
 
-    // Settings button (right, gear icon)
-    const settingsContainer = this.add.container(btnRowCenterX + smallBtnW / 2 + 8, btnRowY);
+    // Settings button (right)
+    const settingsContainer = this.add.container(btnCenterX + smallBtnW / 2 + 6, btnRowY);
     const settingsBtnBg = this.add.graphics();
     drawButton(settingsBtnBg, smallBtnW, smallBtnH, COLORS.BG_PANEL_LIGHT);
     settingsContainer.add(settingsBtnBg);
 
-    const settingsBtnText = this.add.text(0, 0, '\u2699 Settings', TEXT_STYLES.BUTTON_SM).setOrigin(0.5);
+    const settingsBtnText = this.add.text(0, 0, '\u2699 Settings', {
+      ...TEXT_STYLES.BUTTON_SM, fontSize: '12px',
+    }).setOrigin(0.5);
     settingsContainer.add(settingsBtnText);
 
     const settingsHitArea = new Phaser.Geom.Rectangle(-smallBtnW / 2, -smallBtnH / 2, smallBtnW, smallBtnH);
@@ -1414,20 +1485,24 @@ export class GameScene extends Phaser.Scene {
     });
 
     // Speed control buttons (1x / 2x / 3x)
-    this.add.text(rightPanelX, hudY + 326, 'SPEED', TEXT_STYLES.HUD_LABEL).setDepth(10);
+    this.add.text(leftColX, hudY + 250, 'SPEED', {
+      ...TEXT_STYLES.HUD_LABEL, fontSize: '10px',
+    }).setDepth(10);
 
     GAME_SPEEDS.forEach((speed, i) => {
-      const sBtnW = 60;
-      const sBtnH = 30;
-      const sBtnX = rightPanelX + 15 + i * 75 + sBtnW / 2;
-      const sBtnY = hudY + 352;
+      const sBtnW = 55;
+      const sBtnH = 26;
+      const sBtnX = leftColX + 12 + i * 68 + sBtnW / 2;
+      const sBtnY = hudY + 276;
 
       const sContainer = this.add.container(sBtnX, sBtnY);
       const sBg = this.add.graphics();
       drawButton(sBg, sBtnW, sBtnH, speed === 1 ? COLORS.CYAN : COLORS.BG_PANEL_LIGHT);
       sContainer.add(sBg);
 
-      const sText = this.add.text(0, 0, `${speed}x`, TEXT_STYLES.BUTTON_SM).setOrigin(0.5);
+      const sText = this.add.text(0, 0, `${speed}x`, {
+        ...TEXT_STYLES.BUTTON_SM, fontSize: '12px',
+      }).setOrigin(0.5);
       sContainer.add(sText);
 
       const sHitArea = new Phaser.Geom.Rectangle(-sBtnW / 2, -sBtnH / 2, sBtnW, sBtnH);
@@ -1455,17 +1530,20 @@ export class GameScene extends Phaser.Scene {
     });
 
     // Wave preview section
-    const previewY = hudY + 392;
+    const previewY = hudY + 305;
     const waveSepGfx = this.add.graphics().setDepth(10);
-    drawSeparator(waveSepGfx, rightPanelX - 10, previewY, rightPanelX + panelW - 30);
+    drawSeparator(waveSepGfx, leftColX - 5, previewY, leftColX + contentW - 5);
 
-    this.add.text(rightPanelX, previewY + 8, 'Next Wave:', TEXT_STYLES.HUD_LABEL).setDepth(10);
-    this.wavePreviewText = this.add.text(rightPanelX, previewY + 26, '', {
+    this.add.text(leftColX, previewY + 6, 'Next Wave:', {
+      ...TEXT_STYLES.HUD_LABEL, fontSize: '10px',
+    }).setDepth(10);
+    this.wavePreviewText = this.add.text(leftColX, previewY + 20, '', {
       fontFamily: FONTS.MONO,
-      fontSize: '11px',
+      fontSize: '10px',
       color: COLORS.TEXT_DIM,
-      wordWrap: { width: panelW - 40 },
+      wordWrap: { width: contentW - 10 },
       lineSpacing: 2,
+      resolution: 2,
     }).setDepth(10);
 
     this.updateWavePreview();
@@ -1483,6 +1561,7 @@ export class GameScene extends Phaser.Scene {
       obj.destroy();
     }
     this.wavePreviewSprites = [];
+    this.dismissWaveTooltip();
 
     const waveConfig = getWaveConfig(this.currentWave);
     if (!waveConfig) {
@@ -1498,9 +1577,9 @@ export class GameScene extends Phaser.Scene {
     this.wavePreviewText.setText(header);
     this.wavePreviewText.setColor(waveConfig.boss ? '#ff8844' : COLORS.TEXT_DIM);
 
-    // Render visual enemy entries with sprites
-    const rightPanelX = GRID_OFFSET_X + GRID.COLUMNS * GRID.CELL_SIZE + 30;
-    const previewBaseY = this.wavePreviewText.y + 18;
+    // Render visual enemy entries with sprites (left panel)
+    const previewX = 35; // leftColX
+    const previewBaseY = this.wavePreviewText.y + 16;
     let yOffset = 0;
 
     const TYPE_COLORS: Record<string, string> = {
@@ -1523,38 +1602,50 @@ export class GameScene extends Phaser.Scene {
 
       // Small sprite
       if (this.textures.exists(spriteKey)) {
-        const sprite = this.add.image(rightPanelX + 12, rowY + 8, spriteKey);
+        const sprite = this.add.image(previewX + 12, rowY + 8, spriteKey);
         sprite.setScale(1.5).setDepth(10);
         this.wavePreviewSprites.push(sprite);
       }
 
       // Name + count
-      const nameText = this.add.text(rightPanelX + 28, rowY, `${enemyStats.name} x${entry.count}`, {
+      const nameText = this.add.text(previewX + 28, rowY, `${enemyStats.name} x${entry.count}`, {
         fontFamily: FONTS.MONO,
         fontSize: '11px',
         color: '#cccccc',
+        resolution: 2,
       }).setDepth(10);
       this.wavePreviewSprites.push(nameText);
 
       // Type tag (skip "standard" as it's redundant)
       if (enemyStats.type !== 'standard') {
         const typeColor = TYPE_COLORS[enemyStats.type] ?? '#888888';
-        const typeText = this.add.text(rightPanelX + 28, rowY + 13, enemyStats.type, {
+        const typeText = this.add.text(previewX + 28, rowY + 13, enemyStats.type, {
           fontFamily: FONTS.MONO,
           fontSize: '9px',
           color: typeColor,
+          resolution: 2,
         }).setDepth(10);
         this.wavePreviewSprites.push(typeText);
       }
 
-      yOffset += 28;
+      // Interactive hit zone for tooltip
+      const hitZone = this.add.rectangle(previewX + 100, rowY + 12, 220, 26, 0x000000, 0)
+        .setDepth(10)
+        .setInteractive({ useHandCursor: true });
+      hitZone.on('pointerover', () => this.showWaveTooltip(enemyStats, hitZone.x, hitZone.y, false));
+      hitZone.on('pointerout', () => { if (!this.waveTooltipPinned) this.dismissWaveTooltip(); });
+      hitZone.on('pointerdown', () => this.showWaveTooltip(enemyStats, hitZone.x, hitZone.y, true));
+      this.wavePreviewSprites.push(hitZone);
+
+      yOffset += 24;
 
       // Limit preview rows to prevent overflow
-      if (yOffset > 180) {
-        const moreText = this.add.text(rightPanelX + 28, previewBaseY + yOffset, '...', {
+      if (yOffset > 300) {
+        const moreText = this.add.text(previewX + 28, previewBaseY + yOffset, '...', {
           fontFamily: FONTS.MONO,
           fontSize: '11px',
           color: COLORS.TEXT_DIM,
+          resolution: 2,
         }).setDepth(10);
         this.wavePreviewSprites.push(moreText);
         break;
@@ -1569,30 +1660,173 @@ export class GameScene extends Phaser.Scene {
         const bossSpriteKey = waveConfig.boss.replace(/^boss_/, '');
 
         if (this.textures.exists(bossSpriteKey)) {
-          const sprite = this.add.image(rightPanelX + 12, rowY + 8, bossSpriteKey);
+          const sprite = this.add.image(previewX + 12, rowY + 8, bossSpriteKey);
           sprite.setScale(1.5).setDepth(10);
           this.wavePreviewSprites.push(sprite);
         }
 
-        const bossText = this.add.text(rightPanelX + 28, rowY, `BOSS: ${bossStats.name}`, {
+        const bossText = this.add.text(previewX + 28, rowY, `BOSS: ${bossStats.name}`, {
           fontFamily: FONTS.MONO,
           fontSize: '11px',
           color: '#ffaa44',
           fontStyle: 'bold',
+          resolution: 2,
         }).setDepth(10);
         this.wavePreviewSprites.push(bossText);
 
         if (bossStats.bossAbility) {
-          const abilityText = this.add.text(rightPanelX + 28, rowY + 13, bossStats.bossAbility.name, {
+          const abilityText = this.add.text(previewX + 28, rowY + 13, bossStats.bossAbility.name, {
             fontFamily: FONTS.MONO,
             fontSize: '9px',
             color: '#ff8844',
             fontStyle: 'italic',
+            resolution: 2,
           }).setDepth(10);
           this.wavePreviewSprites.push(abilityText);
         }
+
+        // Interactive hit zone for boss tooltip
+        const bossHitZone = this.add.rectangle(previewX + 100, rowY + 12, 220, 26, 0x000000, 0)
+          .setDepth(10)
+          .setInteractive({ useHandCursor: true });
+        bossHitZone.on('pointerover', () => this.showWaveTooltip(bossStats, bossHitZone.x, bossHitZone.y, false));
+        bossHitZone.on('pointerout', () => { if (!this.waveTooltipPinned) this.dismissWaveTooltip(); });
+        bossHitZone.on('pointerdown', () => this.showWaveTooltip(bossStats, bossHitZone.x, bossHitZone.y, true));
+        this.wavePreviewSprites.push(bossHitZone);
       }
     }
+  }
+
+  // ============================================================
+  // Wave Preview Tooltip
+  // ============================================================
+
+  private getWeakness(attr: Attribute): string {
+    // Which attacker attribute deals 1.5x to this defender?
+    if (attr === Attribute.VACCINE) return 'Data';
+    if (attr === Attribute.DATA) return 'Virus';
+    if (attr === Attribute.VIRUS) return 'Vaccine';
+    return 'None';
+  }
+
+  private showWaveTooltip(enemy: EnemyStats, anchorX: number, anchorY: number, pin: boolean): void {
+    // If clicking the same pinned tooltip, dismiss it
+    if (pin && this.waveTooltipPinned && this.waveTooltip) {
+      this.dismissWaveTooltip();
+      return;
+    }
+
+    this.dismissWaveTooltip();
+    if (pin) this.waveTooltipPinned = true;
+
+    const tooltipW = 210;
+    const isBoss = !!enemy.bossAbility;
+    const tooltipH = isBoss ? 175 : 140;
+
+    // Position tooltip to the right of the wave preview anchor
+    let tx = anchorX + 30;
+    let ty = anchorY - 20;
+
+    // If it overflows right, try left side
+    if (tx + tooltipW > GAME_WIDTH - 4) {
+      tx = anchorX - tooltipW - 30;
+    }
+    // Clamp to screen bounds
+    if (tx < 4) tx = 4;
+    if (ty + tooltipH > GAME_HEIGHT - 4) ty = GAME_HEIGHT - tooltipH - 4;
+    if (ty < 4) ty = 4;
+
+    const container = this.add.container(tx, ty).setDepth(50);
+
+    // Panel background
+    const bg = this.add.graphics();
+    bg.fillStyle(COLORS.BG_PANEL, 0.97);
+    bg.fillRoundedRect(0, 0, tooltipW, tooltipH, 8);
+    bg.lineStyle(1.5, COLORS.CYAN, 0.6);
+    bg.strokeRoundedRect(0, 0, tooltipW, tooltipH, 8);
+    container.add(bg);
+
+    // Sprite (2x scale)
+    const spriteKey = enemy.id.replace(/^(enemy_|boss_)/, '');
+    let contentStartX = 12;
+    if (this.textures.exists(spriteKey)) {
+      const sprite = this.add.image(24, 24, spriteKey).setScale(2.5);
+      container.add(sprite);
+      contentStartX = 48;
+    }
+
+    // Name
+    const attrColor = ATTRIBUTE_COLORS_STR[enemy.attribute] ?? '#ffffff';
+    const nameText = this.add.text(contentStartX, 8, enemy.name, {
+      fontFamily: FONTS.MONO,
+      fontSize: '13px',
+      color: attrColor,
+      fontStyle: 'bold',
+      resolution: 2,
+    });
+    container.add(nameText);
+
+    // Stage + Attribute
+    const stageAttr = `${STAGE_NAMES[enemy.stageTier]} | ${ATTRIBUTE_NAMES[enemy.attribute]}`;
+    const stageText = this.add.text(contentStartX, 24, stageAttr, {
+      fontFamily: FONTS.MONO,
+      fontSize: '10px',
+      color: COLORS.TEXT_DIM,
+      resolution: 2,
+    });
+    container.add(stageText);
+
+    // Stats section
+    const statsY = 46;
+    const statLines = [
+      { label: 'HP', value: `${enemy.baseHP}`, color: '#ff6666' },
+      { label: 'Speed', value: `${enemy.moveSpeed}`, color: '#ffaa44' },
+      { label: 'Armor', value: `${Math.round(enemy.armor * 100)}%`, color: '#4488ff' },
+      { label: 'Type', value: enemy.type, color: '#cccccc' },
+      { label: 'Weak to', value: this.getWeakness(enemy.attribute), color: '#ff4444' },
+    ];
+
+    statLines.forEach((stat, i) => {
+      const y = statsY + i * 16;
+      container.add(this.add.text(12, y, stat.label, {
+        fontFamily: FONTS.MONO, fontSize: '10px', color: COLORS.TEXT_DIM, resolution: 2,
+      }));
+      container.add(this.add.text(80, y, stat.value, {
+        fontFamily: FONTS.MONO, fontSize: '10px', color: stat.color, resolution: 2,
+      }));
+    });
+
+    // Boss ability section
+    if (isBoss && enemy.bossAbility) {
+      const abilityY = statsY + statLines.length * 16 + 4;
+      container.add(this.add.text(12, abilityY, enemy.bossAbility.name, {
+        fontFamily: FONTS.MONO, fontSize: '11px', color: '#ff8844', fontStyle: 'bold', resolution: 2,
+      }));
+      container.add(this.add.text(12, abilityY + 14, enemy.bossAbility.description, {
+        fontFamily: FONTS.MONO, fontSize: '9px', color: '#cc6633', wordWrap: { width: tooltipW - 24 }, resolution: 2,
+      }));
+    }
+
+    // Pin indicator
+    if (pin) {
+      container.add(this.add.text(tooltipW - 16, 4, '[x]', {
+        fontFamily: FONTS.MONO, fontSize: '9px', color: COLORS.TEXT_DIM, resolution: 2,
+      }));
+    }
+
+    // Fade in
+    container.alpha = 0;
+    this.tweens.add({ targets: container, alpha: 1, duration: 120, ease: 'Cubic.easeOut' });
+
+    this.waveTooltip = container;
+  }
+
+  private dismissWaveTooltip(): void {
+    if (this.waveTooltip) {
+      this.waveTooltip.destroy();
+      this.waveTooltip = null;
+    }
+    this.waveTooltipPinned = false;
   }
 
   // ============================================================
@@ -1606,7 +1840,7 @@ export class GameScene extends Phaser.Scene {
     // Update button highlights
     GAME_SPEEDS.forEach((s, i) => {
       if (this.speedBtnBgs[i]) {
-        drawButton(this.speedBtnBgs[i], 60, 30, s === speed ? COLORS.CYAN : COLORS.BG_PANEL_LIGHT);
+        drawButton(this.speedBtnBgs[i], 55, 26, s === speed ? COLORS.CYAN : COLORS.BG_PANEL_LIGHT);
       }
     });
   }
@@ -1618,17 +1852,17 @@ export class GameScene extends Phaser.Scene {
   private updateAutoStartDisplay(): void {
     if (this.autoStartWave) {
       this.autoStartBtnText.setText('Auto Start: ON');
-      drawButton(this.autoStartBtnBg, 220, 28, COLORS.CYAN);
+      drawButton(this.autoStartBtnBg, 200, 24, COLORS.CYAN);
     } else {
       this.autoStartBtnText.setText('Auto Start: OFF');
-      drawButton(this.autoStartBtnBg, 220, 28, COLORS.BG_PANEL_LIGHT);
+      drawButton(this.autoStartBtnBg, 200, 24, COLORS.BG_PANEL_LIGHT);
     }
   }
 
   private startNextWave(): void {
     if (this.isWaveActive) return;
     this.isWaveActive = true;
-    drawButton(this.startWaveBtnBg, 220, 44, COLORS.DISABLED);
+    drawButton(this.startWaveBtnBg, 200, 36, COLORS.DISABLED);
     this.startWaveBtnText.setText('Wave in progress...');
     this.startWaveBtnText.setColor(COLORS.DISABLED_TEXT);
     this.waveManager.startWave(this.currentWave);
@@ -1657,9 +1891,13 @@ export class GameScene extends Phaser.Scene {
   }
 
   private onEnemyReachedBase() {
+    if (this.gameOverTriggered) return;
+
     this.lives -= 1;
     this.livesText.setText(`${this.lives}`);
     if (this.lives <= 0) {
+      this.gameOverTriggered = true;
+      this.livesText.setText('0');
       EventBus.emit(GameEvents.GAME_OVER);
       this.scene.start('GameOverScene', { wave: this.currentWave, won: false });
     }
@@ -1692,6 +1930,62 @@ export class GameScene extends Phaser.Scene {
     }
     // Hide starters display after first tower is placed
     this.hideStarterDisplay();
+  }
+
+  private onMergeCompleted(data: { survivorID: string }) {
+    // Find the survivor tower and play a merge visual effect at its position
+    for (const child of this.towerContainer.list) {
+      const tower = child as Tower;
+      if (tower.towerID === data.survivorID) {
+        this.playMergeEffect(tower.x, tower.y);
+        break;
+      }
+    }
+  }
+
+  private playMergeEffect(x: number, y: number): void {
+    const colors = [0x00ddff, 0x44eeff, 0xffffff, 0x00bbff];
+    const particleCount = 16;
+
+    for (let i = 0; i < particleCount; i++) {
+      const angle = (i / particleCount) * Math.PI * 2;
+      const speed = 40 + Math.random() * 40;
+      const color = colors[Math.floor(Math.random() * colors.length)];
+
+      const particle = this.add.graphics().setDepth(20);
+      const size = 2 + Math.random() * 3;
+      particle.fillStyle(color, 0.9);
+      particle.fillCircle(0, 0, size);
+      particle.setPosition(x, y);
+
+      this.tweens.add({
+        targets: particle,
+        x: x + Math.cos(angle) * speed,
+        y: y + Math.sin(angle) * speed,
+        alpha: 0,
+        scaleX: 0.2,
+        scaleY: 0.2,
+        duration: 400 + Math.random() * 200,
+        ease: 'Cubic.easeOut',
+        onComplete: () => particle.destroy(),
+      });
+    }
+
+    // Central flash
+    const flash = this.add.graphics().setDepth(19);
+    flash.fillStyle(0x00ddff, 0.6);
+    flash.fillCircle(0, 0, 20);
+    flash.setPosition(x, y);
+
+    this.tweens.add({
+      targets: flash,
+      alpha: 0,
+      scaleX: 2,
+      scaleY: 2,
+      duration: 300,
+      ease: 'Cubic.easeOut',
+      onComplete: () => flash.destroy(),
+    });
   }
 
   // ============================================================
@@ -1732,6 +2026,7 @@ export class GameScene extends Phaser.Scene {
       fontStyle: 'bold',
       stroke: '#000000',
       strokeThickness: 3,
+      resolution: 2,
     }).setOrigin(0.5).setDepth(50);
 
     // Float up 40px over 600ms, fade out, then destroy
@@ -1776,7 +2071,7 @@ export class GameScene extends Phaser.Scene {
     // Re-enable start wave button
     this.startWaveBtnText.setText('Start Wave');
     this.startWaveBtnText.setColor(COLORS.TEXT_WHITE);
-    drawButton(this.startWaveBtnBg, 220, 44, COLORS.PRIMARY);
+    drawButton(this.startWaveBtnBg, 200, 36, COLORS.PRIMARY);
 
     // Auto-start next wave after a brief delay
     if (this.autoStartWave) {
