@@ -146,8 +146,8 @@ Live at: https://wandering-pork.github.io/DigiMerge-TD/
 - [ ] B9: Boss sprites aura (add colored glow/pulse around boss enemies)
 
 **Sprint 12C — Gameplay Improvements:**
-- [ ] C1: Wave enemy type limits (max 5 types per wave, min 5 units each)
-- [ ] C2: Game continues when window unfocused (auto-pause or cap delta time)
+- [x] C1: Wave enemy type limits (max 5 unique Digimon per wave, min 5 units each)
+- [x] C2: Auto-pause on tab blur (visibilitychange listener + delta time cap)
 - [ ] C3: Improved projectile particles (trailing particles matching attribute color)
 - [ ] C4: Hit particles per attack effect (per-effect visual: orange for burn, blue for freeze, etc.)
 - [ ] C5: Multi-hit visual (spread/stagger multi-hit projectiles for clarity)

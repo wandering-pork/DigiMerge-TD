@@ -47,8 +47,8 @@ export const WAVE_DATA: Record<number, WaveConfig> = {
 
   2: {
     enemies: [
-      { id: 'enemy_tsunomon', count: 4 },
-      { id: 'enemy_tokomon', count: 3 },
+      { id: 'enemy_tsunomon', count: 5 },
+      { id: 'enemy_tokomon', count: 5 },
     ],
     spawnInterval: 2000,
   },
@@ -56,7 +56,7 @@ export const WAVE_DATA: Record<number, WaveConfig> = {
   3: {
     enemies: [
       { id: 'enemy_pagumon', count: 6 },
-      { id: 'enemy_agumon', count: 2 },
+      { id: 'enemy_agumon', count: 5 },
     ],
     spawnInterval: 2000,
   },
@@ -64,19 +64,16 @@ export const WAVE_DATA: Record<number, WaveConfig> = {
   4: {
     enemies: [
       { id: 'enemy_gigimon', count: 6 },
-      { id: 'enemy_gabumon', count: 3 },
+      { id: 'enemy_gabumon', count: 5 },
     ],
     spawnInterval: 2000,
   },
 
   5: {
     enemies: [
-      { id: 'enemy_koromon', count: 2 },
-      { id: 'enemy_tsunomon', count: 1 },
-      { id: 'enemy_pagumon', count: 2 },
-      { id: 'enemy_agumon', count: 2 },
-      { id: 'enemy_gabumon', count: 2 },
-      { id: 'enemy_goblimon', count: 1 },
+      { id: 'enemy_koromon', count: 5 },
+      { id: 'enemy_pagumon', count: 5 },
+      { id: 'enemy_agumon', count: 5 },
     ],
     spawnInterval: 2000,
   },
