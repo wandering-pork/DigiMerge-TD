@@ -71,6 +71,20 @@ describe('WaveData', () => {
     }
   });
 
+  it('each wave should have at most 5 unique Digimon types', () => {
+    for (let i = 1; i <= 100; i++) {
+      expect(WAVE_DATA[i].enemies.length, `Wave ${i} has more than 5 unique Digimon`).toBeLessThanOrEqual(5);
+    }
+  });
+
+  it('each enemy entry should have at least 5 units', () => {
+    for (let i = 1; i <= 100; i++) {
+      for (const entry of WAVE_DATA[i].enemies) {
+        expect(entry.count, `Wave ${i}, ${entry.id} has fewer than 5 units`).toBeGreaterThanOrEqual(5);
+      }
+    }
+  });
+
   it('spawn intervals should decrease across phases', () => {
     // Phase 1: 2000-1800, Phase 2: 1500, Phase 3: 1200, Phase 4: 1000, Phase 5: 800
     expect(WAVE_DATA[1].spawnInterval).toBeGreaterThan(WAVE_DATA[25].spawnInterval);
@@ -157,6 +171,22 @@ describe('generateEndlessWave', () => {
       const config = generateEndlessWave(w);
       if (config.boss) {
         expect(enemies[config.boss], `Endless boss "${config.boss}" not in database`).toBeDefined();
+      }
+    }
+  });
+
+  it('endless waves should have at most 5 unique Digimon types', () => {
+    for (let w = 101; w <= 130; w++) {
+      const config = generateEndlessWave(w);
+      expect(config.enemies.length, `Endless wave ${w} has more than 5 types`).toBeLessThanOrEqual(5);
+    }
+  });
+
+  it('endless waves should have at least 5 units per Digimon type', () => {
+    for (let w = 101; w <= 130; w++) {
+      const config = generateEndlessWave(w);
+      for (const entry of config.enemies) {
+        expect(entry.count, `Endless wave ${w}, ${entry.id} has fewer than 5 units`).toBeGreaterThanOrEqual(5);
       }
     }
   });

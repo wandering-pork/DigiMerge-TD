@@ -111,6 +111,9 @@ export class GameScene extends Phaser.Scene {
   // Starter display (hideable after first placement)
   private starterDisplayObjects: Phaser.GameObjects.GameObject[] = [];
 
+  // Visibility change handler for auto-pause on tab blur
+  private visibilityHandler: (() => void) | null = null;
+
   constructor() {
     super({ key: 'GameScene' });
   }
@@ -225,6 +228,9 @@ export class GameScene extends Phaser.Scene {
     // Setup ghost preview sprite (hidden by default)
     this.setupGhostPreview();
 
+    // Auto-pause when browser tab loses focus
+    this.setupVisibilityHandler();
+
     // Load saved game if applicable
     this.loadSavedGame();
 
@@ -288,6 +294,12 @@ export class GameScene extends Phaser.Scene {
     EventBus.off(GameEvents.BOSS_SPAWNED, this.onBossSpawned, this);
     EventBus.off(GameEvents.TOWER_PLACED, this.onTowerPlaced, this);
     EventBus.off(GameEvents.DAMAGE_DEALT, this.onDamageDealt, this);
+
+    // Remove visibility change listener
+    if (this.visibilityHandler) {
+      document.removeEventListener('visibilitychange', this.visibilityHandler);
+      this.visibilityHandler = null;
+    }
 
     this.waveManager.cleanup();
     this.combatManager.cleanup();
@@ -572,6 +584,20 @@ export class GameScene extends Phaser.Scene {
     if (this.ghostSprite) {
       this.ghostSprite.setVisible(false);
     }
+  }
+
+  // ============================================================
+  // Visibility (auto-pause on tab blur)
+  // ============================================================
+
+  private setupVisibilityHandler(): void {
+    this.visibilityHandler = () => {
+      if (document.hidden && !this.scene.isPaused()) {
+        this.scene.launch('PauseScene');
+        this.scene.pause();
+      }
+    };
+    document.addEventListener('visibilitychange', this.visibilityHandler);
   }
 
   // ============================================================
