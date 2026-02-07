@@ -111,7 +111,7 @@ Live at: https://wandering-pork.github.io/DigiMerge-TD/
 
 ---
 
-## File Inventory (46 source files)
+## File Inventory (45 source files)
 
 - **config/**: Constants.ts, GameConfig.ts
 - **data/**: DigimonDatabase.ts, EvolutionPaths.ts, StatusEffects.ts, WaveData.ts

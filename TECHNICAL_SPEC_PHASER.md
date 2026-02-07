@@ -34,9 +34,11 @@
 │                         PHASER GAME                              │
 ├─────────────────────────────────────────────────────────────────┤
 │  SCENES                                                          │
-│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐           │
-│  │   Boot   │→│ Preload  │→│ MainMenu │→│   Game   │           │
-│  └──────────┘ └──────────┘ └──────────┘ └──────────┘           │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌────────────────┐     │
+│  │   Boot   │→│ Preload  │→│ MainMenu │→│ StarterSelect  │→Game│
+│  └──────────┘ └──────────┘ └──────────┘ └────────────────┘     │
+│  Overlays: PauseScene, SettingsScene, EncyclopediaScene,        │
+│            CreditsScene, GameOverScene                           │
 ├─────────────────────────────────────────────────────────────────┤
 │  MANAGERS (Singletons via Registry)                              │
 │  ┌──────────────┐ ┌──────────────┐ ┌──────────────┐            │
@@ -145,7 +147,10 @@ import { MainMenuScene } from '@/scenes/MainMenuScene';
 import { StarterSelectScene } from '@/scenes/StarterSelectScene';
 import { GameScene } from '@/scenes/GameScene';
 import { PauseScene } from '@/scenes/PauseScene';
+import { SettingsScene } from '@/scenes/SettingsScene';
 import { GameOverScene } from '@/scenes/GameOverScene';
+import { EncyclopediaScene } from '@/scenes/EncyclopediaScene';
+import { CreditsScene } from '@/scenes/CreditsScene';
 
 export const GameConfig: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
@@ -165,7 +170,10 @@ export const GameConfig: Phaser.Types.Core.GameConfig = {
     StarterSelectScene,
     GameScene,
     PauseScene,
+    SettingsScene,
     GameOverScene,
+    EncyclopediaScene,
+    CreditsScene,
   ],
   render: {
     pixelArt: true,

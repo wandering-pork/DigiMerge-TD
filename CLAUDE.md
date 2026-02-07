@@ -31,6 +31,7 @@ digimerge-td/
 │   ├── assets/
 │   │   ├── sprites/Idle Frame Only/  # 842 Digimon sprite PNGs (~16x16)
 │   │   ├── sfx/                      # 17 WAV sound effects
+│   │   ├── music/                    # 2 MP3 music tracks
 │   │   └── tiles/                    # Sprout Lands tileset PNGs
 │   └── favicon.ico
 ├── .github/workflows/
@@ -49,7 +50,8 @@ digimerge-td/
 │   │   ├── PauseScene.ts     # Simple pause overlay (click/ESC to resume)
 │   │   ├── SettingsScene.ts  # Volume, restart, main menu
 │   │   ├── GameOverScene.ts
-│   │   └── EncyclopediaScene.ts  # Digimon browser/catalog
+│   │   ├── EncyclopediaScene.ts  # Digimon browser/catalog
+│   │   └── CreditsScene.ts       # Credits & disclaimer
 │   ├── entities/
 │   │   ├── Tower.ts          # Digimon tower class
 │   │   ├── Enemy.ts          # Enemy class
@@ -144,8 +146,7 @@ A `/phaser` skill is available for Phaser 3 API questions, game development patt
 | `GAME_DESIGN_DOCUMENT.md` | Complete game mechanics, systems, UI/UX |
 | `ENEMY_SPAWN_DESIGN.md` | Wave compositions, enemy types, bosses |
 | `DIGIMON_STATS_DATABASE.md` | All Digimon stats, evolution paths |
-| `PROGRESS.md` | Implementation progress, completed work, roadmap |
-| `PROGRESS.md` | Current implementation status, completed sprints, test summary |
+| `PROGRESS.md` | Implementation progress, completed sprints, test summary, roadmap |
 
 ---
 
@@ -247,8 +248,8 @@ const ATTRIBUTE_MULTIPLIERS: Record<Attribute, Record<Attribute, number>> = {
 ### Scene Flow
 ```
 BootScene → PreloadScene → MainMenuScene → StarterSelectScene → GameScene
-                              ↓                                   ↓    ↓
-                        EncyclopediaScene                 PauseScene  SettingsScene
+                              ↓    ↓                             ↓    ↓
+                   EncyclopediaScene CreditsScene         PauseScene  SettingsScene
                                                                          ↓
                                                                    GameOverScene
 ```
@@ -390,7 +391,7 @@ interface SaveData {
 ### Other Assets
 - **UI Elements**: Built with Phaser Graphics + UITheme.ts design tokens
 - **Effects**: Simple shapes (particles, tweens)
-- **Music**: Not included (skip for MVP)
+- **Music**: 2 MP3 files in `public/assets/music/` (menu_theme.mp3, battle_theme.mp3)
 
 ---
 
