@@ -302,6 +302,9 @@ export class GameScene extends Phaser.Scene {
   }
 
   update(time: number, delta: number) {
+    // Stop updating after game over to avoid interfering with scene transition
+    if (this.gameOverTriggered) return;
+
     // Cap delta to prevent enemy teleportation when tab loses focus
     const cappedDelta = Math.min(delta, 100); // Max 100ms (10fps minimum)
 
@@ -2073,21 +2076,27 @@ export class GameScene extends Phaser.Scene {
       EventBus.emit(GameEvents.GAME_OVER);
 
       // Find the MVP tower (most kills)
-      const allTowers = this.towerManager.getAllTowers();
       let mvpTower: { name: string; kills: number; damage: number } | undefined;
-      if (allTowers.length > 0) {
-        const mvp = allTowers.reduce((best, t) => t.killCount > best.killCount ? t : best, allTowers[0]);
-        if (mvp.killCount > 0) {
-          mvpTower = { name: mvp.stats.name, kills: mvp.killCount, damage: Math.round(mvp.totalDamageDealt) };
+      try {
+        const allTowers = this.towerManager.getAllTowers();
+        if (allTowers.length > 0) {
+          const mvp = allTowers.reduce((best, t) => t.killCount > best.killCount ? t : best, allTowers[0]);
+          if (mvp.killCount > 0) {
+            mvpTower = { name: mvp.stats.name, kills: mvp.killCount, damage: Math.round(mvp.totalDamageDealt) };
+          }
         }
+      } catch (e) {
+        console.warn('[GameScene] Error computing MVP tower:', e);
       }
 
-      this.scene.start('GameOverScene', {
-        wave: this.currentWave,
-        won: false,
-        lives: 0,
-        statistics: { ...this.statistics, playtimeSeconds: Math.floor(this.playtimeMs / 1000) },
-        mvpTower,
+      this.time.delayedCall(100, () => {
+        this.scene.start('GameOverScene', {
+          wave: this.currentWave,
+          won: false,
+          lives: 0,
+          statistics: { ...this.statistics, playtimeSeconds: Math.floor(this.playtimeMs / 1000) },
+          mvpTower,
+        });
       });
     }
   }
@@ -2275,24 +2284,31 @@ export class GameScene extends Phaser.Scene {
 
     // Check for victory (all MVP waves cleared)
     if (this.currentWave >= TOTAL_WAVES_MVP) {
+      this.gameOverTriggered = true;
       EventBus.emit(GameEvents.GAME_WON);
 
       // Find the MVP tower (most kills)
-      const allTowers = this.towerManager.getAllTowers();
       let mvpTower: { name: string; kills: number; damage: number } | undefined;
-      if (allTowers.length > 0) {
-        const mvp = allTowers.reduce((best, t) => t.killCount > best.killCount ? t : best, allTowers[0]);
-        if (mvp.killCount > 0) {
-          mvpTower = { name: mvp.stats.name, kills: mvp.killCount, damage: Math.round(mvp.totalDamageDealt) };
+      try {
+        const allTowers = this.towerManager.getAllTowers();
+        if (allTowers.length > 0) {
+          const mvp = allTowers.reduce((best, t) => t.killCount > best.killCount ? t : best, allTowers[0]);
+          if (mvp.killCount > 0) {
+            mvpTower = { name: mvp.stats.name, kills: mvp.killCount, damage: Math.round(mvp.totalDamageDealt) };
+          }
         }
+      } catch (e) {
+        console.warn('[GameScene] Error computing MVP tower:', e);
       }
 
-      this.scene.start('GameOverScene', {
-        wave: this.currentWave,
-        won: true,
-        lives: this.lives,
-        statistics: { ...this.statistics, playtimeSeconds: Math.floor(this.playtimeMs / 1000) },
-        mvpTower,
+      this.time.delayedCall(100, () => {
+        this.scene.start('GameOverScene', {
+          wave: this.currentWave,
+          won: true,
+          lives: this.lives,
+          statistics: { ...this.statistics, playtimeSeconds: Math.floor(this.playtimeMs / 1000) },
+          mvpTower,
+        });
       });
       return;
     }
