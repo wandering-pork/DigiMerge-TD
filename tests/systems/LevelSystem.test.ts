@@ -12,56 +12,56 @@ import { Stage } from '@/types';
 
 describe('LevelSystem', () => {
   describe('getLevelUpCost', () => {
-    it('Lv1 -> Lv2 costs 3 DigiBytes', () => {
-      expect(getLevelUpCost(1)).toBe(3);
+    it('Lv1 -> Lv2 costs 2 DigiBytes', () => {
+      expect(getLevelUpCost(1)).toBe(2);
     });
 
-    it('Lv10 -> Lv11 costs 30 DigiBytes', () => {
-      expect(getLevelUpCost(10)).toBe(30);
+    it('Lv10 -> Lv11 costs 20 DigiBytes', () => {
+      expect(getLevelUpCost(10)).toBe(20);
     });
 
-    it('Lv20 -> Lv21 costs 60 DigiBytes', () => {
-      expect(getLevelUpCost(20)).toBe(60);
+    it('Lv20 -> Lv21 costs 40 DigiBytes', () => {
+      expect(getLevelUpCost(20)).toBe(40);
     });
 
     it('cost scales linearly with level', () => {
-      expect(getLevelUpCost(5)).toBe(15);
-      expect(getLevelUpCost(50)).toBe(150);
-      expect(getLevelUpCost(100)).toBe(300);
+      expect(getLevelUpCost(5)).toBe(10);
+      expect(getLevelUpCost(50)).toBe(100);
+      expect(getLevelUpCost(100)).toBe(200);
     });
 
     it('In-Training uses 1x multiplier', () => {
-      expect(getLevelUpCost(10, Stage.IN_TRAINING)).toBe(30);
+      expect(getLevelUpCost(10, Stage.IN_TRAINING)).toBe(20);
     });
 
     it('Rookie uses 1.5x multiplier', () => {
-      // 3 * 10 * 1.5 = 45
-      expect(getLevelUpCost(10, Stage.ROOKIE)).toBe(45);
+      // 2 * 10 * 1.5 = 30
+      expect(getLevelUpCost(10, Stage.ROOKIE)).toBe(30);
     });
 
     it('Champion uses 2x multiplier', () => {
-      // 3 * 10 * 2 = 60
-      expect(getLevelUpCost(10, Stage.CHAMPION)).toBe(60);
+      // 2 * 10 * 2 = 40
+      expect(getLevelUpCost(10, Stage.CHAMPION)).toBe(40);
     });
 
     it('Ultimate uses 2.5x multiplier', () => {
-      // 3 * 10 * 2.5 = 75
-      expect(getLevelUpCost(10, Stage.ULTIMATE)).toBe(75);
+      // 2 * 10 * 2.5 = 50
+      expect(getLevelUpCost(10, Stage.ULTIMATE)).toBe(50);
     });
 
     it('Mega uses 3x multiplier', () => {
-      // 3 * 10 * 3 = 90
-      expect(getLevelUpCost(10, Stage.MEGA)).toBe(90);
+      // 2 * 10 * 3 = 60
+      expect(getLevelUpCost(10, Stage.MEGA)).toBe(60);
     });
 
     it('Ultra uses 3.5x multiplier', () => {
-      // 3 * 10 * 3.5 = 105
-      expect(getLevelUpCost(10, Stage.ULTRA)).toBe(105);
+      // 2 * 10 * 3.5 = 70
+      expect(getLevelUpCost(10, Stage.ULTRA)).toBe(70);
     });
 
     it('stage multiplier rounds up fractional costs', () => {
-      // Rookie Lv1: 3 * 1 * 1.5 = 4.5 -> ceil = 5
-      expect(getLevelUpCost(1, Stage.ROOKIE)).toBe(5);
+      // Rookie Lv1: 2 * 1 * 1.5 = 3
+      expect(getLevelUpCost(1, Stage.ROOKIE)).toBe(3);
     });
   });
 
@@ -175,16 +175,16 @@ describe('LevelSystem', () => {
   });
 
   describe('getTotalLevelUpCost', () => {
-    it('Lv1 -> Lv5: 3 + 6 + 9 + 12 = 30', () => {
-      expect(getTotalLevelUpCost(1, 5)).toBe(30);
+    it('Lv1 -> Lv5: 2 + 4 + 6 + 8 = 20', () => {
+      expect(getTotalLevelUpCost(1, 5)).toBe(20);
     });
 
-    it('Lv1 -> Lv2: single level costs 3', () => {
-      expect(getTotalLevelUpCost(1, 2)).toBe(3);
+    it('Lv1 -> Lv2: single level costs 2', () => {
+      expect(getTotalLevelUpCost(1, 2)).toBe(2);
     });
 
-    it('Lv10 -> Lv15: 30 + 33 + 36 + 39 + 42 = 180', () => {
-      expect(getTotalLevelUpCost(10, 15)).toBe(180);
+    it('Lv10 -> Lv15: 20 + 22 + 24 + 26 + 28 = 120', () => {
+      expect(getTotalLevelUpCost(10, 15)).toBe(120);
     });
 
     it('same level to same level costs 0', () => {
@@ -195,19 +195,19 @@ describe('LevelSystem', () => {
       expect(getTotalLevelUpCost(10, 5)).toBe(0);
     });
 
-    it('Lv1 -> Lv10: sum of 3+6+9+12+15+18+21+24+27 = 135', () => {
-      // Sum = 3 * (1+2+3+4+5+6+7+8+9) = 3 * 45 = 135
-      expect(getTotalLevelUpCost(1, 10)).toBe(135);
+    it('Lv1 -> Lv10: sum of 2+4+6+8+10+12+14+16+18 = 90', () => {
+      // Sum = 2 * (1+2+3+4+5+6+7+8+9) = 2 * 45 = 90
+      expect(getTotalLevelUpCost(1, 10)).toBe(90);
     });
 
-    it('Lv1 -> Lv20: sum of 3*i for i=1..19 = 3 * 190 = 570', () => {
-      // Sum = 3 * (1+2+...+19) = 3 * (19*20/2) = 3 * 190 = 570
-      expect(getTotalLevelUpCost(1, 20)).toBe(570);
+    it('Lv1 -> Lv20: sum of 2*i for i=1..19 = 2 * 190 = 380', () => {
+      // Sum = 2 * (1+2+...+19) = 2 * (19*20/2) = 2 * 190 = 380
+      expect(getTotalLevelUpCost(1, 20)).toBe(380);
     });
 
     it('stage multiplier applies to total cost', () => {
-      // Champion Lv1 -> Lv5: ceil(3*1*2) + ceil(3*2*2) + ceil(3*3*2) + ceil(3*4*2) = 6+12+18+24 = 60
-      expect(getTotalLevelUpCost(1, 5, Stage.CHAMPION)).toBe(60);
+      // Champion Lv1 -> Lv5: ceil(2*1*2) + ceil(2*2*2) + ceil(2*3*2) + ceil(2*4*2) = 4+8+12+16 = 40
+      expect(getTotalLevelUpCost(1, 5, Stage.CHAMPION)).toBe(40);
     });
   });
 
@@ -217,23 +217,23 @@ describe('LevelSystem', () => {
     });
 
     it('returns currentLevel when budget is less than cost for one level', () => {
-      // Lv1 -> Lv2 costs 3
-      expect(getMaxAffordableLevel(1, 10, 2)).toBe(1);
+      // Lv1 -> Lv2 costs 2
+      expect(getMaxAffordableLevel(1, 10, 1)).toBe(1);
     });
 
     it('returns currentLevel + 1 when budget is exactly the cost for one level', () => {
-      // Lv1 -> Lv2 costs 3
-      expect(getMaxAffordableLevel(1, 10, 3)).toBe(2);
+      // Lv1 -> Lv2 costs 2
+      expect(getMaxAffordableLevel(1, 10, 2)).toBe(2);
     });
 
     it('returns the highest affordable level within budget', () => {
-      // Lv1 -> Lv5 costs 30 (3+6+9+12)
-      // Lv1 -> Lv4 costs 18 (3+6+9)
-      expect(getMaxAffordableLevel(1, 10, 25)).toBe(4);
+      // Lv1 -> Lv5 costs 20 (2+4+6+8)
+      // Lv1 -> Lv6 costs 30 (2+4+6+8+10)
+      expect(getMaxAffordableLevel(1, 10, 25)).toBe(5);
     });
 
     it('returns maxLevel when budget can afford all levels', () => {
-      // Lv1 -> Lv10 costs 135
+      // Lv1 -> Lv10 costs 90
       expect(getMaxAffordableLevel(1, 10, 999)).toBe(10);
     });
 
@@ -246,15 +246,16 @@ describe('LevelSystem', () => {
     });
 
     it('works with stage multiplier', () => {
-      // Champion Lv1 -> Lv2: ceil(3*1*2) = 6
-      // Champion Lv1 -> Lv3: 6 + ceil(3*2*2) = 6 + 12 = 18
-      // Budget of 15 can afford Lv2 (cost 6) but not Lv3 (cost 18)
-      expect(getMaxAffordableLevel(1, 10, 15, Stage.CHAMPION)).toBe(2);
+      // Champion Lv1 -> Lv2: ceil(2*1*2) = 4
+      // Champion Lv1 -> Lv3: 4 + ceil(2*2*2) = 4 + 8 = 12
+      // Champion Lv1 -> Lv4: 12 + ceil(2*3*2) = 12 + 12 = 24
+      // Budget of 15 can afford Lv3 (cost 12) but not Lv4 (cost 24)
+      expect(getMaxAffordableLevel(1, 10, 15, Stage.CHAMPION)).toBe(3);
     });
 
     it('handles mid-range levels correctly', () => {
-      // Lv10 -> Lv11: 30, Lv11 -> Lv12: 33, Lv12 -> Lv13: 36
-      // Budget 65 can afford Lv10 -> Lv12 (30+33=63) but not Lv13 (63+36=99)
+      // Lv10 -> Lv11: 20, Lv11 -> Lv12: 22, Lv12 -> Lv13: 24
+      // 20+22=42 <= 65, 42+24=66 > 65, so can afford up to Lv12
       expect(getMaxAffordableLevel(10, 20, 65)).toBe(12);
     });
   });

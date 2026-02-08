@@ -72,23 +72,23 @@ describe('Constants', () => {
   });
 
   describe('getLevelUpCost', () => {
-    it('level 1 costs 3 DigiBytes', () => {
-      expect(getLevelUpCost(1)).toBe(3);
+    it('level 1 costs 2 DigiBytes', () => {
+      expect(getLevelUpCost(1)).toBe(2);
     });
 
-    it('level 10 costs 30 DigiBytes', () => {
-      expect(getLevelUpCost(10)).toBe(30);
+    it('level 10 costs 20 DigiBytes', () => {
+      expect(getLevelUpCost(10)).toBe(20);
     });
 
-    it('level 20 costs 60 DigiBytes', () => {
-      expect(getLevelUpCost(20)).toBe(60);
+    it('level 20 costs 40 DigiBytes', () => {
+      expect(getLevelUpCost(20)).toBe(40);
     });
 
     it('stage multiplier increases cost for higher stages', () => {
-      // Rookie: 3 * 10 * 1.5 = 45
-      expect(getLevelUpCost(10, Stage.ROOKIE)).toBe(45);
-      // Champion: 3 * 10 * 2 = 60
-      expect(getLevelUpCost(10, Stage.CHAMPION)).toBe(60);
+      // Rookie: 2 * 10 * 1.5 = 30
+      expect(getLevelUpCost(10, Stage.ROOKIE)).toBe(30);
+      // Champion: 2 * 10 * 2 = 40
+      expect(getLevelUpCost(10, Stage.CHAMPION)).toBe(40);
     });
   });
 
@@ -236,14 +236,14 @@ describe('Constants', () => {
     });
 
     it('sell price accounts for stage multiplier in level-up costs', () => {
-      // Level 5, In-Training (mult 1): levelUp = ceil(3*1*1)+ceil(3*2*1)+ceil(3*3*1)+ceil(3*4*1) = 3+6+9+12=30
-      // total = 50+30=80, floor(80*0.5)=40
-      expect(getSellPrice(5, Stage.IN_TRAINING)).toBe(40);
+      // Level 5, In-Training (mult 1): levelUp = ceil(2*1*1)+ceil(2*2*1)+ceil(2*3*1)+ceil(2*4*1) = 2+4+6+8=20
+      // total = 50+20=70, floor(70*0.5)=35
+      expect(getSellPrice(5, Stage.IN_TRAINING)).toBe(35);
 
-      // Level 5, Rookie (mult 1.5): levelUp = ceil(3*1*1.5)+ceil(3*2*1.5)+ceil(3*3*1.5)+ceil(3*4*1.5)
-      // = ceil(4.5)+ceil(9)+ceil(13.5)+ceil(18) = 5+9+14+18=46
-      // total = 50+46=96, floor(96*0.5)=48
-      expect(getSellPrice(5, Stage.ROOKIE)).toBe(48);
+      // Level 5, Rookie (mult 1.5): levelUp = ceil(2*1*1.5)+ceil(2*2*1.5)+ceil(2*3*1.5)+ceil(2*4*1.5)
+      // = ceil(3)+ceil(6)+ceil(9)+ceil(12) = 3+6+9+12=30
+      // total = 50+30=80, floor(80*0.5)=40
+      expect(getSellPrice(5, Stage.ROOKIE)).toBe(40);
     });
   });
 });
