@@ -88,3 +88,11 @@ export const ATTRIBUTE_NAMES: Record<Attribute, string> = {
   [Attribute.VIRUS]: 'Virus',
   [Attribute.FREE]: 'Free',
 };
+
+/** Short symbols for colorblind mode: displayed on sprites to distinguish attributes without color. */
+export const ATTRIBUTE_SYMBOLS: Record<Attribute, string> = {
+  [Attribute.VACCINE]: 'V',
+  [Attribute.DATA]: 'D',
+  [Attribute.VIRUS]: 'X',
+  [Attribute.FREE]: 'F',
+};

@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { EnemyStats, Attribute, EnemyType } from '@/types';
+import { EnemyStats, Attribute, EnemyType, ATTRIBUTE_SYMBOLS } from '@/types';
 import { DIGIMON_DATABASE } from '@/data/DigimonDatabase';
 import { getPathPixelPositions, PixelPosition } from '@/utils/GridUtils';
 import { EventBus, GameEvents } from '@/utils/EventBus';
@@ -23,11 +23,19 @@ import {
 
 let enemyCounter = 0;
 
+/** Attribute-keyed death particle colors (used by death particles and boss ring). */
+const ATTR_DEATH_COLORS: Record<Attribute, number> = {
+  [Attribute.VACCINE]: 0x44aaff,
+  [Attribute.DATA]: 0x44ff44,
+  [Attribute.VIRUS]: 0xff4444,
+  [Attribute.FREE]: 0xffff44,
+};
+
 export class Enemy extends Phaser.GameObjects.Container {
   // Identity
-  public readonly enemyID: string;
-  public readonly digimonId: string;
-  public readonly stats: EnemyStats;
+  public enemyID: string;
+  public digimonId: string;
+  public stats: EnemyStats;
 
   // Combat stats
   public hp: number;
@@ -45,7 +53,7 @@ export class Enemy extends Phaser.GameObjects.Container {
 
   // State
   public isAlive: boolean = true;
-  public readonly isBoss: boolean;
+  public isBoss: boolean;
   public isSplitChild: boolean = false;
 
   // Kill attribution: ID of the tower that last hit this enemy
@@ -60,9 +68,11 @@ export class Enemy extends Phaser.GameObjects.Container {
 
   // Visual elements
   private sprite: Phaser.GameObjects.Sprite;
+  private auraSpr: Phaser.GameObjects.Sprite | null = null;
   private healthBarBg: Phaser.GameObjects.Graphics;
   private healthBarFill: Phaser.GameObjects.Graphics;
   private effectIndicators: Phaser.GameObjects.Graphics;
+  private attributeSymbol: Phaser.GameObjects.Text | null = null;
 
   // Health bar dimensions (scaled for 36px cells)
   private static readonly HEALTH_BAR_WIDTH = 28;
@@ -125,17 +135,17 @@ export class Enemy extends Phaser.GameObjects.Container {
 
     // Boss aura: pulsing colored glow
     if (this.isBoss) {
-      const auraSpr = scene.add.sprite(0, 0, spriteKey);
-      auraSpr.setOrigin(0.5, 0.5);
-      auraSpr.setScale(scaleFactor * 1.4);
-      auraSpr.setAlpha(0.3);
-      auraSpr.setTint(0xff4444);
-      auraSpr.setBlendMode(Phaser.BlendModes.ADD);
-      this.addAt(auraSpr, 0); // Behind the main sprite
+      this.auraSpr = scene.add.sprite(0, 0, spriteKey);
+      this.auraSpr.setOrigin(0.5, 0.5);
+      this.auraSpr.setScale(scaleFactor * 1.4);
+      this.auraSpr.setAlpha(0.3);
+      this.auraSpr.setTint(0xff4444);
+      this.auraSpr.setBlendMode(Phaser.BlendModes.ADD);
+      this.addAt(this.auraSpr, 0); // Behind the main sprite
 
       // Pulsing animation
       scene.tweens.add({
-        targets: auraSpr,
+        targets: this.auraSpr,
         alpha: { from: 0.2, to: 0.45 },
         scaleX: { from: scaleFactor * 1.3, to: scaleFactor * 1.6 },
         scaleY: { from: scaleFactor * 1.3, to: scaleFactor * 1.6 },
@@ -162,6 +172,26 @@ export class Enemy extends Phaser.GameObjects.Container {
     this.applyHealthBarVisibility();
     this.drawHealthBarBackground();
     this.updateHealthBar();
+
+    // Attribute symbol (colorblind mode) — top-right
+    const symbol = ATTRIBUTE_SYMBOLS[this.attribute] ?? '?';
+    this.attributeSymbol = scene.add.text(10, -14, symbol, {
+      fontSize: '8px',
+      fontFamily: 'monospace',
+      color: '#ffffff',
+      stroke: '#000000',
+      strokeThickness: 3,
+      fontStyle: 'bold',
+      resolution: 2,
+    });
+    this.attributeSymbol.setOrigin(0.5, 0.5);
+    this.attributeSymbol.setVisible(scene.registry.get('colorblindMode') === true);
+    this.add(this.attributeSymbol);
+
+    // Listen for colorblind mode changes
+    scene.registry.events.on('changedata-colorblindMode', (_parent: unknown, value: boolean) => {
+      if (this.attributeSymbol) this.attributeSymbol.setVisible(value === true);
+    });
 
     // Initialize boss ability state if applicable
     if (this.isBoss && dbStats.bossAbility) {
@@ -327,16 +357,56 @@ export class Enemy extends Phaser.GameObjects.Container {
     // Death particles: small colored burst
     this.spawnDeathParticles();
 
-    // Death animation: fade out and shrink
+    // Enhanced boss death effects
+    if (this.isBoss) {
+      // Screen shake
+      this.scene.cameras.main.shake(300, 0.01);
+
+      // Flash the boss sprite white briefly before fade
+      if (this.sprite) {
+        this.sprite.setTint(0xffffff);
+        this.scene.time.delayedCall(100, () => {
+          if (this.sprite) this.sprite.clearTint();
+        });
+      }
+
+      // Expanding ring effect in the attribute's color
+      const ring = this.scene.add.graphics();
+      // Position ring in world space, accounting for container offset
+      const worldX = this.x;
+      const worldY = this.y;
+      const parent = this.parentContainer;
+      if (parent) {
+        ring.setPosition(worldX + parent.x, worldY + parent.y);
+      } else {
+        ring.setPosition(worldX, worldY);
+      }
+      ring.setDepth(5);
+      const ringColor = ATTR_DEATH_COLORS[this.attribute] ?? 0xffffff;
+      ring.lineStyle(3, ringColor, 0.8);
+      ring.strokeCircle(0, 0, 10);
+      this.scene.tweens.add({
+        targets: ring,
+        scaleX: 4,
+        scaleY: 4,
+        alpha: 0,
+        duration: 500,
+        ease: 'Quad.easeOut',
+        onComplete: () => ring.destroy(),
+      });
+    }
+
+    // Death animation: fade out and shrink (longer for bosses)
+    const deathDuration = this.isBoss ? 500 : 300;
     this.scene.tweens.add({
       targets: this,
       alpha: 0,
       scaleX: 0.5,
       scaleY: 0.5,
-      duration: 300,
+      duration: deathDuration,
       ease: 'Power2',
       onComplete: () => {
-        this.destroy();
+        this.returnToPool();
       },
     });
   }
@@ -345,12 +415,6 @@ export class Enemy extends Phaser.GameObjects.Container {
    * Spawn small colored particles on death for visual feedback.
    */
   private spawnDeathParticles(): void {
-    const ATTR_DEATH_COLORS: Record<Attribute, number> = {
-      [Attribute.VACCINE]: 0x44aaff,
-      [Attribute.DATA]: 0x44ff44,
-      [Attribute.VIRUS]: 0xff4444,
-      [Attribute.FREE]: 0xffff44,
-    };
     const color = ATTR_DEATH_COLORS[this.attribute] ?? 0xffffff;
     const count = this.isBoss ? 12 : 6;
     const spread = this.isBoss ? 24 : 16;
@@ -381,7 +445,7 @@ export class Enemy extends Phaser.GameObjects.Container {
   }
 
   /**
-   * Handle enemy reaching the base: emit event and destroy immediately.
+   * Handle enemy reaching the base: emit event and return to pool.
    */
   public reachBase(): void {
     if (!this.isAlive) return;
@@ -393,7 +457,163 @@ export class Enemy extends Phaser.GameObjects.Container {
       digimonId: this.digimonId,
     });
 
-    this.destroy();
+    this.returnToPool();
+  }
+
+  // ---------------------------------------------------------------------------
+  // Pool support — return to pool and reset for reuse
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Return this enemy to the object pool. Hides and deactivates it without
+   * destroying the underlying game objects, so it can be reused via {@link reset}.
+   */
+  public returnToPool(): void {
+    this.isAlive = false;
+    this.setVisible(false);
+    this.setActive(false);
+    this.scene.tweens.killTweensOf(this);
+    if (this.sprite) this.sprite.clearTint();
+    this.activeEffects.clear();
+    this.pendingBossActions = [];
+    // Clear effect indicator graphics
+    this.effectIndicators.clear();
+    // Clear health bar graphics
+    this.healthBarBg.clear();
+    this.healthBarFill.clear();
+    // Kill boss aura tween so it doesn't keep running in the background
+    if (this.auraSpr) {
+      this.scene.tweens.killTweensOf(this.auraSpr);
+    }
+    // Emit pool-return so WaveManager can remove from activeEnemies
+    this.emit('pool-return');
+  }
+
+  /**
+   * Reset this enemy for reuse from the pool.
+   * Reinitialises all state so the enemy behaves exactly like a freshly
+   * constructed instance without allocating a new Container/Graphics set.
+   */
+  public reset(digimonId: string, waveScaling?: number): void {
+    // Generate new unique ID
+    enemyCounter++;
+    this.enemyID = `enemy_${enemyCounter}_${Date.now()}`;
+    this.digimonId = digimonId;
+    this.isBoss = digimonId.startsWith('boss_');
+
+    // Look up stats from database
+    const dbStats = DIGIMON_DATABASE.enemies[digimonId];
+    if (!dbStats) {
+      throw new Error(`Enemy not found in database: ${digimonId}`);
+    }
+    this.stats = { ...dbStats };
+
+    // Set combat properties with optional wave scaling
+    const scaling = waveScaling ?? 1;
+    this.maxHp = dbStats.baseHP * scaling;
+    this.hp = this.maxHp;
+    this.speed = dbStats.moveSpeed;
+    this.armor = dbStats.armor;
+    this.attribute = dbStats.attribute;
+    this.enemyType = dbStats.type;
+    this.reward = dbStats.reward;
+
+    // Reset path state
+    this.pathIndex = 0;
+    this.pathProgress = 0;
+
+    // Position at first waypoint
+    if (this.pathPositions.length > 0) {
+      this.x = this.pathPositions[0].x;
+      this.y = this.pathPositions[0].y;
+    }
+
+    // Reset state flags
+    this.isAlive = true;
+    this.isSplitChild = false;
+    this.lastHitByTowerID = undefined;
+    this.activeEffects = new Map();
+    this.bossAbilityState = null;
+    this.pendingBossActions = [];
+
+    // Kill any leftover tweens from a previous lifecycle
+    this.scene.tweens.killTweensOf(this);
+
+    // Update sprite texture
+    const spriteKey = dbStats.spriteKey ?? digimonId.replace(/^(enemy_|boss_)/, '');
+    this.sprite.setTexture(spriteKey);
+    this.sprite.setOrigin(0.5, 0.5);
+
+    // Re-scale sprite to target size
+    const targetSize = 24;
+    const currentWidth = this.sprite.width || 16;
+    const scaleFactor = targetSize / currentWidth;
+    this.sprite.setScale(scaleFactor);
+    this.sprite.flipX = false;
+
+    // Reset sprite tint
+    this.sprite.clearTint();
+    if (this.enemyType === 'shielded') {
+      this.sprite.setTint(0x88aaff);
+    }
+
+    // Handle boss aura: destroy old if exists, create new if now a boss
+    if (this.auraSpr) {
+      this.scene.tweens.killTweensOf(this.auraSpr);
+      this.auraSpr.destroy();
+      this.auraSpr = null;
+    }
+
+    if (this.isBoss) {
+      this.auraSpr = this.scene.add.sprite(0, 0, spriteKey);
+      this.auraSpr.setOrigin(0.5, 0.5);
+      this.auraSpr.setScale(scaleFactor * 1.4);
+      this.auraSpr.setAlpha(0.3);
+      this.auraSpr.setTint(0xff4444);
+      this.auraSpr.setBlendMode(Phaser.BlendModes.ADD);
+      this.addAt(this.auraSpr, 0); // Behind the main sprite
+
+      // Pulsing animation
+      this.scene.tweens.add({
+        targets: this.auraSpr,
+        alpha: { from: 0.2, to: 0.45 },
+        scaleX: { from: scaleFactor * 1.3, to: scaleFactor * 1.6 },
+        scaleY: { from: scaleFactor * 1.3, to: scaleFactor * 1.6 },
+        duration: 1200,
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.easeInOut',
+      });
+    }
+
+    // Reset health bar
+    this.applyHealthBarVisibility();
+    this.drawHealthBarBackground();
+    this.updateHealthBar();
+
+    // Clear effect indicators
+    this.effectIndicators.clear();
+
+    // Update attribute symbol (colorblind mode)
+    if (this.attributeSymbol) {
+      const symbol = ATTRIBUTE_SYMBOLS[this.attribute] ?? '?';
+      this.attributeSymbol.setText(symbol);
+      this.attributeSymbol.setVisible(this.scene.registry.get('colorblindMode') === true);
+    }
+
+    // Initialize boss ability state if applicable
+    if (this.isBoss && dbStats.bossAbility) {
+      this.bossAbilityState = createBossAbilityState(dbStats.bossAbility);
+    }
+
+    // Reset container visual state
+    this.setVisible(true);
+    this.setActive(true);
+    this.setAlpha(1);
+    this.setScale(1);
+
+    // Set container size for hit detection
+    this.setSize(targetSize, targetSize);
   }
 
   // ---------------------------------------------------------------------------

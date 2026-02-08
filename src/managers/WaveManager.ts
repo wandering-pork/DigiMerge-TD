@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { getWaveConfig } from '@/data/WaveData';
 import { DIGIMON_DATABASE } from '@/data/DigimonDatabase';
-import { WaveConfig, WaveEnemy } from '@/types';
+import { WaveConfig } from '@/types';
 import { Enemy } from '@/entities/Enemy';
 import { EventBus, GameEvents } from '@/utils/EventBus';
 
@@ -146,8 +146,15 @@ export class WaveManager {
 
   /**
    * Clear all state. Call when resetting the game or leaving the scene.
+   * Destroys all enemies (active + pooled) so they are garbage-collected.
    */
   public cleanup(): void {
+    // Destroy all enemies (active + pooled) for full reset
+    const enemies = [...this.enemyContainer.list] as Enemy[];
+    for (const enemy of enemies) {
+      enemy.destroy();
+    }
+
     this.spawnQueue = [];
     this.activeEnemies.clear();
     this.isActive = false;
@@ -161,18 +168,41 @@ export class WaveManager {
   // Internal
   // ------------------------------------------------------------------
 
+  // ------------------------------------------------------------------
+  // Enemy pooling
+  // ------------------------------------------------------------------
+
   /**
-   * Instantiate an Enemy and add it to the scene.
+   * Obtain an enemy, reusing an inactive one from the container if available,
+   * or creating a fresh instance when the pool is empty (lazy pooling).
+   */
+  private getEnemy(digimonId: string, waveScaling: number): Enemy {
+    // Scan for an inactive enemy that can be recycled
+    const enemies = this.enemyContainer.list as Enemy[];
+    for (const e of enemies) {
+      if (!e.isAlive && !e.visible) {
+        e.reset(digimonId, waveScaling);
+        return e;
+      }
+    }
+
+    // No recyclable enemy — allocate a new one and add to the container
+    const enemy = new Enemy(this.scene, digimonId, waveScaling);
+    this.enemyContainer.add(enemy);
+    return enemy;
+  }
+
+  /**
+   * Instantiate (or recycle) an Enemy and add it to the active set.
    */
   private spawnEnemy(digimonId: string, waveScaling: number): void {
-    const enemy = new Enemy(this.scene, digimonId, waveScaling);
+    const enemy = this.getEnemy(digimonId, waveScaling);
 
-    this.enemyContainer.add(enemy);
     this.activeEnemies.add(enemy);
 
-    // When the enemy is destroyed (dies or reaches base), remove it from
+    // When the enemy returns to pool (dies or reaches base), remove it from
     // the active set and check if the wave is now complete.
-    enemy.once('destroy', () => {
+    enemy.once('pool-return', () => {
       this.activeEnemies.delete(enemy);
       this.checkWaveComplete();
     });
@@ -238,7 +268,7 @@ export class WaveManager {
 
     for (let i = 0; i < data.splitCount; i++) {
       try {
-        const child = new Enemy(this.scene, data.digimonId, childScaling);
+        const child = this.getEnemy(data.digimonId, childScaling);
         child.isSplitChild = true;
 
         // Position child at parent's path progress with slight offset for visibility
@@ -250,10 +280,9 @@ export class WaveManager {
         child.x = data.x + offsetX;
         child.y = data.y;
 
-        this.enemyContainer.add(child);
         this.activeEnemies.add(child);
 
-        child.once('destroy', () => {
+        child.once('pool-return', () => {
           this.activeEnemies.delete(child);
           this.checkWaveComplete();
         });

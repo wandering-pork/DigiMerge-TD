@@ -129,6 +129,11 @@ export class GameScene extends Phaser.Scene {
   // Starter display (hideable after first placement)
   private starterDisplayObjects: Phaser.GameObjects.GameObject[] = [];
 
+  // Game speed indicator badge (shown over grid when speed > 1x)
+  private speedIndicator: Phaser.GameObjects.Container | null = null;
+  private speedIndicatorText: Phaser.GameObjects.Text | null = null;
+  private speedIndicatorBg: Phaser.GameObjects.Graphics | null = null;
+
   // Low lives warning vignette
   private dangerVignette: Phaser.GameObjects.Graphics | null = null;
 
@@ -1612,6 +1617,29 @@ export class GameScene extends Phaser.Scene {
       this.speedBtnTexts.push(sText);
     });
 
+    // Persistent speed indicator badge (over grid, top-right)
+    {
+      const gridCenterX = GRID_OFFSET_X + GRID.COLUMNS * GRID.CELL_SIZE - 30;
+      const badgeY = 10;
+      this.speedIndicator = this.add.container(gridCenterX, badgeY).setDepth(15);
+      this.speedIndicatorBg = this.add.graphics();
+      this.speedIndicatorBg.fillStyle(COLORS.BG_PANEL, 0.85);
+      this.speedIndicatorBg.fillRoundedRect(-24, -10, 48, 20, 6);
+      this.speedIndicatorBg.lineStyle(1.5, COLORS.AMBER, 0.6);
+      this.speedIndicatorBg.strokeRoundedRect(-24, -10, 48, 20, 6);
+      this.speedIndicator.add(this.speedIndicatorBg);
+
+      this.speedIndicatorText = this.add.text(0, 0, '1x', {
+        fontFamily: FONTS.MONO,
+        fontSize: '13px',
+        color: COLORS.TEXT_WHITE,
+        fontStyle: 'bold',
+        resolution: 2,
+      }).setOrigin(0.5);
+      this.speedIndicator.add(this.speedIndicatorText);
+      this.speedIndicator.setVisible(false); // Hidden at 1x
+    }
+
     // Wave preview section
     const previewY = hudY + 305;
     const waveSepGfx = this.add.graphics().setDepth(10);
@@ -1959,6 +1987,23 @@ export class GameScene extends Phaser.Scene {
         drawButton(this.speedBtnBgs[i], 55, 26, s === speed ? COLORS.CYAN : COLORS.BG_PANEL_LIGHT);
       }
     });
+
+    // Update persistent speed indicator badge
+    if (this.speedIndicator && this.speedIndicatorText && this.speedIndicatorBg) {
+      if (speed > 1) {
+        this.speedIndicatorText.setText(`${speed}x`);
+        this.speedIndicatorBg.clear();
+        const badgeColor = speed === 3 ? COLORS.DANGER : COLORS.AMBER;
+        this.speedIndicatorBg.fillStyle(COLORS.BG_PANEL, 0.85);
+        this.speedIndicatorBg.fillRoundedRect(-24, -10, 48, 20, 6);
+        this.speedIndicatorBg.lineStyle(1.5, badgeColor, 0.8);
+        this.speedIndicatorBg.strokeRoundedRect(-24, -10, 48, 20, 6);
+        this.speedIndicatorText.setColor(speed === 3 ? '#ff6666' : '#ffbb66');
+        this.speedIndicator.setVisible(true);
+      } else {
+        this.speedIndicator.setVisible(false);
+      }
+    }
   }
 
   // ============================================================

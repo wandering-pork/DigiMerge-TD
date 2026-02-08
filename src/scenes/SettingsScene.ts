@@ -34,7 +34,7 @@ export class SettingsScene extends Phaser.Scene {
     // Panel
     const panelWidth = 310;
     const showGameButtons = this.callerScene !== 'MainMenuScene';
-    const panelHeight = showGameButtons ? 520 : 420;
+    const panelHeight = showGameButtons ? 546 : 446;
     const panelX = (width - panelWidth) / 2;
     const panelY = (height - panelHeight) / 2;
 
@@ -418,6 +418,48 @@ export class SettingsScene extends Phaser.Scene {
     });
 
     hpRow.add(hpBtnContainer);
+    controlY += 26;
+
+    // Colorblind Mode Toggle
+    const isColorblind = this.registry.get('colorblindMode') === true;
+
+    const cbRow = this.add.container(0, controlY);
+    cbRow.add(this.add.text(controlX, 0, 'Colorblind Mode', {
+      fontFamily: FONTS.BODY,
+      fontSize: '13px',
+      color: '#aabbcc',
+      resolution: 2,
+    }));
+
+    const cbBtnW = 50;
+    const cbBtnH = 22;
+    const cbBtnContainer = this.add.container(panelX + panelWidth - 44, 0);
+    const cbBtnBg = this.add.graphics();
+    drawButton(cbBtnBg, cbBtnW, cbBtnH, isColorblind ? COLORS.CYAN_DIM : COLORS.BG_PANEL_LIGHT);
+    cbBtnContainer.add(cbBtnBg);
+
+    const cbText = this.add.text(0, 0, isColorblind ? 'ON' : 'OFF', {
+      fontFamily: FONTS.BODY,
+      fontSize: '11px',
+      color: '#ffffff',
+      fontStyle: 'bold',
+      resolution: 2,
+    }).setOrigin(0.5);
+    cbBtnContainer.add(cbText);
+
+    const cbHitArea = new Phaser.Geom.Rectangle(-cbBtnW / 2, -cbBtnH / 2, cbBtnW, cbBtnH);
+    cbBtnContainer.setInteractive(cbHitArea, Phaser.Geom.Rectangle.Contains);
+    cbBtnContainer.input!.cursor = 'pointer';
+
+    cbBtnContainer.on('pointerdown', () => {
+      const current = this.registry.get('colorblindMode') === true;
+      const newValue = !current;
+      this.registry.set('colorblindMode', newValue);
+      cbText.setText(newValue ? 'ON' : 'OFF');
+      drawButton(cbBtnBg, cbBtnW, cbBtnH, newValue ? COLORS.CYAN_DIM : COLORS.BG_PANEL_LIGHT);
+    });
+
+    cbRow.add(cbBtnContainer);
     controlY += 26;
 
     // Separator before save section

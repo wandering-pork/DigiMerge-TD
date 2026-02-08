@@ -2,7 +2,7 @@
 
 ## Current Status
 
-**All 11 sprints complete + Sprint 12A-D + Sprint 13-16 + Sprint 18-24B done** | 498 tests passing | 19 test files | TypeScript clean | Vite build succeeds
+**All 11 sprints complete + Sprint 12A-D + Sprint 13-16 + Sprint 18-24B + Sprint 27 done** | 498 tests passing | 19 test files | TypeScript clean | Vite build succeeds
 
 Live at: https://wandering-pork.github.io/DigiMerge-TD/
 
@@ -35,6 +35,12 @@ Live at: https://wandering-pork.github.io/DigiMerge-TD/
 - Sharper wave preview text (bumped font sizes, increased resolution)
 - Removed auto-pause on tab blur (game continues when tab loses focus)
 - Robust game over transition (native setTimeout + safety fallback)
+- Enemy object pooling (lazy pooling, reuse inactive enemies, returnToPool/reset lifecycle)
+- Enhanced boss death animation (screen shake, white flash, expanding ring, longer duration)
+- Tower attack animation (brief upward sprite jump on fire)
+- Persistent game speed indicator badge (shows "2x"/"3x" over grid when speed > 1x)
+- Colorblind mode: attribute symbols (V/D/X/F) on tower and enemy sprites, toggle in Settings
+- Settings: Colorblind Mode toggle under Display section
 
 ---
 
@@ -231,14 +237,17 @@ Live at: https://wandering-pork.github.io/DigiMerge-TD/
 
 ---
 
-### Sprint 23 — Performance Optimization ✓ (partial)
+### Sprint 23 — Performance Optimization ✓
 
-#### 23A: Object Pooling ✓ (Projectiles)
+#### 23A: Object Pooling ✓
 - [x] Projectile pool — lazy pooling, reuse inactive projectiles instead of create/destroy
 - [x] `Projectile.reset()` method reinitializes all state for reuse
 - [x] `CombatManager.getProjectile()` scans for inactive projectiles before allocating
 - [x] Update loop skips inactive pooled projectiles
-- [ ] Enemy pool — reuse instead of create/destroy per wave
+- [x] Enemy pool — lazy pooling, `Enemy.reset()` + `returnToPool()` lifecycle
+- [x] `WaveManager.getEnemy()` scans for inactive enemies before allocating
+- [x] Splitter children also use enemy pool
+- [x] `WaveManager.cleanup()` destroys all pooled enemies on game reset
 - [ ] Particle pool — reuse for merge effects, hit particles, status effect visuals
 - [ ] Measure before/after FPS on late-game waves (80+) with many towers
 
@@ -260,12 +269,12 @@ Live at: https://wandering-pork.github.io/DigiMerge-TD/
 
 ---
 
-### Sprint 24 — Visual Polish ✓ (partial)
+### Sprint 24 — Visual Polish ✓
 
-#### 24A: Boss & Enemy Effects ✓ (partial)
-- [ ] Unique boss death animation (larger explosion, screen flash, reward popup)
+#### 24A: Boss & Enemy Effects ✓
+- [x] Unique boss death animation (screen shake, white flash, expanding ring, 500ms duration)
 - [x] Enemy death particles (attribute-colored burst on kill, 6 particles standard, 12 for bosses)
-- [ ] Tower attack animation (brief scale pulse or flash when firing)
+- [x] Tower attack animation (brief upward sprite jump when firing)
 - [ ] Enhanced boss ability visual feedback (screen shake, overlays, area indicators)
 
 #### 24B: Evolution Path Preview ✓
@@ -302,13 +311,15 @@ Live at: https://wandering-pork.github.io/DigiMerge-TD/
 
 ---
 
-### Sprint 27 — Accessibility
+### Sprint 27 — Accessibility ✓ (partial)
 
-- [ ] Colorblind mode: add attribute icons/symbols alongside colors (e.g. shield=Vaccine, sword=Virus, circle=Data, star=Free)
-- [ ] Attribute icon display on tower sprites, enemy sprites, and all UI panels
+- [x] Colorblind mode: attribute symbols (V/D/X/F) displayed on tower and enemy sprites
+- [x] Attribute symbol badges on tower sprites (top-right, 9px monospace) and enemy sprites (top-right, 8px)
+- [x] Symbols respond to real-time toggle via registry change listener
+- [x] Current game speed indicator (persistent badge over grid, amber at 2x, red at 3x, hidden at 1x)
+- [x] Settings toggle for colorblind mode (ON/OFF button in Display section)
 - [ ] High-contrast mode option for UI panels and text
-- [ ] Current game speed indicator (persistent HUD badge showing 1x/2x/3x)
-- [ ] Settings toggle for colorblind-friendly palette
+- [ ] Settings toggle for colorblind-friendly palette (alternative color scheme)
 
 ---
 

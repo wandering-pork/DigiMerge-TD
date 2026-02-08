@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { DigimonStats, Stage, Attribute, TargetPriority, TowerSaveData, BonusEffect } from '@/types';
+import { DigimonStats, Stage, Attribute, TargetPriority, TowerSaveData, BonusEffect, ATTRIBUTE_SYMBOLS } from '@/types';
 import { DIGIMON_DATABASE } from '@/data/DigimonDatabase';
 import { STAGE_CONFIG, GRID } from '@/config/Constants';
 import { gridToPixelCenter } from '@/utils/GridUtils';
@@ -43,6 +43,7 @@ export class Tower extends Phaser.GameObjects.Container {
   private selectionHighlight: Phaser.GameObjects.Graphics;
   private rangeCircle: Phaser.GameObjects.Graphics;
   private stunIndicator: Phaser.GameObjects.Text | null = null;
+  private attributeSymbol: Phaser.GameObjects.Text | null = null;
 
   constructor(
     scene: Phaser.Scene,
@@ -118,6 +119,26 @@ export class Tower extends Phaser.GameObjects.Container {
     });
     this.levelText.setOrigin(0.5, 0.5);
     this.add(this.levelText);
+
+    // Attribute symbol badge (colorblind mode) — top-right corner
+    const symbol = ATTRIBUTE_SYMBOLS[this.attribute] ?? '?';
+    this.attributeSymbol = scene.add.text(14, -22, symbol, {
+      fontSize: '9px',
+      fontFamily: 'monospace',
+      color: '#ffffff',
+      stroke: '#000000',
+      strokeThickness: 3,
+      fontStyle: 'bold',
+      resolution: 2,
+    });
+    this.attributeSymbol.setOrigin(0.5, 0.5);
+    this.attributeSymbol.setVisible(scene.registry.get('colorblindMode') === true);
+    this.add(this.attributeSymbol);
+
+    // Listen for colorblind mode changes
+    scene.registry.events.on('changedata-colorblindMode', (_parent: unknown, value: boolean) => {
+      if (this.attributeSymbol) this.attributeSymbol.setVisible(value === true);
+    });
 
     // Set container size for hit detection and make interactive
     this.setSize(GRID.CELL_SIZE, GRID.CELL_SIZE);
@@ -277,6 +298,26 @@ export class Tower extends Phaser.GameObjects.Container {
       this.stunIndicator.setVisible(false);
     }
     this.sprite.clearTint();
+  }
+
+  // ---------------------------------------------------------------------------
+  // Attack Animation
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Brief upward "jump" animation on the tower sprite when it fires a projectile.
+   * Does not interfere with the sprite's normalized scale.
+   */
+  public playAttackAnimation(): void {
+    if (this.sprite && this.stunTimer <= 0) {
+      this.scene.tweens.add({
+        targets: this.sprite,
+        y: this.sprite.y - 3, // Small upward jump
+        duration: 60,
+        yoyo: true,
+        ease: 'Quad.easeOut',
+      });
+    }
   }
 
   // ---------------------------------------------------------------------------

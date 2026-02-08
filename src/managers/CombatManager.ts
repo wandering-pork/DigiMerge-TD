@@ -130,6 +130,9 @@ export class CombatManager {
    * effects so triple-proccing is avoided.
    */
   public fireProjectile(tower: Tower, target: Enemy): void {
+    // Play attack animation on the tower sprite (once per fire, before projectile loop)
+    tower.playAttackAnimation();
+
     const baseDamage = tower.getAttackDamage();
     const attributeMult = getAttributeMultiplier(tower.attribute, target.attribute);
     const totalDamage = baseDamage * attributeMult;
