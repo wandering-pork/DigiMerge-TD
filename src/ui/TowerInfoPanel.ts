@@ -3,13 +3,14 @@ import { Tower } from '@/entities/Tower';
 import { EventBus, GameEvents } from '@/utils/EventBus';
 import { STAGE_NAMES, ATTRIBUTE_NAMES, TargetPriority } from '@/types';
 import { getLevelUpCost, getTotalLevelUpCost, canLevelUp, calculateMaxLevel, getMaxAffordableLevel } from '@/systems/LevelSystem';
-import { getEvolutions, EVOLUTION_PATHS } from '@/data/EvolutionPaths';
+import { getEvolutions } from '@/data/EvolutionPaths';
 import { DIGIMON_DATABASE } from '@/data/DigimonDatabase';
 import { canMerge, MergeCandidate } from '@/systems/MergeSystem';
 import { GRID, GRID_OFFSET_X, getSellPrice as calculateSellPrice } from '@/config/Constants';
 import { STATUS_EFFECTS, STATUS_EFFECT_CONFIGS } from '@/data/StatusEffects';
 import { COLORS, ATTRIBUTE_COLORS_STR, TEXT_STYLES, FONTS, ANIM } from './UITheme';
 import { drawPanel, drawButton, drawSeparator, animateSlideIn, animateSlideOut, animateButtonHover, animateButtonPress } from './UIHelpers';
+import { canDisplaySprite, getStaticFrame } from '@/utils/SpriteAnimHelper';
 
 /**
  * Parse a compound effect type (e.g., 'burn_aoe', 'slow_pierce') into
@@ -210,10 +211,6 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
 
   // Bonus effects from merge inheritance
   private bonusEffectTexts: Phaser.GameObjects.Text[] = [];
-
-  // Evolution preview objects (dynamically created/destroyed)
-  private evoPreviewObjects: Phaser.GameObjects.GameObject[] = [];
-  private evoPreviewBottomY: number = 0;
 
   // Keyboard listener
   private escKey: Phaser.Input.Keyboard.Key | null = null;
@@ -611,8 +608,13 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
 
     // Update sprite
     const spriteKey = tower.stats.spriteKey ?? tower.digimonId;
-    if (this.scene.textures.exists(spriteKey)) {
-      this.digimonSprite.setTexture(spriteKey);
+    if (canDisplaySprite(this.scene, spriteKey)) {
+      const staticFrame = getStaticFrame(spriteKey);
+      if (staticFrame) {
+        this.digimonSprite.setTexture(staticFrame.atlas, staticFrame.frame);
+      } else {
+        this.digimonSprite.setTexture(spriteKey);
+      }
       this.digimonSprite.setVisible(true);
     } else {
       this.digimonSprite.setVisible(false);
@@ -701,128 +703,13 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
       this.digivolveBtn.setVisible(false);
     }
 
-    // Evolution path preview
-    this.refreshEvolutionPreview(tower);
-
-    // Merge button - show if there are valid merge candidates nearby
-    // Reposition merge button based on whether digivolve/evo preview is visible
-    const baseY = this.digivolveBtn.visible
+    // Merge button — position after digivolve (if visible) or sell
+    const mergeY = this.digivolveBtn.visible
       ? this.digivolveBtn.y + 44
       : this.sellBtn.y + 44;
-    const mergeY = this.evoPreviewBottomY > baseY
-      ? this.evoPreviewBottomY + 8
-      : baseY;
     this.mergeBtn.y = mergeY;
     this.mergeBtn.setVisible(true);
     this.mergeBtnText.setText('Merge...');
-  }
-
-  // ---------------------------------------------------------------------------
-  // Evolution Path Preview
-  // ---------------------------------------------------------------------------
-
-  private refreshEvolutionPreview(tower: Tower): void {
-    // Clean up old preview objects
-    for (const obj of this.evoPreviewObjects) obj.destroy();
-    this.evoPreviewObjects = [];
-    this.evoPreviewBottomY = 0;
-
-    // Get ALL evolution paths for this Digimon (not filtered by DP)
-    const allPaths = EVOLUTION_PATHS[tower.digimonId];
-    if (!allPaths || allPaths.length === 0) return;
-
-    const w = TowerInfoPanel.PANEL_WIDTH;
-    const startY = this.digivolveBtn.visible
-      ? this.digivolveBtn.y + 30
-      : this.sellBtn.y + 30;
-
-    // Section label
-    const label = this.scene.add.text(15, startY, 'Evolutions:', {
-      fontFamily: FONTS.MONO,
-      fontSize: '11px',
-      color: COLORS.TEXT_LABEL,
-      resolution: 2,
-    });
-    this.add(label);
-    this.evoPreviewObjects.push(label);
-
-    let yOffset = startY + 18;
-
-    for (const path of allPaths) {
-      const evoStats = DIGIMON_DATABASE.towers[path.resultId];
-      if (!evoStats) continue;
-
-      const isUnlocked = tower.dp >= path.minDP && tower.dp <= path.maxDP;
-      const alpha = isUnlocked ? 1.0 : 0.4;
-
-      // Sprite
-      const spriteKey = evoStats.spriteKey ?? path.resultId;
-      if (this.scene.textures.exists(spriteKey)) {
-        const sprite = this.scene.add.image(28, yOffset + 12, spriteKey);
-        sprite.setScale(1.8).setAlpha(alpha);
-        this.add(sprite);
-        this.evoPreviewObjects.push(sprite);
-      }
-
-      // Name + DP requirement
-      const dpReqText = path.minDP === 0 ? '' : ` (DP ${path.minDP}+)`;
-      const defaultTag = path.isDefault ? '' : ' *';
-      const nameColor = isUnlocked ? '#fff8f0' : '#665555';
-      const nameObj = this.scene.add.text(48, yOffset, `${evoStats.name}${defaultTag}`, {
-        fontFamily: FONTS.MONO,
-        fontSize: '12px',
-        color: nameColor,
-        resolution: 2,
-      }).setAlpha(alpha);
-      this.add(nameObj);
-      this.evoPreviewObjects.push(nameObj);
-
-      // Stats line: DMG | SPD | RNG
-      const statsColor = isUnlocked ? COLORS.TEXT_DIM : '#554444';
-      const statsStr = `DMG:${evoStats.baseDamage} SPD:${evoStats.baseSpeed.toFixed(1)} RNG:${evoStats.range.toFixed(1)}`;
-      const statsObj = this.scene.add.text(48, yOffset + 14, statsStr, {
-        fontFamily: FONTS.MONO,
-        fontSize: '10px',
-        color: statsColor,
-        resolution: 2,
-      }).setAlpha(alpha);
-      this.add(statsObj);
-      this.evoPreviewObjects.push(statsObj);
-
-      // DP requirement tag (right side)
-      if (dpReqText) {
-        const dpColor = isUnlocked ? '#44cc88' : '#884444';
-        const dpObj = this.scene.add.text(w - 15, yOffset + 2, dpReqText, {
-          fontFamily: FONTS.MONO,
-          fontSize: '10px',
-          color: dpColor,
-          resolution: 2,
-        }).setOrigin(1, 0).setAlpha(alpha);
-        this.add(dpObj);
-        this.evoPreviewObjects.push(dpObj);
-      }
-
-      // Effect name if present
-      if (evoStats.effectType) {
-        const effectInfo = getSkillDisplay(evoStats.effectType, evoStats.effectChance);
-        if (effectInfo) {
-          const effectColor = isUnlocked ? '#ffaa44' : '#664433';
-          const effectObj = this.scene.add.text(48, yOffset + 26, effectInfo.name, {
-            fontFamily: FONTS.MONO,
-            fontSize: '10px',
-            color: effectColor,
-            fontStyle: 'italic',
-            resolution: 2,
-          }).setAlpha(alpha);
-          this.add(effectObj);
-          this.evoPreviewObjects.push(effectObj);
-        }
-      }
-
-      yOffset += evoStats.effectType ? 42 : 32;
-    }
-
-    this.evoPreviewBottomY = yOffset;
   }
 
   // ---------------------------------------------------------------------------
@@ -1143,10 +1030,6 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
     EventBus.off(GameEvents.DIGIBYTES_CHANGED, this.onDigibytesChanged, this);
     EventBus.off(GameEvents.TOWER_SOLD_SHORTCUT, this.onSell, this);
     EventBus.off(GameEvents.TOWER_LEVELUP_SHORTCUT, this.onLevelUp, this);
-
-    // Clean up evolution preview objects
-    for (const obj of this.evoPreviewObjects) obj.destroy();
-    this.evoPreviewObjects = [];
 
     if (this.escKey) {
       this.escKey.off('down', this.onEscPressed, this);

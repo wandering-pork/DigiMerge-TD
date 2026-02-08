@@ -20,6 +20,7 @@ import {
   getDamageReduction,
   BossAbilityAction,
 } from '@/systems/BossAbilitySystem';
+import { getAtlasEntry, ensureIdleAnim } from '@/utils/SpriteAnimHelper';
 
 let enemyCounter = 0;
 
@@ -71,6 +72,8 @@ export class Enemy extends Phaser.GameObjects.Container {
   private auraSpr: Phaser.GameObjects.Sprite | null = null;
   private healthBarBg: Phaser.GameObjects.Graphics;
   private healthBarFill: Phaser.GameObjects.Graphics;
+  private armorBarBg: Phaser.GameObjects.Graphics | null = null;
+  private armorBarFill: Phaser.GameObjects.Graphics | null = null;
   private effectIndicators: Phaser.GameObjects.Graphics;
   private attributeSymbol: Phaser.GameObjects.Text | null = null;
 
@@ -117,7 +120,12 @@ export class Enemy extends Phaser.GameObjects.Container {
     // Create sprite child
     // Use explicit spriteKey from database if set, otherwise strip "enemy_"/"boss_" prefix
     const spriteKey = dbStats.spriteKey ?? digimonId.replace(/^(enemy_|boss_)/, '');
-    this.sprite = scene.add.sprite(0, 0, spriteKey);
+    const atlasEntry = getAtlasEntry(spriteKey);
+    if (atlasEntry) {
+      this.sprite = scene.add.sprite(0, 0, atlasEntry.atlas, `${atlasEntry.prefix}_0`);
+    } else {
+      this.sprite = scene.add.sprite(0, 0, spriteKey);
+    }
     this.sprite.setOrigin(0.5, 0.5);
 
     // Scale 16px sprites to ~24px for enemies (fits in 36px cells)
@@ -128,6 +136,12 @@ export class Enemy extends Phaser.GameObjects.Container {
 
     this.add(this.sprite);
 
+    // Play idle animation if atlas coverage exists
+    const idleAnimKey = ensureIdleAnim(scene, spriteKey);
+    if (idleAnimKey && this.sprite.anims) {
+      this.sprite.play(idleAnimKey);
+    }
+
     // Visual indicator for shielded enemies: blue tint
     if (this.enemyType === 'shielded') {
       this.sprite.setTint(0x88aaff);
@@ -135,7 +149,11 @@ export class Enemy extends Phaser.GameObjects.Container {
 
     // Boss aura: pulsing colored glow
     if (this.isBoss) {
-      this.auraSpr = scene.add.sprite(0, 0, spriteKey);
+      if (atlasEntry) {
+        this.auraSpr = scene.add.sprite(0, 0, atlasEntry.atlas, `${atlasEntry.prefix}_0`);
+      } else {
+        this.auraSpr = scene.add.sprite(0, 0, spriteKey);
+      }
       this.auraSpr.setOrigin(0.5, 0.5);
       this.auraSpr.setScale(scaleFactor * 1.4);
       this.auraSpr.setAlpha(0.3);
@@ -164,6 +182,14 @@ export class Enemy extends Phaser.GameObjects.Container {
     this.healthBarFill = scene.add.graphics();
     this.add(this.healthBarFill);
 
+    // Create armor bar (only for armored enemies)
+    if (this.armor > 0) {
+      this.armorBarBg = scene.add.graphics();
+      this.armorBarFill = scene.add.graphics();
+      this.add(this.armorBarBg);
+      this.add(this.armorBarFill);
+    }
+
     // Create effect indicator graphics (drawn below health bar)
     this.effectIndicators = scene.add.graphics();
     this.add(this.effectIndicators);
@@ -172,6 +198,7 @@ export class Enemy extends Phaser.GameObjects.Container {
     this.applyHealthBarVisibility();
     this.drawHealthBarBackground();
     this.updateHealthBar();
+    this.drawArmorBar();
 
     // Attribute symbol (colorblind mode) — top-right
     const symbol = ATTRIBUTE_SYMBOLS[this.attribute] ?? '?';
@@ -229,6 +256,8 @@ export class Enemy extends Phaser.GameObjects.Container {
     }
     this.healthBarBg.setVisible(visible);
     this.healthBarFill.setVisible(visible);
+    if (this.armorBarBg) this.armorBarBg.setVisible(visible);
+    if (this.armorBarFill) this.armorBarFill.setVisible(visible);
   }
 
   /**
@@ -261,6 +290,29 @@ export class Enemy extends Phaser.GameObjects.Container {
   }
 
   /**
+   * Draw the armor bar below the HP bar.
+   * Silver when full, red when armor_break is active.
+   */
+  private drawArmorBar(): void {
+    if (!this.armorBarBg || !this.armorBarFill) return;
+    const y = Enemy.HEALTH_BAR_Y + Enemy.HEALTH_BAR_HEIGHT + 1;
+
+    // Background (full width)
+    this.armorBarBg.clear();
+    this.armorBarBg.fillStyle(0x555555, 0.6);
+    this.armorBarBg.fillRect(-Enemy.HEALTH_BAR_WIDTH / 2, y, Enemy.HEALTH_BAR_WIDTH, 2);
+
+    // Fill (effective armor ratio)
+    this.armorBarFill.clear();
+    if (this.armor > 0) {
+      const effectiveRatio = this.getEffectiveArmor() / this.armor;
+      const color = effectiveRatio < 1 ? 0xff4444 : 0xaaaaaa;
+      this.armorBarFill.fillStyle(color, 0.8);
+      this.armorBarFill.fillRect(-Enemy.HEALTH_BAR_WIDTH / 2, y, Enemy.HEALTH_BAR_WIDTH * effectiveRatio, 2);
+    }
+  }
+
+  /**
    * Get the current HP as a fraction of max HP (0 to 1).
    */
   public getHpPercent(): number {
@@ -272,10 +324,10 @@ export class Enemy extends Phaser.GameObjects.Container {
    * Apply damage to this enemy, reduced by effective armor.
    * actualDamage = amount * (1 - effectiveArmor)
    */
-  public takeDamage(amount: number): void {
+  public takeDamage(amount: number, ignoreArmor: boolean = false): void {
     if (!this.isAlive) return;
 
-    const effectiveArmor = this.getEffectiveArmor();
+    const effectiveArmor = ignoreArmor ? 0 : this.getEffectiveArmor();
     let actualDamage = amount * (1 - effectiveArmor);
 
     // Boss damage shield (e.g. Transcendent Sword)
@@ -473,6 +525,7 @@ export class Enemy extends Phaser.GameObjects.Container {
     this.setVisible(false);
     this.setActive(false);
     this.scene.tweens.killTweensOf(this);
+    if (this.sprite && this.sprite.anims) this.sprite.stop();
     if (this.sprite) this.sprite.clearTint();
     this.activeEffects.clear();
     this.pendingBossActions = [];
@@ -481,6 +534,8 @@ export class Enemy extends Phaser.GameObjects.Container {
     // Clear health bar graphics
     this.healthBarBg.clear();
     this.healthBarFill.clear();
+    if (this.armorBarBg) this.armorBarBg.clear();
+    if (this.armorBarFill) this.armorBarFill.clear();
     // Kill boss aura tween so it doesn't keep running in the background
     if (this.auraSpr) {
       this.scene.tweens.killTweensOf(this.auraSpr);
@@ -541,7 +596,12 @@ export class Enemy extends Phaser.GameObjects.Container {
 
     // Update sprite texture
     const spriteKey = dbStats.spriteKey ?? digimonId.replace(/^(enemy_|boss_)/, '');
-    this.sprite.setTexture(spriteKey);
+    const atlasEntry = getAtlasEntry(spriteKey);
+    if (atlasEntry) {
+      this.sprite.setTexture(atlasEntry.atlas, `${atlasEntry.prefix}_0`);
+    } else {
+      this.sprite.setTexture(spriteKey);
+    }
     this.sprite.setOrigin(0.5, 0.5);
 
     // Re-scale sprite to target size
@@ -550,6 +610,15 @@ export class Enemy extends Phaser.GameObjects.Container {
     const scaleFactor = targetSize / currentWidth;
     this.sprite.setScale(scaleFactor);
     this.sprite.flipX = false;
+
+    // Play idle animation or stop
+    if (this.sprite.anims) {
+      this.sprite.stop();
+      const idleAnimKey = ensureIdleAnim(this.scene, spriteKey);
+      if (idleAnimKey) {
+        this.sprite.play(idleAnimKey);
+      }
+    }
 
     // Reset sprite tint
     this.sprite.clearTint();
@@ -565,7 +634,11 @@ export class Enemy extends Phaser.GameObjects.Container {
     }
 
     if (this.isBoss) {
-      this.auraSpr = this.scene.add.sprite(0, 0, spriteKey);
+      if (atlasEntry) {
+        this.auraSpr = this.scene.add.sprite(0, 0, atlasEntry.atlas, `${atlasEntry.prefix}_0`);
+      } else {
+        this.auraSpr = this.scene.add.sprite(0, 0, spriteKey);
+      }
       this.auraSpr.setOrigin(0.5, 0.5);
       this.auraSpr.setScale(scaleFactor * 1.4);
       this.auraSpr.setAlpha(0.3);
@@ -590,6 +663,15 @@ export class Enemy extends Phaser.GameObjects.Container {
     this.applyHealthBarVisibility();
     this.drawHealthBarBackground();
     this.updateHealthBar();
+
+    // Recreate armor bar if needed
+    if (this.armor > 0 && !this.armorBarBg) {
+      this.armorBarBg = this.scene.add.graphics();
+      this.armorBarFill = this.scene.add.graphics();
+      this.add(this.armorBarBg);
+      this.add(this.armorBarFill);
+    }
+    this.drawArmorBar();
 
     // Clear effect indicators
     this.effectIndicators.clear();
@@ -657,6 +739,7 @@ export class Enemy extends Phaser.GameObjects.Container {
     }
 
     this.drawEffectIndicators();
+    this.drawArmorBar();
   }
 
   /**
@@ -681,6 +764,13 @@ export class Enemy extends Phaser.GameObjects.Container {
           const dotDamage = calculateDotDamage(effect, config, this.maxHp);
           if (dotDamage > 0) {
             this.takeDamageRaw(dotDamage);
+            // Emit DoT damage event for floating numbers
+            EventBus.emit(GameEvents.DAMAGE_DEALT, {
+              x: this.x, y: this.y,
+              damage: dotDamage,
+              multiplier: 1.0,
+              dotType: effect.id,
+            });
             // If enemy died from DoT, stop processing
             if (!this.isAlive) return;
           }
@@ -715,6 +805,7 @@ export class Enemy extends Phaser.GameObjects.Container {
     // Redraw indicators if effects changed
     if (toRemove.length > 0 || toAdd.length > 0) {
       this.drawEffectIndicators();
+      this.drawArmorBar();
     }
   }
 

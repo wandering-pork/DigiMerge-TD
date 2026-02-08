@@ -7,6 +7,7 @@ import { STAGE_NAMES, ATTRIBUTE_NAMES, EvolutionPath } from '@/types';
 import { EventBus, GameEvents } from '@/utils/EventBus';
 import { COLORS, ATTRIBUTE_COLORS_STR, TEXT_STYLES, FONTS } from './UITheme';
 import { drawPanel, drawButton, animateModalIn, animateModalOut, animateButtonHover, animateButtonPress } from './UIHelpers';
+import { canDisplaySprite, getStaticFrame } from '@/utils/SpriteAnimHelper';
 
 /**
  * EvolutionModal is a centered overlay that shows available evolution
@@ -214,8 +215,11 @@ export class EvolutionModal extends Phaser.GameObjects.Container {
 
       // Sprite
       const evoSpriteKey = stats.spriteKey ?? evo.resultId;
-      if (this.scene.textures.exists(evoSpriteKey)) {
-        const sprite = this.scene.add.image(px + 55, optionY + 34, evoSpriteKey);
+      if (canDisplaySprite(this.scene, evoSpriteKey)) {
+        const evoStaticFrame = getStaticFrame(evoSpriteKey);
+        const sprite = evoStaticFrame
+          ? this.scene.add.image(px + 55, optionY + 34, evoStaticFrame.atlas, evoStaticFrame.frame)
+          : this.scene.add.image(px + 55, optionY + 34, evoSpriteKey);
         sprite.setScale(3);
         optionCont.add(sprite);
       }

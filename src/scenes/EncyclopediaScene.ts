@@ -6,6 +6,7 @@ import { GAME_WIDTH, GAME_HEIGHT } from '@/config/Constants';
 import { COLORS, TEXT_STYLES, FONTS, ANIM } from '@/ui/UITheme';
 import { drawPanel, drawButton, drawDigitalGrid, drawSeparator, animateButtonHover, animateButtonPress, animateModalIn, animateModalOut, createDigitalParticles } from '@/ui/UIHelpers';
 import { ATTRIBUTE_COLORS_STR } from '@/ui/UITheme';
+import { canDisplaySprite, getStaticFrame } from '@/utils/SpriteAnimHelper';
 
 type FilterMode = 'all' | 'towers' | 'enemies';
 type StageFilter = 'all' | Stage;
@@ -70,11 +71,15 @@ export class EncyclopediaScene extends Phaser.Scene {
   private stageBtnTexts: Phaser.GameObjects.Text[] = [];
   private stageBtnBgs: Phaser.GameObjects.Graphics[] = [];
 
+  // Caller scene tracking (for adaptive back navigation)
+  private callerScene: string = 'MainMenuScene';
+
   constructor() {
     super({ key: 'EncyclopediaScene' });
   }
 
-  create() {
+  create(data?: { from?: string }) {
+    this.callerScene = data?.from ?? 'MainMenuScene';
     this.cameras.main.setBackgroundColor('#0f0a14');
 
     // Build entry list
@@ -124,7 +129,7 @@ export class EncyclopediaScene extends Phaser.Scene {
         if (this.detailVisible) {
           this.hideDetail();
         } else {
-          this.scene.start('MainMenuScene');
+          this.goBack();
         }
       });
     }
@@ -223,8 +228,11 @@ export class EncyclopediaScene extends Phaser.Scene {
       const spriteKey = entry.isTower
         ? ((entry.stats as DigimonStats).spriteKey ?? entry.id)
         : entry.id.replace(/^(enemy_|boss_)/, '');
-      if (this.textures.exists(spriteKey)) {
-        const sprite = this.add.image(cx, cy - 16, spriteKey);
+      if (canDisplaySprite(this, spriteKey)) {
+        const gridStaticFrame = getStaticFrame(spriteKey);
+        const sprite = gridStaticFrame
+          ? this.add.image(cx, cy - 16, gridStaticFrame.atlas, gridStaticFrame.frame)
+          : this.add.image(cx, cy - 16, spriteKey);
         sprite.setScale(3);
         this.gridContainer.add(sprite);
       } else {
@@ -350,8 +358,11 @@ export class EncyclopediaScene extends Phaser.Scene {
     const spriteKey = entry.isTower
       ? ((entry.stats as DigimonStats).spriteKey ?? entry.id)
       : entry.id.replace(/^(enemy_|boss_)/, '');
-    if (this.textures.exists(spriteKey)) {
-      const sprite = this.add.image(cardX + 70, cardY + 80, spriteKey).setScale(4);
+    if (canDisplaySprite(this, spriteKey)) {
+      const detailStaticFrame = getStaticFrame(spriteKey);
+      const sprite = detailStaticFrame
+        ? this.add.image(cardX + 70, cardY + 80, detailStaticFrame.atlas, detailStaticFrame.frame).setScale(4)
+        : this.add.image(cardX + 70, cardY + 80, spriteKey).setScale(4);
       panelCont.add(sprite);
     }
 
@@ -506,8 +517,11 @@ export class EncyclopediaScene extends Phaser.Scene {
             // Clickable sprite + name group
             const evoContainer = this.add.container(prevX + 20, statsY + 22);
 
-            if (this.textures.exists(prevSpriteKey)) {
-              const evoSprite = this.add.image(0, 0, prevSpriteKey).setScale(2);
+            if (canDisplaySprite(this, prevSpriteKey)) {
+              const prevStaticFrame = getStaticFrame(prevSpriteKey);
+              const evoSprite = prevStaticFrame
+                ? this.add.image(0, 0, prevStaticFrame.atlas, prevStaticFrame.frame).setScale(2)
+                : this.add.image(0, 0, prevSpriteKey).setScale(2);
               evoContainer.add(evoSprite);
             } else {
               const placeholder = this.add.text(0, 0, '?', {
@@ -567,8 +581,11 @@ export class EncyclopediaScene extends Phaser.Scene {
             // Clickable sprite + name group
             const evoContainer = this.add.container(nextX + 20, statsY + 22);
 
-            if (this.textures.exists(nextSpriteKey)) {
-              const evoSprite = this.add.image(0, 0, nextSpriteKey).setScale(2);
+            if (canDisplaySprite(this, nextSpriteKey)) {
+              const nextStaticFrame = getStaticFrame(nextSpriteKey);
+              const evoSprite = nextStaticFrame
+                ? this.add.image(0, 0, nextStaticFrame.atlas, nextStaticFrame.frame).setScale(2)
+                : this.add.image(0, 0, nextSpriteKey).setScale(2);
               evoContainer.add(evoSprite);
             } else {
               const placeholder = this.add.text(0, 0, '?', {
@@ -822,12 +839,21 @@ export class EncyclopediaScene extends Phaser.Scene {
     btn.add(this.add.text(0, 0, '< Back', TEXT_STYLES.BUTTON_SM).setOrigin(0.5));
     btn.setInteractive(new Phaser.Geom.Rectangle(-42, -16, 85, 32), Phaser.Geom.Rectangle.Contains);
     btn.input!.cursor = 'pointer';
-    btn.on('pointerdown', () => this.scene.start('MainMenuScene'));
+    btn.on('pointerdown', () => this.goBack());
     btn.on('pointerover', () => {
       drawButton(bg, 85, 32, COLORS.BG_HOVER, { glowRing: true });
     });
     btn.on('pointerout', () => {
       drawButton(bg, 85, 32, COLORS.BG_PANEL_LIGHT);
     });
+  }
+
+  private goBack(): void {
+    if (this.callerScene === 'GameScene') {
+      this.scene.resume('GameScene');
+      this.scene.stop();
+    } else {
+      this.scene.start('MainMenuScene');
+    }
   }
 }

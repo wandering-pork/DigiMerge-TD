@@ -11,7 +11,7 @@ export interface ProjectileTarget {
   y: number;
   isAlive: boolean;
   lastHitByTowerID?: string;
-  takeDamage(amount: number): void;
+  takeDamage(amount: number, ignoreArmor?: boolean): void;
   applyEffect?(effectType: string, sourceDamage: number): void;
 }
 
@@ -71,6 +71,12 @@ export class Projectile extends Phaser.GameObjects.Container {
 
   /** Attribute multiplier applied to this projectile's damage (for damage number coloring). */
   public attributeMultiplier: number = 1;
+
+  /** When true, this projectile bypasses enemy armor entirely. */
+  public ignoresArmor: boolean = false;
+
+  /** When true, this projectile deals 25% bonus damage (holy effect). */
+  public holyBonus: boolean = false;
 
   /** ID of the tower that fired this projectile (for kill/damage attribution). */
   public sourceTowerID: string = '';
@@ -159,6 +165,8 @@ export class Projectile extends Phaser.GameObjects.Container {
     this.sourceDamage = 0;
     this.attributeMultiplier = 1;
     this.sourceTowerID = '';
+    this.ignoresArmor = false;
+    this.holyBonus = false;
     this.prevX = x;
     this.prevY = y;
     this.trailPositions = [];
@@ -246,13 +254,15 @@ export class Projectile extends Phaser.GameObjects.Container {
         this.target.lastHitByTowerID = this.sourceTowerID;
       }
 
-      this.target.takeDamage(this.damage);
+      const holyMult = this.holyBonus ? 1.25 : 1.0;
+      const finalDamage = this.damage * holyMult;
+      this.target.takeDamage(finalDamage, this.ignoresArmor);
 
       // Emit damage dealt event for floating damage numbers and per-tower tracking
       EventBus.emit(GameEvents.DAMAGE_DEALT, {
         x: this.target.x,
         y: this.target.y,
-        damage: this.damage,
+        damage: finalDamage,
         multiplier: this.attributeMultiplier,
         sourceTowerID: this.sourceTowerID || undefined,
       });

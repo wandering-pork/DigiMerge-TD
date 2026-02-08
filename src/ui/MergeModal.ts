@@ -6,6 +6,7 @@ import { getDPFromMerge } from '@/systems/DPSystem';
 import { EventBus, GameEvents } from '@/utils/EventBus';
 import { COLORS, ATTRIBUTE_COLORS_STR, TEXT_STYLES, FONTS } from './UITheme';
 import { drawPanel, drawButton, drawSeparator, animateModalIn, animateModalOut, animateButtonHover, animateButtonPress } from './UIHelpers';
+import { canDisplaySprite, getStaticFrame } from '@/utils/SpriteAnimHelper';
 
 interface MergeResult {
   survivorLevel: number;
@@ -456,8 +457,13 @@ export class MergeModal extends Phaser.GameObjects.Container {
     dpText: Phaser.GameObjects.Text,
   ): void {
     const spriteKey = tower.stats.spriteKey ?? tower.digimonId;
-    if (this.scene.textures.exists(spriteKey)) {
-      sprite.setTexture(spriteKey);
+    if (canDisplaySprite(this.scene, spriteKey)) {
+      const staticFrame = getStaticFrame(spriteKey);
+      if (staticFrame) {
+        sprite.setTexture(staticFrame.atlas, staticFrame.frame);
+      } else {
+        sprite.setTexture(spriteKey);
+      }
       sprite.setVisible(true);
     } else {
       sprite.setVisible(false);

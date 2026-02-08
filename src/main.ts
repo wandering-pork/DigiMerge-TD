@@ -15,4 +15,40 @@ Phaser.GameObjects.Text.prototype.setStyle = function (style: any) {
 
 const game = new Phaser.Game(gameConfig);
 
+// --- Background tab workaround ---
+// Browsers pause requestAnimationFrame when a tab is hidden.
+// We use a Web Worker with setInterval to keep ticking the game loop
+// in the background. The worker only drives updates while the tab is hidden;
+// when visible, normal RAF takes over.
+const workerBlob = new Blob(
+  [`setInterval(()=>postMessage(0),${1000 / 60})`],
+  { type: 'application/javascript' },
+);
+const worker = new Worker(URL.createObjectURL(workerBlob));
+let lastBgTime = 0;
+
+worker.onmessage = () => {
+  // Only step while the document is hidden (RAF is paused)
+  if (!document.hidden) return;
+
+  const now = performance.now();
+  if (lastBgTime === 0) lastBgTime = now;
+  const delta = now - lastBgTime;
+  lastBgTime = now;
+
+  // Drive Phaser's TimeStep manually
+  if (delta > 0 && delta < 500) {
+    game.loop.step(now);
+  }
+};
+
+// Reset background timer when visibility changes
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    lastBgTime = performance.now();
+  } else {
+    lastBgTime = 0;
+  }
+});
+
 export default game;

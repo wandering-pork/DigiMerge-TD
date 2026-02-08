@@ -34,6 +34,7 @@ import { drawPanel, drawButton, drawSeparator, drawDigitalGrid, animateButtonHov
 import { BossAbilityAction, getCooldownProgress } from '@/systems/BossAbilitySystem';
 import { Projectile } from '@/entities/Projectile';
 import { TutorialOverlay } from '@/ui/TutorialOverlay';
+import { canDisplaySprite, getStaticFrame } from '@/utils/SpriteAnimHelper';
 
 export class GameScene extends Phaser.Scene {
   // Graphics
@@ -284,6 +285,7 @@ export class GameScene extends Phaser.Scene {
     EventBus.on(GameEvents.DAMAGE_DEALT, this.onDamageDealt, this);
     EventBus.on(GameEvents.TOWER_EVOLVED, this.onTowerEvolved, this);
     EventBus.on(GameEvents.TOWER_SOLD, this.onTowerSold, this);
+    EventBus.on('tower:healed', this.onTowerHeal, this);
 
     // Setup ghost preview sprite (hidden by default)
     this.setupGhostPreview();
@@ -364,6 +366,7 @@ export class GameScene extends Phaser.Scene {
     EventBus.off(GameEvents.DAMAGE_DEALT, this.onDamageDealt, this);
     EventBus.off(GameEvents.TOWER_EVOLVED, this.onTowerEvolved, this);
     EventBus.off(GameEvents.TOWER_SOLD, this.onTowerSold, this);
+    EventBus.off('tower:healed', this.onTowerHeal, this);
 
     // Clean up ghost preview
     if (this.ghostSprite) {
@@ -685,8 +688,13 @@ export class GameScene extends Phaser.Scene {
 
       // Use the first selected starter as the preview texture
       const starters: string[] = this.registry.get('selectedStarters') || [];
-      if (starters.length > 0 && this.textures.exists(starters[0])) {
-        this.ghostSprite.setTexture(starters[0]);
+      if (starters.length > 0 && canDisplaySprite(this, starters[0])) {
+        const ghostFrame = getStaticFrame(starters[0]);
+        if (ghostFrame) {
+          this.ghostSprite.setTexture(ghostFrame.atlas, ghostFrame.frame);
+        } else {
+          this.ghostSprite.setTexture(starters[0]);
+        }
         this.ghostSprite.setScale(1.75);
         this.ghostSprite.setPosition(cellX, cellY - 4);
         this.ghostSprite.setVisible(true);
@@ -1572,8 +1580,40 @@ export class GameScene extends Phaser.Scene {
       this.scene.launch('SettingsScene');
     });
 
+    // Encyclopedia button (full width, below Pause/Settings row)
+    const encBtnW = 200;
+    const encBtnH = 28;
+    const encContainer = this.add.container(btnCenterX, hudY + 254);
+    const encBtnBg = this.add.graphics();
+    drawButton(encBtnBg, encBtnW, encBtnH, COLORS.BG_PANEL_LIGHT);
+    encContainer.add(encBtnBg);
+
+    const encBtnText = this.add.text(0, 0, '\ud83d\udcd6 Encyclopedia', {
+      ...TEXT_STYLES.BUTTON_SM, fontSize: '12px',
+    }).setOrigin(0.5);
+    encContainer.add(encBtnText);
+
+    const encHitArea = new Phaser.Geom.Rectangle(-encBtnW / 2, -encBtnH / 2, encBtnW, encBtnH);
+    encContainer.setInteractive(encHitArea, Phaser.Geom.Rectangle.Contains);
+    encContainer.input!.cursor = 'pointer';
+    encContainer.setDepth(10);
+
+    encContainer.on('pointerover', () => {
+      drawButton(encBtnBg, encBtnW, encBtnH, COLORS.BG_HOVER, { glowRing: true });
+      animateButtonHover(this, encContainer, true);
+    });
+    encContainer.on('pointerout', () => {
+      drawButton(encBtnBg, encBtnW, encBtnH, COLORS.BG_PANEL_LIGHT);
+      animateButtonHover(this, encContainer, false);
+    });
+    encContainer.on('pointerdown', () => {
+      animateButtonPress(this, encContainer);
+      this.scene.launch('EncyclopediaScene', { from: 'GameScene' });
+      this.scene.pause();
+    });
+
     // Speed control buttons (1x / 2x / 3x)
-    this.add.text(leftColX, hudY + 250, 'SPEED', {
+    this.add.text(leftColX, hudY + 286, 'SPEED', {
       ...TEXT_STYLES.HUD_LABEL, fontSize: '10px',
     }).setDepth(10);
 
@@ -1581,7 +1621,7 @@ export class GameScene extends Phaser.Scene {
       const sBtnW = 55;
       const sBtnH = 26;
       const sBtnX = leftColX + 12 + i * 68 + sBtnW / 2;
-      const sBtnY = hudY + 276;
+      const sBtnY = hudY + 312;
 
       const sContainer = this.add.container(sBtnX, sBtnY);
       const sBg = this.add.graphics();
@@ -1641,7 +1681,7 @@ export class GameScene extends Phaser.Scene {
     }
 
     // Wave preview section
-    const previewY = hudY + 305;
+    const previewY = hudY + 341;
     const waveSepGfx = this.add.graphics().setDepth(10);
     drawSeparator(waveSepGfx, leftColX - 5, previewY, leftColX + contentW - 5);
 
@@ -1718,8 +1758,11 @@ export class GameScene extends Phaser.Scene {
       const rowY = previewBaseY + yOffset;
 
       // Small sprite
-      if (this.textures.exists(spriteKey)) {
-        const sprite = this.add.image(previewX + 12, rowY + 8, spriteKey);
+      if (canDisplaySprite(this, spriteKey)) {
+        const waveStaticFrame = getStaticFrame(spriteKey);
+        const sprite = waveStaticFrame
+          ? this.add.image(previewX + 12, rowY + 8, waveStaticFrame.atlas, waveStaticFrame.frame)
+          : this.add.image(previewX + 12, rowY + 8, spriteKey);
         sprite.setScale(1.5).setDepth(10);
         this.wavePreviewSprites.push(sprite);
       }
@@ -1776,8 +1819,11 @@ export class GameScene extends Phaser.Scene {
         const rowY = previewBaseY + yOffset;
         const bossSpriteKey = bossStats.spriteKey ?? waveConfig.boss.replace(/^boss_/, '');
 
-        if (this.textures.exists(bossSpriteKey)) {
-          const sprite = this.add.image(previewX + 12, rowY + 8, bossSpriteKey);
+        if (canDisplaySprite(this, bossSpriteKey)) {
+          const bossStaticFrame = getStaticFrame(bossSpriteKey);
+          const sprite = bossStaticFrame
+            ? this.add.image(previewX + 12, rowY + 8, bossStaticFrame.atlas, bossStaticFrame.frame)
+            : this.add.image(previewX + 12, rowY + 8, bossSpriteKey);
           sprite.setScale(1.5).setDepth(10);
           this.wavePreviewSprites.push(sprite);
         }
@@ -1893,8 +1939,11 @@ export class GameScene extends Phaser.Scene {
     // Sprite (2x scale)
     const spriteKey = enemy.spriteKey ?? enemy.id.replace(/^(enemy_|boss_)/, '');
     let contentStartX = 12;
-    if (this.textures.exists(spriteKey)) {
-      const sprite = this.add.image(24, 24, spriteKey).setScale(2.5);
+    if (canDisplaySprite(this, spriteKey)) {
+      const tipStaticFrame = getStaticFrame(spriteKey);
+      const sprite = tipStaticFrame
+        ? this.add.image(24, 24, tipStaticFrame.atlas, tipStaticFrame.frame).setScale(2.5)
+        : this.add.image(24, 24, spriteKey).setScale(2.5);
       container.add(sprite);
       contentStartX = 48;
     }
@@ -2281,7 +2330,7 @@ export class GameScene extends Phaser.Scene {
   // Damage Numbers
   // ============================================================
 
-  private onDamageDealt(data: { x: number; y: number; damage: number; multiplier: number; sourceTowerID?: string }): void {
+  private onDamageDealt(data: { x: number; y: number; damage: number; multiplier: number; sourceTowerID?: string; dotType?: string }): void {
     // Track per-tower damage
     if (data.sourceTowerID) {
       const tower = (this.towerContainer.list as Tower[]).find(t => t.towerID === data.sourceTowerID);
@@ -2294,10 +2343,10 @@ export class GameScene extends Phaser.Scene {
 
     const worldX = GRID_OFFSET_X + data.x;
     const worldY = GRID_OFFSET_Y + data.y;
-    this.showDamageNumber(worldX, worldY, data.damage, data.multiplier);
+    this.showDamageNumber(worldX, worldY, data.damage, data.multiplier, data.dotType);
   }
 
-  private showDamageNumber(x: number, y: number, damage: number, multiplier: number): void {
+  private showDamageNumber(x: number, y: number, damage: number, multiplier: number, dotType?: string): void {
     // Random jitter for visual variety when multiple hits land at once
     const jitterX = (Math.random() - 0.5) * 20; // +/-10px
     const jitterY = (Math.random() - 0.5) * 20;
@@ -2305,9 +2354,13 @@ export class GameScene extends Phaser.Scene {
     const displayDamage = Math.round(damage);
     if (displayDamage <= 0) return;
 
-    // Color based on attribute effectiveness
+    // Color based on attribute effectiveness (DoT colors override)
     let color = '#ffffff'; // neutral
-    if (multiplier > 1.0) {
+    if (dotType === 'burn') {
+      color = '#ff8800'; // orange
+    } else if (dotType === 'poison') {
+      color = '#aa00ff'; // purple
+    } else if (multiplier > 1.0) {
       color = '#44ff44'; // super effective (green)
     } else if (multiplier < 1.0) {
       color = '#ff6666'; // not effective (red)
@@ -2336,6 +2389,34 @@ export class GameScene extends Phaser.Scene {
       onComplete: () => {
         dmgText.destroy();
       },
+    });
+  }
+
+  private onTowerHeal(data: { amount: number }): void {
+    this.lives = Math.min(this.lives + data.amount, STARTING_LIVES);
+    this.livesText.setText(`${this.lives}`);
+    EventBus.emit(GameEvents.LIVES_CHANGED, this.lives);
+
+    // Floating "+1 Life" text at top of grid
+    const floatX = GRID_OFFSET_X + (GRID.COLUMNS * GRID.CELL_SIZE) / 2;
+    const floatY = GRID_OFFSET_Y + 20;
+    const healText = this.add.text(floatX, floatY, `+${data.amount} Life`, {
+      fontFamily: FONTS.MONO,
+      fontSize: '16px',
+      color: '#44ff88',
+      fontStyle: 'bold',
+      stroke: '#000000',
+      strokeThickness: 3,
+      resolution: 2,
+    }).setOrigin(0.5).setDepth(50);
+
+    this.tweens.add({
+      targets: healText,
+      y: healText.y - 40,
+      alpha: { from: 1, to: 0 },
+      duration: 800,
+      ease: 'Cubic.easeOut',
+      onComplete: () => healText.destroy(),
     });
   }
 

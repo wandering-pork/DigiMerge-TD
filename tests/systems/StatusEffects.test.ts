@@ -51,10 +51,30 @@ describe('getBaseEffectType', () => {
 
   it('returns null for unknown effect types', () => {
     expect(getBaseEffectType('crit')).toBeNull();
-    expect(getBaseEffectType('holy')).toBeNull();
     expect(getBaseEffectType('lifesteal')).toBeNull();
     expect(getBaseEffectType('chain')).toBeNull();
     expect(getBaseEffectType('multiHit')).toBeNull();
+  });
+
+  it('resolves armor_break underscore variants to camelCase', () => {
+    expect(getBaseEffectType('armor_break')).toBe('armorBreak');
+    expect(getBaseEffectType('armor_break_stun')).toBe('armorBreak');
+    expect(getBaseEffectType('pierce_armor_break')).toBe('armorBreak');
+    // Note: 'burn_aoe_armor_break' returns 'burn' because the first-underscore prefix
+    // 'burn' already matches STATUS_EFFECT_CONFIGS before reaching the armor_break check
+    expect(getBaseEffectType('burn_aoe_armor_break')).toBe('burn');
+  });
+
+  it('resolves armor_pierce to armorPierce', () => {
+    expect(getBaseEffectType('armor_pierce')).toBe('armorPierce');
+  });
+
+  it('resolves holy to holy', () => {
+    expect(getBaseEffectType('holy')).toBe('holy');
+  });
+
+  it('resolves heal to heal', () => {
+    expect(getBaseEffectType('heal')).toBe('heal');
   });
 });
 

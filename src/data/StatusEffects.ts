@@ -104,6 +104,12 @@ export function getBaseEffectType(effectType: string): string | null {
   if (STATUS_EFFECT_CONFIGS[base]) {
     return base;
   }
+  // Handle multi-word effect types (underscore → camelCase mapping)
+  if (effectType.includes('armor_break')) return 'armorBreak';
+  // Non-status-effect types (handled as projectile properties, not debuffs)
+  if (effectType.includes('armor_pierce')) return 'armorPierce';
+  if (effectType.includes('holy')) return 'holy';
+  if (effectType.includes('heal')) return 'heal';
   return null;
 }
 

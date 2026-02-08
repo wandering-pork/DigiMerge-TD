@@ -6,6 +6,7 @@ import { Projectile } from '@/entities/Projectile';
 import { findTarget, MockTarget } from '@/systems/TargetingSystem';
 import { getAttributeMultiplier } from '@/systems/AttributeSystem';
 import { getBaseEffectType } from '@/data/StatusEffects';
+import { EventBus } from '@/utils/EventBus';
 
 /**
  * CombatManager handles tower targeting and attack execution each frame.
@@ -171,7 +172,13 @@ export class CombatManager {
           const effectChance = tower.stats.effectChance ?? 0;
           if (effectType && effectChance > 0 && Math.random() < effectChance) {
             const baseEffect = getBaseEffectType(effectType);
-            if (baseEffect) {
+            if (baseEffect === 'armorPierce') {
+              projectile.ignoresArmor = true;
+            } else if (baseEffect === 'holy') {
+              projectile.holyBonus = true;
+            } else if (baseEffect === 'heal') {
+              EventBus.emit('tower:healed', { amount: 1 });
+            } else if (baseEffect) {
               projectile.effectType = effectType;
               projectile.sourceDamage = baseDamage;
             }
@@ -182,7 +189,16 @@ export class CombatManager {
             for (const bonus of tower.bonusEffects) {
               if (Math.random() < bonus.effectChance) {
                 const baseEffect = getBaseEffectType(bonus.effectType);
-                if (baseEffect) {
+                if (baseEffect === 'armorPierce') {
+                  projectile.ignoresArmor = true;
+                  break;
+                } else if (baseEffect === 'holy') {
+                  projectile.holyBonus = true;
+                  break;
+                } else if (baseEffect === 'heal') {
+                  EventBus.emit('tower:healed', { amount: 1 });
+                  break;
+                } else if (baseEffect) {
                   // If no primary effect was applied, use the bonus as the projectile's effect
                   if (!projectile.effectType) {
                     projectile.effectType = bonus.effectType;

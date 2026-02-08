@@ -1,6 +1,8 @@
 import Phaser from 'phaser';
 import { COLORS, TEXT_STYLES, FONTS } from '@/ui/UITheme';
 import { drawDigitalGrid } from '@/ui/UIHelpers';
+import { ATLAS_KEYS } from '@/data/SpriteAtlasData';
+import { hasAtlasEntry } from '@/utils/SpriteAnimHelper';
 
 export class PreloadScene extends Phaser.Scene {
   constructor() {
@@ -304,8 +306,29 @@ export class PreloadScene extends Phaser.Scene {
       apocalymon: 'Apocalymon.png',
     };
 
+    // Load texture atlases (5 per-stage atlases replace ~155 individual sprite loads)
+    for (const atlasKey of ATLAS_KEYS) {
+      this.load.atlas(
+        atlasKey,
+        `assets/sprites/atlases/${atlasKey}.png`,
+        `assets/sprites/atlases/${atlasKey}.json`,
+      );
+    }
+
+    // Starters always load individually (some atlas frames render incorrectly)
+    const starterKeys = new Set([
+      'koromon', 'tsunomon', 'tokomon', 'gigimon', 'tanemon',
+      'demiveemon', 'pagumon', 'viximon', 'nyaromon', 'gummymon',
+      'chocomon', 'pyocomon', 'mochimon', 'pukamon', 'dorimon',
+      'sunmon', 'moonmon', 'kyokyomon', 'puroromon', 'budmon', 'caprimon',
+    ]);
+
+    // Load only sprites NOT covered by atlases as individual images
+    // (starters are always loaded individually for reliable card display)
     for (const [key, filename] of Object.entries(sprites)) {
-      this.load.image(key, `${spritePath}/${filename}`);
+      if (!hasAtlasEntry(key) || starterKeys.has(key)) {
+        this.load.image(key, `${spritePath}/${filename}`);
+      }
     }
 
     // -- Load SFX --

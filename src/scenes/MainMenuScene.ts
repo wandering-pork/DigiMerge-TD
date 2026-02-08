@@ -35,13 +35,67 @@ export class MainMenuScene extends Phaser.Scene {
     // Decorative corner accents
     this.drawCornerAccents(width, height);
 
+    // --- Collect button configs first to compute layout ---
+    const buttonConfigs: { label: string; normalColor: number; hoverColor: number; onClick: () => void }[] = [];
+
+    if (SaveManager.hasSave()) {
+      const save = SaveManager.load();
+      if (save) {
+        buttonConfigs.push({
+          label: `Continue (Wave ${save.gameState.currentWave})`,
+          normalColor: COLORS.SUCCESS, hoverColor: COLORS.SUCCESS_HOVER,
+          onClick: () => { this.registry.set('loadSave', true); this.scene.start('GameScene'); },
+        });
+      }
+    }
+
+    buttonConfigs.push({
+      label: 'New Game',
+      normalColor: COLORS.PRIMARY, hoverColor: COLORS.PRIMARY_HOVER,
+      onClick: () => { this.registry.remove('loadSave'); this.scene.start('StarterSelectScene'); },
+    });
+
+    buttonConfigs.push({
+      label: 'Encyclopedia',
+      normalColor: COLORS.BG_PANEL_LIGHT, hoverColor: COLORS.BG_HOVER,
+      onClick: () => { this.scene.start('EncyclopediaScene'); },
+    });
+
+    if (HighScoreManager.hasHighScores()) {
+      buttonConfigs.push({
+        label: 'High Scores',
+        normalColor: COLORS.BG_PANEL_LIGHT, hoverColor: COLORS.BG_HOVER,
+        onClick: () => { this.scene.start('HighScoresScene'); },
+      });
+    }
+
+    buttonConfigs.push({
+      label: 'Credits',
+      normalColor: COLORS.BG_PANEL_LIGHT, hoverColor: COLORS.BG_HOVER,
+      onClick: () => { this.scene.start('CreditsScene'); },
+    });
+
+    // --- Dynamic vertical layout ---
+    const btnH = 46;
+    const btnW = 260;
+    const btnGap = 12;
+    const totalBtnHeight = buttonConfigs.length * btnH + (buttonConfigs.length - 1) * btnGap;
+    const titleBlockH = 80; // title + subtitle + separator
+    const versionH = 30;
+    const padding = 40; // top/bottom padding
+    // Distribute: [padding] [titleBlock] [gap] [buttons] [gap] [version] [padding]
+    const availableH = height - padding * 2 - titleBlockH - versionH;
+    const gapBetween = (availableH - totalBtnHeight) / 2;
+    const titleY = padding + titleBlockH / 2 - 10;
+    const btnStartY = padding + titleBlockH + gapBetween + btnH / 2;
+
     // Title text with glow layer underneath
-    const titleGlow = this.add.text(width / 2, height / 3, 'DigiMerge TD', {
+    const titleGlow = this.add.text(width / 2, titleY, 'DigiMerge TD', {
       ...TEXT_STYLES.SCENE_TITLE,
       fontSize: '52px',
     }).setOrigin(0.5).setAlpha(0.15);
 
-    const title = this.add.text(width / 2, height / 3, 'DigiMerge TD', {
+    const title = this.add.text(width / 2, titleY, 'DigiMerge TD', {
       ...TEXT_STYLES.SCENE_TITLE,
       fontSize: '52px',
     }).setOrigin(0.5);
@@ -69,7 +123,7 @@ export class MainMenuScene extends Phaser.Scene {
     });
 
     // Subtitle with decorative lines
-    const subtitleY = height / 3 + 55;
+    const subtitleY = titleY + 55;
     this.add.text(width / 2, subtitleY, 'A Digimon Tower Defense Merge Game', {
       ...TEXT_STYLES.SCENE_SUBTITLE,
       fontSize: '16px',
@@ -85,72 +139,15 @@ export class MainMenuScene extends Phaser.Scene {
     sepGfx.fillCircle(width / 2 + sepW / 2, subtitleY + 22, 2);
     sepGfx.fillCircle(width / 2, subtitleY + 22, 3);
 
-    // Build buttons with staggered entrance
-    let btnY = height / 2 + 30;
+    // Build buttons with dynamic positioning
     const buttons: Phaser.GameObjects.Container[] = [];
-
-    // Continue button (only shown if save exists)
-    if (SaveManager.hasSave()) {
-      const save = SaveManager.load();
-      if (save) {
-        buttons.push(this.createMenuButton(
-          width / 2, btnY, 260, 50,
-          `Continue (Wave ${save.gameState.currentWave})`,
-          COLORS.SUCCESS, COLORS.SUCCESS_HOVER,
-          () => {
-            this.registry.set('loadSave', true);
-            this.scene.start('GameScene');
-          },
-        ));
-        btnY += 68;
-      }
-    }
-
-    // New Game button
-    buttons.push(this.createMenuButton(
-      width / 2, btnY, 260, 50,
-      'New Game',
-      COLORS.PRIMARY, COLORS.PRIMARY_HOVER,
-      () => {
-        this.registry.remove('loadSave');
-        this.scene.start('StarterSelectScene');
-      },
-    ));
-    btnY += 68;
-
-    // Encyclopedia button
-    buttons.push(this.createMenuButton(
-      width / 2, btnY, 260, 50,
-      'Encyclopedia',
-      COLORS.BG_PANEL_LIGHT, COLORS.BG_HOVER,
-      () => {
-        this.scene.start('EncyclopediaScene');
-      },
-    ));
-    btnY += 68;
-
-    // High Scores button (only shown if high scores exist)
-    if (HighScoreManager.hasHighScores()) {
+    buttonConfigs.forEach((cfg, i) => {
+      const y = btnStartY + i * (btnH + btnGap);
       buttons.push(this.createMenuButton(
-        width / 2, btnY, 260, 50,
-        'High Scores',
-        COLORS.BG_PANEL_LIGHT, COLORS.BG_HOVER,
-        () => {
-          this.scene.start('HighScoresScene');
-        },
+        width / 2, y, btnW, btnH,
+        cfg.label, cfg.normalColor, cfg.hoverColor, cfg.onClick,
       ));
-      btnY += 68;
-    }
-
-    // Credits button
-    buttons.push(this.createMenuButton(
-      width / 2, btnY, 260, 50,
-      'Credits',
-      COLORS.BG_PANEL_LIGHT, COLORS.BG_HOVER,
-      () => {
-        this.scene.start('CreditsScene');
-      },
-    ));
+    });
 
     // Staggered button entrance animation
     animateStaggeredEntrance(this, buttons, 'up');

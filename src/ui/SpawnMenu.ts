@@ -7,6 +7,7 @@ import { EventBus, GameEvents } from '@/utils/EventBus';
 import { Tower } from '@/entities/Tower';
 import { COLORS, ATTRIBUTE_COLORS_STR, TEXT_STYLES, FONTS } from './UITheme';
 import { drawPanel, drawButton, drawSeparator, animateSlideIn, animateSlideOut, animateButtonHover, animateButtonPress } from './UIHelpers';
+import { canDisplaySprite, getStaticFrame } from '@/utils/SpriteAnimHelper';
 
 /**
  * Given a list of selected starter IDs (In-Training stage), return all
@@ -472,8 +473,11 @@ export class SpawnMenu extends Phaser.GameObjects.Container {
         fontStyle: 'bold',
       }).setOrigin(0.5);
       itemContainer.add(symbolText);
-    } else if (spriteKey && this.scene.textures.exists(spriteKey)) {
-      const sprite = this.scene.add.image(24, 24, spriteKey);
+    } else if (spriteKey && canDisplaySprite(this.scene, spriteKey)) {
+      const spawnStaticFrame = getStaticFrame(spriteKey);
+      const sprite = spawnStaticFrame
+        ? this.scene.add.image(24, 24, spawnStaticFrame.atlas, spawnStaticFrame.frame)
+        : this.scene.add.image(24, 24, spriteKey);
       sprite.setScale(2.5);
       itemContainer.add(sprite);
     }

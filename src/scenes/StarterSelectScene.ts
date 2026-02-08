@@ -69,18 +69,23 @@ export class StarterSelectScene extends Phaser.Scene {
       fontSize: '40px',
     }).setOrigin(0.5);
 
-    // Selection count with visual indicator
-    this.selectionCountText = this.add.text(width / 2, 80, 'Choose Your Starter Digimon', {
+    // Selection indicator
+    this.selectionCountText = this.add.text(width / 2, 78, 'Tap a Digimon to select it', {
       ...TEXT_STYLES.SCENE_SUBTITLE,
-      fontSize: '15px',
+      fontSize: '14px',
     }).setOrigin(0.5);
 
     // Starter grid: 7 columns x 3 rows (landscape-optimized)
     const cols = 7;
-    const cellWidth = 155;
-    const cellHeight = 130;
-    const gridStartX = (width - cols * cellWidth) / 2 + cellWidth / 2;
-    const gridStartY = 170;
+    const cardW = 110;
+    const cardH = 130;
+    const gapX = 16;
+    const gapY = 14;
+    const totalGridW = cols * cardW + (cols - 1) * gapX;
+    const gridStartX = (width - totalGridW) / 2 + cardW / 2;
+    const gridStartY = 160;
+    const cellWidth = cardW + gapX;
+    const cellHeight = cardH + gapY;
 
     this.starters.forEach((starter, index) => {
       const col = index % cols;
@@ -179,35 +184,34 @@ export class StarterSelectScene extends Phaser.Scene {
 
   private createStarterCard(x: number, y: number, starter: StarterInfo): Phaser.GameObjects.Container {
     const container = this.add.container(x, y);
-    const cardW = 100;
-    const cardH = 125;
+    const cw = 110;
+    const ch = 130;
 
     // Card background with attribute-colored accent
     const bg = this.add.graphics();
-    this.drawCardBg(bg, cardW, cardH, false);
+    this.drawCardBg(bg, cw, ch, false);
     container.add(bg);
     this.cardBgs.set(starter.key, bg);
 
     // Highlight border (hidden initially)
     const highlight = this.add.graphics();
     highlight.lineStyle(2.5, COLORS.CYAN, 0.9);
-    highlight.strokeRoundedRect(-cardW / 2, -cardH / 2, cardW, cardH, 10);
-    // Selection glow
+    highlight.strokeRoundedRect(-cw / 2, -ch / 2, cw, ch, 10);
     highlight.fillStyle(COLORS.CYAN, 0.04);
-    highlight.fillRoundedRect(-cardW / 2 - 3, -cardH / 2 - 3, cardW + 6, cardH + 6, 12);
+    highlight.fillRoundedRect(-cw / 2 - 3, -ch / 2 - 3, cw + 6, ch + 6, 12);
     highlight.setVisible(false);
     container.add(highlight);
     this.cardHighlights.set(starter.key, highlight);
 
-    // Sprite (Kyokyomon sprite is very faint/tiny — boost its scale)
-    const sprite = this.add.image(0, -18, starter.key);
-    sprite.setScale(starter.key === 'kyokyomon' ? 3.5 : 2.5);
+    // Sprite (use individual texture for consistent card display)
+    const sprite = this.add.image(0, -16, starter.key);
+    sprite.setScale(2.8);
     container.add(sprite);
 
     // Name label
-    const nameText = this.add.text(0, 38, starter.name, {
+    const nameText = this.add.text(0, 40, starter.name, {
       fontFamily: FONTS.BODY,
-      fontSize: '12px',
+      fontSize: '13px',
       color: '#ccccdd',
     }).setOrigin(0.5);
     container.add(nameText);
@@ -217,13 +221,13 @@ export class StarterSelectScene extends Phaser.Scene {
     if (stats) {
       const attrColor = [COLORS.VACCINE, COLORS.DATA, COLORS.VIRUS, COLORS.FREE][stats.attribute];
       const attrBar = this.add.graphics();
-      attrBar.fillStyle(attrColor, 0.6);
-      attrBar.fillRoundedRect(-20, 50, 40, 3, 1);
+      attrBar.fillStyle(attrColor, 0.7);
+      attrBar.fillRoundedRect(-22, 53, 44, 3, 1);
       container.add(attrBar);
     }
 
     // Make the container interactive
-    const hitArea = new Phaser.Geom.Rectangle(-cardW / 2, -cardH / 2, cardW, cardH);
+    const hitArea = new Phaser.Geom.Rectangle(-cw / 2, -ch / 2, cw, ch);
     container.setInteractive(hitArea, Phaser.Geom.Rectangle.Contains);
     container.input!.cursor = 'pointer';
 
@@ -233,7 +237,7 @@ export class StarterSelectScene extends Phaser.Scene {
 
     container.on('pointerover', () => {
       if (!this.selected.has(starter.key)) {
-        this.drawCardBg(bg, cardW, cardH, false, true);
+        this.drawCardBg(bg, cw, ch, false, true);
         this.tweens.killTweensOf(container);
         this.tweens.add({
           targets: container,
@@ -245,7 +249,7 @@ export class StarterSelectScene extends Phaser.Scene {
 
     container.on('pointerout', () => {
       if (!this.selected.has(starter.key)) {
-        this.drawCardBg(bg, cardW, cardH, false);
+        this.drawCardBg(bg, cw, ch, false);
         this.tweens.killTweensOf(container);
         this.tweens.add({
           targets: container,
@@ -285,12 +289,14 @@ export class StarterSelectScene extends Phaser.Scene {
     const container = this.starterContainers.get(key)!;
     const highlight = this.cardHighlights.get(key)!;
     const bg = this.cardBgs.get(key)!;
+    const cw = 110;
+    const ch = 130;
 
     if (this.selected.has(key)) {
       // Deselect
       this.selected.delete(key);
       highlight.setVisible(false);
-      this.drawCardBg(bg, 100, 125, false);
+      this.drawCardBg(bg, cw, ch, false);
       this.tweens.killTweensOf(container);
       container.setScale(1);
     } else {
@@ -300,7 +306,7 @@ export class StarterSelectScene extends Phaser.Scene {
         const prevHighlight = this.cardHighlights.get(prevKey)!;
         const prevBg = this.cardBgs.get(prevKey)!;
         prevHighlight.setVisible(false);
-        this.drawCardBg(prevBg, 100, 125, false);
+        this.drawCardBg(prevBg, cw, ch, false);
         this.tweens.killTweensOf(prevContainer);
         prevContainer.setScale(1);
       }
@@ -309,7 +315,7 @@ export class StarterSelectScene extends Phaser.Scene {
       // Select the new one
       this.selected.add(key);
       highlight.setVisible(true);
-      this.drawCardBg(bg, 100, 125, true);
+      this.drawCardBg(bg, cw, ch, true);
 
       // Selection pop animation
       this.tweens.killTweensOf(container);
@@ -339,7 +345,7 @@ export class StarterSelectScene extends Phaser.Scene {
   private updateStartButton(): void {
     const count = this.selected.size;
     if (count === 0) {
-      this.selectionCountText.setText('Choose Your Starter Digimon');
+      this.selectionCountText.setText('Tap a Digimon to select it');
     } else {
       // Show the selected starter's name
       const selectedKey = Array.from(this.selected)[0];

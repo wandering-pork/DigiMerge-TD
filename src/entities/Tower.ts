@@ -3,6 +3,7 @@ import { DigimonStats, Stage, Attribute, TargetPriority, TowerSaveData, BonusEff
 import { DIGIMON_DATABASE } from '@/data/DigimonDatabase';
 import { STAGE_CONFIG, GRID } from '@/config/Constants';
 import { gridToPixelCenter } from '@/utils/GridUtils';
+import { getAtlasEntry, ensureIdleAnim } from '@/utils/SpriteAnimHelper';
 
 export class Tower extends Phaser.GameObjects.Container {
   // Identity
@@ -104,9 +105,21 @@ export class Tower extends Phaser.GameObjects.Container {
     this.add(this.rangeCircle);
 
     // Digimon sprite (offset upward slightly to make room for level text)
-    this.sprite = scene.add.sprite(0, -4, dbStats.spriteKey ?? digimonId);
+    const spriteKey = dbStats.spriteKey ?? digimonId;
+    const atlasEntry = getAtlasEntry(spriteKey);
+    if (atlasEntry) {
+      this.sprite = scene.add.sprite(0, -4, atlasEntry.atlas, `${atlasEntry.prefix}_0`);
+    } else {
+      this.sprite = scene.add.sprite(0, -4, spriteKey);
+    }
     this.sprite.setScale(this.getSpriteScale());
     this.add(this.sprite);
+
+    // Play idle animation if atlas coverage exists
+    const idleAnimKey = ensureIdleAnim(scene, spriteKey);
+    if (idleAnimKey && this.sprite.anims) {
+      this.sprite.play(idleAnimKey);
+    }
 
     // Level text below sprite
     this.levelText = scene.add.text(0, 12, `Lv.${this.level}`, {
@@ -194,7 +207,21 @@ export class Tower extends Phaser.GameObjects.Container {
     this.targetPriority = dbStats.priority ?? this.targetPriority;
 
     // Update sprite texture and scale
-    this.sprite.setTexture(dbStats.spriteKey ?? digimonId);
+    const newSpriteKey = dbStats.spriteKey ?? digimonId;
+    const newAtlasEntry = getAtlasEntry(newSpriteKey);
+    if (newAtlasEntry) {
+      this.sprite.setTexture(newAtlasEntry.atlas, `${newAtlasEntry.prefix}_0`);
+    } else {
+      this.sprite.setTexture(newSpriteKey);
+    }
+    // Switch to new idle animation (or stop if none)
+    if (this.sprite.anims) {
+      this.sprite.stop();
+      const newIdleAnim = ensureIdleAnim(this.scene, newSpriteKey);
+      if (newIdleAnim) {
+        this.sprite.play(newIdleAnim);
+      }
+    }
     this.sprite.setScale(this.getSpriteScale());
   }
 
@@ -371,7 +398,14 @@ export class Tower extends Phaser.GameObjects.Container {
    */
   private getSpriteScale(): number {
     const targetSize = GRID.CELL_SIZE * 0.78; // ~28px for 36px cells
-    const texture = this.scene.textures.get(this.digimonId);
+    // For atlas sprites, frame size is always 16x16
+    const spriteKey = this.stats.spriteKey ?? this.digimonId;
+    const atlasEntry = getAtlasEntry(spriteKey);
+    if (atlasEntry) {
+      return targetSize / 16;
+    }
+    // For individual textures, check actual dimensions
+    const texture = this.scene.textures.get(spriteKey);
     if (texture && texture.source.length > 0) {
       const frame = texture.get();
       const maxDim = Math.max(frame.width, frame.height);

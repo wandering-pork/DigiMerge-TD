@@ -2,7 +2,7 @@
 
 ## Current Status
 
-**All 11 sprints complete + Sprint 12A-D + Sprint 13-16 + Sprint 18-24B + Sprint 27 done** | 498 tests passing | 19 test files | TypeScript clean | Vite build succeeds
+**All 11 sprints complete + Sprint 12A-D + Sprint 13-16 + Sprint 18-24B + Sprint 23B + Sprint 27-29 done** | 522 tests passing | 20 test files | TypeScript clean | Vite build succeeds
 
 Live at: https://wandering-pork.github.io/DigiMerge-TD/
 
@@ -10,7 +10,7 @@ Live at: https://wandering-pork.github.io/DigiMerge-TD/
 - ~171 tower Digimon (21 starter lines + alternate evolutions + Ultra tier), ~86 enemy Digimon, 12 bosses with unique abilities
 - 100 main waves across 5 phases + endless mode (101+)
 - Full merge, digivolve, DP, and origin systems + merge ability inheritance (bonus effects)
-- Status effects (burn, poison, slow, freeze, stun, armor break) with visual feedback
+- Status effects (burn, poison, slow, freeze, stun, armor break, armor pierce, holy, heal) with visual feedback
 - Boss ability system (10 unique abilities: stun, speed boost, DB drain, heal, etc.)
 - Tutorial (8-step overlay), Encyclopedia (browsable catalog with filters, crisp detail view)
 - Wave preview with interactive enemy tooltips (hover/click for stats + boss abilities)
@@ -18,7 +18,9 @@ Live at: https://wandering-pork.github.io/DigiMerge-TD/
 - Background music (menu + battle themes), game speed (1x/2x/3x)
 - Visual merge effect (particle burst), right-click cancel, placement cancel
 - Credits scene with disclaimer, version v1.0.0
-- Sprout Lands tileset, 192 loaded sprites, 17 SFX, 2 music tracks
+- Sprout Lands tileset, 192 Digimon sprites (155 via 5 texture atlases + 24 individual), 17 SFX, 2 music tracks
+- Sprite idle animations (3-frame front-facing cycle at 4fps) for 155 atlas-covered Digimon
+- Texture atlas system: 84% HTTP request reduction (209→34), SpriteAnimHelper for atlas-aware display
 - Volume persistence across scenes (localStorage), improved UI text readability
 - Statistics tracking (kills, towers, merges, digivolutions, DB earned, playtime)
 - Per-tower kill count and damage tracking, MVP tower in post-game
@@ -29,11 +31,13 @@ Live at: https://wandering-pork.github.io/DigiMerge-TD/
 - High scores system (top 10, localStorage), High Scores scene from main menu
 - Range preview (teal circle) on tower placement hover, ghost sprite preview
 - SpawnMenu tooltips: origin system "?" hover, attribute triangle reference, starter stats preview
-- Evolution path preview in TowerInfoPanel (sprites, stats, DP requirements, locked/unlocked)
+- In-game Encyclopedia access (HUD button, pauses game, ESC to return)
 - Object pooling for projectiles (lazy pooling, reuse inactive projectiles)
 - Enemy death particles (attribute-colored burst, larger for bosses)
 - Sharper wave preview text (bumped font sizes, increased resolution)
-- Removed auto-pause on tab blur (game continues when tab loses focus)
+- Background tab support: Web Worker tick keeps game running when tab is hidden (bypasses browser RAF throttling)
+- Main menu: dynamic button layout (no overlap when all 5 buttons visible), reduced dead space
+- Starter select: better card spacing (110×130px cards, explicit gaps), larger sprites, no redundant title
 - Robust game over transition (native setTimeout + safety fallback)
 - Enemy object pooling (lazy pooling, reuse inactive enemies, returnToPool/reset lifecycle)
 - Enhanced boss death animation (screen shake, white flash, expanding ring, longer duration)
@@ -41,6 +45,10 @@ Live at: https://wandering-pork.github.io/DigiMerge-TD/
 - Persistent game speed indicator badge (shows "2x"/"3x" over grid when speed > 1x)
 - Colorblind mode: attribute symbols (V/D/X/F) on tower and enemy sprites, toggle in Settings
 - Settings: Colorblind Mode toggle under Display section
+- Armor bar visual on enemies (gray bar below HP, turns red on armor break)
+- DoT damage floating numbers (orange for burn, purple for poison)
+- armor_pierce (bypass armor entirely), holy (+25% bonus damage), heal (restore player lives) effects
+- Cleaner TowerInfoPanel (evolution preview removed, players use Encyclopedia instead)
 
 ---
 
@@ -121,7 +129,7 @@ Live at: https://wandering-pork.github.io/DigiMerge-TD/
 
 ---
 
-## Test Summary (498 tests, 19 files)
+## Test Summary (522 tests, 20 files)
 
 | Test File | Tests |
 |-----------|-------|
@@ -131,7 +139,7 @@ Live at: https://wandering-pork.github.io/DigiMerge-TD/
 | LevelSystem | 49 |
 | MergeSystem | 28 |
 | OriginSystem | 34 |
-| StatusEffects | 73 |
+| StatusEffects | 77 |
 | BossAbilitySystem | 26 |
 | GridUtils | 16 |
 | Constants | 37 |
@@ -144,19 +152,20 @@ Live at: https://wandering-pork.github.io/DigiMerge-TD/
 | TutorialOverlay | 4 |
 | EncyclopediaScene | 6 |
 | HighScoreManager | 13 |
+| SpriteAnimHelper | 20 |
 
 ---
 
-## File Inventory (47 source files)
+## File Inventory (49 source files)
 
 - **config/**: Constants.ts, GameConfig.ts
-- **data/**: DigimonDatabase.ts, EvolutionPaths.ts, StatusEffects.ts, WaveData.ts
+- **data/**: DigimonDatabase.ts, EvolutionPaths.ts, StatusEffects.ts, WaveData.ts, SpriteAtlasData.ts (auto-generated)
 - **entities/**: Tower.ts, Enemy.ts, Projectile.ts
 - **managers/**: AudioManager.ts, CombatManager.ts, GameStateManager.ts, HighScoreManager.ts, SaveManager.ts, TowerManager.ts, WaveManager.ts
 - **scenes/**: BootScene.ts, PreloadScene.ts, MainMenuScene.ts, StarterSelectScene.ts, GameScene.ts, PauseScene.ts, SettingsScene.ts, GameOverScene.ts, HighScoresScene.ts, EncyclopediaScene.ts, CreditsScene.ts
 - **systems/**: AttributeSystem.ts, BossAbilitySystem.ts, DPSystem.ts, LevelSystem.ts, MergeSystem.ts, OriginSystem.ts, TargetingSystem.ts
 - **ui/**: SpawnMenu.ts, TowerInfoPanel.ts, EvolutionModal.ts, MergeModal.ts, TutorialOverlay.ts, UITheme.ts, UIHelpers.ts
-- **utils/**: EventBus.ts, GridUtils.ts
+- **utils/**: EventBus.ts, GridUtils.ts, SpriteAnimHelper.ts
 - **types/**: DigimonTypes.ts, GameTypes.ts, index.ts
 - main.ts
 
@@ -171,9 +180,11 @@ Live at: https://wandering-pork.github.io/DigiMerge-TD/
 - [x] Updated Enemy.ts to prefer `spriteKey` field over ID-derived key
 - [x] Verified all 12 boss sprite keys resolve correctly
 
-#### 20B: Tower Effect Audit (manual playtest)
-- [ ] Playtest and verify all tower status effects work correctly
-- [ ] Check proc rates, bonus effect inheritance, visual indicators
+#### 20B: Tower Effect Audit ✓ (via Sprint 29)
+- [x] Fixed armor_break naming bug (underscore→camelCase mapping) — 15+ towers fixed
+- [x] Implemented armor_pierce (bypass armor), holy (+25% damage), heal (restore lives)
+- [x] Added armor bar visual, DoT floating numbers (burn=orange, poison=purple)
+- [ ] Manual playtest of all proc rates and bonus effect inheritance
 
 #### 20C: Statistics Activation ✓
 - [x] Wire up `GameStatistics` tracking in GameScene via EventBus listeners
@@ -251,13 +262,15 @@ Live at: https://wandering-pork.github.io/DigiMerge-TD/
 - [ ] Particle pool — reuse for merge effects, hit particles, status effect visuals
 - [ ] Measure before/after FPS on late-game waves (80+) with many towers
 
-#### 23B: Sprite Sheet Atlases
-- [ ] Set up texture atlas tooling (TexturePacker or free alternative)
-- [ ] Pack tower sprites into atlas(es) by stage
-- [ ] Pack enemy sprites into atlas(es) by phase
-- [ ] Pack UI/effect sprites into atlas
-- [ ] Update PreloadScene to load atlases instead of individual PNGs
-- [ ] Measure load time improvement (currently ~192 individual sprite loads)
+#### 23B: Texture Atlases + Sprite Animations ✓
+- [x] Atlas generation script (`scripts/generate-atlases.ts`) using `sharp` — extracts 12 frames per sprite sheet, packs into grid atlases
+- [x] 5 per-stage texture atlases (atlas_baby2, atlas_child, atlas_adult, atlas_perfect, atlas_ultimate)
+- [x] Auto-generated `SpriteAtlasData.ts` mapping 155 game sprite keys to atlas entries
+- [x] `SpriteAnimHelper.ts` — centralized helpers: `hasAtlasEntry`, `getStaticFrame`, `ensureIdleAnim`, `canDisplaySprite`, `applySprite`
+- [x] Updated PreloadScene: 5 atlas loads + 24 individual fallbacks (84% HTTP request reduction)
+- [x] Tower.ts + Enemy.ts: atlas-aware sprite creation + idle animation (3-frame, 4fps, loop)
+- [x] All UI panels (TowerInfoPanel, MergeModal, EvolutionModal, SpawnMenu) + scenes (Encyclopedia, GameScene, StarterSelect) use atlas-aware display
+- [x] 20 new unit tests for SpriteAnimHelper (518 total)
 
 ---
 
@@ -277,11 +290,9 @@ Live at: https://wandering-pork.github.io/DigiMerge-TD/
 - [x] Tower attack animation (brief upward sprite jump when firing)
 - [ ] Enhanced boss ability visual feedback (screen shake, overlays, area indicators)
 
-#### 24B: Evolution Path Preview ✓
-- [x] Show all evolution paths in TowerInfoPanel (sprite, name, stats, ability)
-- [x] DP requirement tags (green=unlocked, red=locked)
-- [x] Dimmed/alpha-reduced locked evolutions (DP not in range)
-- [x] Merge button repositions below evolution preview section
+#### 24B: Evolution Path Preview ✓ (removed in Sprint 29)
+- [x] ~~Show all evolution paths in TowerInfoPanel~~ — removed in Sprint 29 (players use Encyclopedia instead)
+- [x] ~~DP requirement tags, dimmed locked evolutions~~ — removed; simplified merge button positioning
 
 ---
 
@@ -325,6 +336,31 @@ Live at: https://wandering-pork.github.io/DigiMerge-TD/
 - [x] Settings toggle for colorblind mode (ON/OFF button in Display section)
 - [ ] High-contrast mode option for UI panels and text
 - [ ] Settings toggle for colorblind-friendly palette (alternative color scheme)
+
+---
+
+### Sprint 28 — UI Polish & Background Tab ✓
+
+- [x] Background tab fix: Web Worker with setInterval drives `game.loop.step()` while `document.hidden` (browsers pause RAF on hidden tabs)
+- [x] Main menu dynamic layout: buttons collected first, positions calculated based on count (no more High Scores/Credits overlap)
+- [x] Main menu: title moved higher, button height 46px with 12px gaps, evenly distributed vertical spacing
+- [x] Starter select: removed redundant title/subtitle duplication ("Choose Your Starter" + "Tap a Digimon to select it")
+- [x] Starter select: cards widened to 110×130px with 16px horizontal / 14px vertical gaps, sprites scaled to 2.8x
+- [x] Starter select: larger name text (13px), wider attribute bars (44px)
+
+### Sprint 29 — Effect Audit & In-Game Encyclopedia ✓
+
+- [x] **Starter card fix**: Pyocomon & Kyokyomon render correctly (force individual PNG load for all starters)
+- [x] **armor_break naming bug (CRITICAL)**: Fixed `getBaseEffectType` underscore→camelCase mapping — 15+ towers now properly apply armor break
+- [x] **armor_pierce**: New projectile property — bypasses enemy armor entirely (6+ towers affected)
+- [x] **holy effect**: New projectile property — 25% bonus damage to all targets (7+ towers affected)
+- [x] **heal effect**: New event-driven system — restores 1 player life on proc with "+1 Life" floating text (2+ towers)
+- [x] **Armor bar visual**: Gray/silver bar below HP bar for armored enemies, turns red when armor break active
+- [x] **DoT floating numbers**: Burn ticks show orange numbers, poison ticks show purple numbers
+- [x] **In-game Encyclopedia**: HUD button below Pause/Settings, launches EncyclopediaScene as overlay (pauses game)
+- [x] **EncyclopediaScene overlay**: callerScene tracking — Back/ESC resumes GameScene or returns to MainMenu
+- [x] **TowerInfoPanel cleanup**: Removed evolution preview section (cluttered, overflow-prone); players use Encyclopedia
+- [x] 4 new tests for effect type mappings (522 total)
 
 ---
 
