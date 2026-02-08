@@ -200,10 +200,10 @@ export class Tower extends Phaser.GameObjects.Container {
 
   /**
    * Return effective attack damage, scaled by level.
-   * Formula: baseDamage * (1 + level * 0.02)
+   * Formula: baseDamage * (1 + level * 0.03)
    */
   public getAttackDamage(): number {
-    return this.stats.baseDamage * (1 + this.level * 0.02);
+    return this.stats.baseDamage * (1 + this.level * 0.03);
   }
 
   /**

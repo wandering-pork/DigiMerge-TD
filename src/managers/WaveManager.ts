@@ -68,13 +68,13 @@ export class WaveManager {
 
     this.currentWave = waveNumber;
 
-    // Scaling: +5% HP per wave for waves 1-100, exponential for endless (101+)
+    // Scaling: +3% HP per wave for waves 1-100, exponential for endless (101+)
     if (waveNumber <= 100) {
-      this.waveScaling = 1 + 0.05 * Math.max(0, waveNumber - 1);
+      this.waveScaling = 1 + 0.03 * Math.max(0, waveNumber - 1);
     } else {
       // Endless: base scaling at wave 100 + exponential growth
-      const baseScaling = 1 + 0.05 * 99; // ~5.95x at wave 100
-      this.waveScaling = baseScaling * Math.pow(1.05, waveNumber - 100);
+      const baseScaling = 1 + 0.03 * 99; // ~3.97x at wave 100
+      this.waveScaling = baseScaling * Math.pow(1.04, waveNumber - 100);
     }
 
     // Build spawn queue from wave enemies

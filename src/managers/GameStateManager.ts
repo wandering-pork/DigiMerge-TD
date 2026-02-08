@@ -83,9 +83,9 @@ export class GameStateManager {
 
   // ─── Waves ──────────────────────────────────────────────────────
 
-  /** Calculate digibytes reward for completing a wave: base 50 + wave * 10. */
+  /** Calculate digibytes reward for completing a wave: base 75 + wave * 12. */
   getWaveReward(wave: number): number {
-    return 50 + wave * 10;
+    return 75 + wave * 12;
   }
 
   /** Advance to the next wave. Emits WAVE_COMPLETED with the completed wave number. */

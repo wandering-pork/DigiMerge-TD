@@ -44,19 +44,19 @@ describe('LevelSystem', () => {
       expect(getLevelUpCost(10, Stage.CHAMPION)).toBe(60);
     });
 
-    it('Ultimate uses 3x multiplier', () => {
+    it('Ultimate uses 2.5x multiplier', () => {
+      // 3 * 10 * 2.5 = 75
+      expect(getLevelUpCost(10, Stage.ULTIMATE)).toBe(75);
+    });
+
+    it('Mega uses 3x multiplier', () => {
       // 3 * 10 * 3 = 90
-      expect(getLevelUpCost(10, Stage.ULTIMATE)).toBe(90);
+      expect(getLevelUpCost(10, Stage.MEGA)).toBe(90);
     });
 
-    it('Mega uses 4x multiplier', () => {
-      // 3 * 10 * 4 = 120
-      expect(getLevelUpCost(10, Stage.MEGA)).toBe(120);
-    });
-
-    it('Ultra uses 5x multiplier', () => {
-      // 3 * 10 * 5 = 150
-      expect(getLevelUpCost(10, Stage.ULTRA)).toBe(150);
+    it('Ultra uses 3.5x multiplier', () => {
+      // 3 * 10 * 3.5 = 105
+      expect(getLevelUpCost(10, Stage.ULTRA)).toBe(105);
     });
 
     it('stage multiplier rounds up fractional costs', () => {
@@ -129,12 +129,12 @@ describe('LevelSystem', () => {
   });
 
   describe('getScaledDamage', () => {
-    it('level 1 gives base * 1.02', () => {
-      expect(getScaledDamage(100, 1)).toBeCloseTo(102);
+    it('level 1 gives base * 1.03', () => {
+      expect(getScaledDamage(100, 1)).toBeCloseTo(103);
     });
 
-    it('level 50 gives base * 2.0', () => {
-      expect(getScaledDamage(100, 50)).toBeCloseTo(200);
+    it('level 50 gives base * 2.5', () => {
+      expect(getScaledDamage(100, 50)).toBeCloseTo(250);
     });
 
     it('level 0 returns base damage unchanged', () => {
@@ -142,12 +142,12 @@ describe('LevelSystem', () => {
     });
 
     it('scales correctly for non-round base damage', () => {
-      // 18 * (1 + 30 * 0.02) = 18 * 1.6 = 28.8
-      expect(getScaledDamage(18, 30)).toBeCloseTo(28.8);
+      // 18 * (1 + 30 * 0.03) = 18 * 1.9 = 34.2
+      expect(getScaledDamage(18, 30)).toBeCloseTo(34.2);
     });
 
-    it('level 100 gives base * 3.0', () => {
-      expect(getScaledDamage(50, 100)).toBeCloseTo(150);
+    it('level 100 gives base * 4.0', () => {
+      expect(getScaledDamage(50, 100)).toBeCloseTo(200);
     });
   });
 

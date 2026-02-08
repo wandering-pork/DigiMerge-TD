@@ -1064,7 +1064,7 @@ export class GameScene extends Phaser.Scene {
         if (minionId && this.bossEnemy) {
           for (let i = 0; i < action.params.minionCount; i++) {
             try {
-              const minion = new Enemy(this, minionId, this.waveManager.currentWave <= 100 ? 1 + 0.05 * (this.waveManager.currentWave - 1) : 1);
+              const minion = new Enemy(this, minionId, this.waveManager.currentWave <= 100 ? 1 + 0.03 * (this.waveManager.currentWave - 1) : 1);
               minion.pathIndex = this.bossEnemy.pathIndex;
               minion.pathProgress = this.bossEnemy.pathProgress;
               minion.x = this.bossEnemy.x + (i - 1) * 15;

@@ -37,10 +37,10 @@ export function calculateMaxLevel(
 
 /**
  * Get damage scaled by level (without attribute multiplier).
- * Formula: baseDamage * (1 + level * 0.02)
+ * Formula: baseDamage * (1 + level * 0.03)
  */
 export function getScaledDamage(baseDamage: number, level: number): number {
-  return baseDamage * (1 + level * 0.02);
+  return baseDamage * (1 + level * 0.03);
 }
 
 /**

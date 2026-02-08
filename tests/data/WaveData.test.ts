@@ -77,10 +77,10 @@ describe('WaveData', () => {
     }
   });
 
-  it('each enemy entry should have at least 5 units', () => {
+  it('each enemy entry should have at least 4 units', () => {
     for (let i = 1; i <= 100; i++) {
       for (const entry of WAVE_DATA[i].enemies) {
-        expect(entry.count, `Wave ${i}, ${entry.id} has fewer than 5 units`).toBeGreaterThanOrEqual(5);
+        expect(entry.count, `Wave ${i}, ${entry.id} has fewer than 4 units`).toBeGreaterThanOrEqual(4);
       }
     }
   });

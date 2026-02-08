@@ -265,27 +265,27 @@ describe('GameStateManager', () => {
   // ─── getWaveReward ────────────────────────────────────────────────
 
   describe('getWaveReward', () => {
-    it('should return base 50 + wave * 10 for wave 1', () => {
-      expect(manager.getWaveReward(1)).toBe(60); // 50 + 1*10
+    it('should return base 75 + wave * 12 for wave 1', () => {
+      expect(manager.getWaveReward(1)).toBe(87); // 75 + 1*12
     });
 
-    it('should return base 50 + wave * 10 for wave 5', () => {
-      expect(manager.getWaveReward(5)).toBe(100); // 50 + 5*10
+    it('should return base 75 + wave * 12 for wave 5', () => {
+      expect(manager.getWaveReward(5)).toBe(135); // 75 + 5*12
     });
 
-    it('should return base 50 + wave * 10 for wave 10', () => {
-      expect(manager.getWaveReward(10)).toBe(150); // 50 + 10*10
+    it('should return base 75 + wave * 12 for wave 10', () => {
+      expect(manager.getWaveReward(10)).toBe(195); // 75 + 10*12
     });
 
-    it('should return base 50 + wave * 10 for wave 20', () => {
-      expect(manager.getWaveReward(20)).toBe(250); // 50 + 20*10
+    it('should return base 75 + wave * 12 for wave 20', () => {
+      expect(manager.getWaveReward(20)).toBe(315); // 75 + 20*12
     });
 
     it('should scale linearly with wave number', () => {
       const reward5 = manager.getWaveReward(5);
       const reward10 = manager.getWaveReward(10);
-      // Difference between wave 10 and wave 5 rewards: (50+100)-(50+50) = 50
-      expect(reward10 - reward5).toBe(50);
+      // Difference between wave 10 and wave 5 rewards: (75+120)-(75+60) = 60
+      expect(reward10 - reward5).toBe(60);
     });
   });
 

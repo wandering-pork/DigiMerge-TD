@@ -113,18 +113,18 @@ describe('Constants', () => {
     });
 
     it('damage increases with level', () => {
-      // 10 * (1 + 10 * 0.02) * 1.0 = 10 * 1.2 = 12
-      expect(calculateDamage(10, 10, 1.0)).toBeCloseTo(12);
+      // 10 * (1 + 10 * 0.03) * 1.0 = 10 * 1.3 = 13
+      expect(calculateDamage(10, 10, 1.0)).toBeCloseTo(13);
     });
 
     it('damage scales with attribute multiplier', () => {
-      // 10 * (1 + 0 * 0.02) * 1.5 = 15
+      // 10 * (1 + 0 * 0.03) * 1.5 = 15
       expect(calculateDamage(10, 0, 1.5)).toBeCloseTo(15);
     });
 
     it('combined level and attribute scaling', () => {
-      // 18 * (1 + 30 * 0.02) * 1.5 = 18 * 1.6 * 1.5 = 43.2
-      expect(calculateDamage(18, 30, 1.5)).toBeCloseTo(43.2);
+      // 18 * (1 + 30 * 0.03) * 1.5 = 18 * 1.9 * 1.5 = 51.3
+      expect(calculateDamage(18, 30, 1.5)).toBeCloseTo(51.3);
     });
   });
 
