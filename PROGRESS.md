@@ -2,7 +2,7 @@
 
 ## Current Status
 
-**All 11 sprints complete + Sprint 12A-D + Sprint 13-16 + Sprint 18-22 done** | 498 tests passing | 19 test files | TypeScript clean | Vite build succeeds
+**All 11 sprints complete + Sprint 12A-D + Sprint 13-16 + Sprint 18-24B done** | 498 tests passing | 19 test files | TypeScript clean | Vite build succeeds
 
 Live at: https://wandering-pork.github.io/DigiMerge-TD/
 
@@ -27,6 +27,14 @@ Live at: https://wandering-pork.github.io/DigiMerge-TD/
 - Keyboard shortcuts: S/Del=sell, U=level up, D=deselect, Tab=cycle towers
 - Post-game stats screen with run summary, MVP tower, animated stat entries
 - High scores system (top 10, localStorage), High Scores scene from main menu
+- Range preview (teal circle) on tower placement hover, ghost sprite preview
+- SpawnMenu tooltips: origin system "?" hover, attribute triangle reference, starter stats preview
+- Evolution path preview in TowerInfoPanel (sprites, stats, DP requirements, locked/unlocked)
+- Object pooling for projectiles (lazy pooling, reuse inactive projectiles)
+- Enemy death particles (attribute-colored burst, larger for bosses)
+- Sharper wave preview text (bumped font sizes, increased resolution)
+- Removed auto-pause on tab blur (game continues when tab loses focus)
+- Robust game over transition (native setTimeout + safety fallback)
 
 ---
 
@@ -175,18 +183,17 @@ Live at: https://wandering-pork.github.io/DigiMerge-TD/
 
 ---
 
-### Sprint 21 — Quality of Life & UX ✓ (partial)
+### Sprint 21 — Quality of Life & UX ✓
 
-#### 21A: Range Preview on Placement
-- [ ] Show range circle when hovering over valid grid cells during tower placement
-- [ ] Preview tower sprite on hover (ghost/transparent) before committing
-- [ ] Show tower base stats in a tooltip during placement
+#### 21A: Range Preview on Placement ✓
+- [x] Show teal range circle when hovering over valid grid cells during tower placement
+- [x] Ghost sprite preview (transparent starter Digimon) on empty tower slots
+- [x] Range calculated from starter stats (range + 1.0 cells, same as Tower.getRange())
 
-#### 21B: SpawnMenu Tooltips & Info
-- [ ] Add attribute triangle diagram/tooltip in SpawnMenu (Vaccine > Virus > Data > Vaccine)
-- [ ] Add origin system explanation tooltip ("Spawn stage limits max evolution")
-- [ ] Show Digimon base stats on hover before spawning (damage, speed, range, effect)
-- [ ] Show evolution path preview (what this Digimon can evolve into)
+#### 21B: SpawnMenu Tooltips & Info ✓
+- [x] Attribute triangle quick reference at bottom of SpawnMenu (color-coded V>X>D>V, F=neutral)
+- [x] Origin system "?" tooltip explaining spawn stage limits (hover to show)
+- [x] Free starter entries show base stats (DMG, SPD, RNG) inline
 
 #### 21C: Warnings & Notifications ✓
 - [x] Low lives warning — flash HUD lives counter when lives ≤ 5
@@ -224,10 +231,13 @@ Live at: https://wandering-pork.github.io/DigiMerge-TD/
 
 ---
 
-### Sprint 23 — Performance Optimization
+### Sprint 23 — Performance Optimization ✓ (partial)
 
-#### 23A: Object Pooling
-- [ ] Projectile pool — reuse instead of create/destroy per shot
+#### 23A: Object Pooling ✓ (Projectiles)
+- [x] Projectile pool — lazy pooling, reuse inactive projectiles instead of create/destroy
+- [x] `Projectile.reset()` method reinitializes all state for reuse
+- [x] `CombatManager.getProjectile()` scans for inactive projectiles before allocating
+- [x] Update loop skips inactive pooled projectiles
 - [ ] Enemy pool — reuse instead of create/destroy per wave
 - [ ] Particle pool — reuse for merge effects, hit particles, status effect visuals
 - [ ] Measure before/after FPS on late-game waves (80+) with many towers
@@ -242,18 +252,27 @@ Live at: https://wandering-pork.github.io/DigiMerge-TD/
 
 ---
 
-### Sprint 24 — Visual Polish
+### Sprint 23-Pre — Bug Fixes & QoL Patch ✓
 
-#### 24A: Boss & Enemy Effects
+- [x] Wave preview text blurriness fix (bumped 9-11px fonts to 11-14px, resolution 3 on smallest)
+- [x] Removed auto-pause on tab blur (game continues in background, delta cap preserved)
+- [x] Game over screen robust transition (native setTimeout + 500ms safety fallback)
+
+---
+
+### Sprint 24 — Visual Polish ✓ (partial)
+
+#### 24A: Boss & Enemy Effects ✓ (partial)
 - [ ] Unique boss death animation (larger explosion, screen flash, reward popup)
-- [ ] Enemy death particles (small burst on kill, colored by attribute)
+- [x] Enemy death particles (attribute-colored burst on kill, 6 particles standard, 12 for bosses)
 - [ ] Tower attack animation (brief scale pulse or flash when firing)
 - [ ] Enhanced boss ability visual feedback (screen shake, overlays, area indicators)
 
-#### 24B: Evolution Path Preview
-- [ ] Show available evolution options in TowerInfoPanel (stat comparison before committing)
-- [ ] Preview next evolution's sprite, damage, speed, range, and ability
-- [ ] Dim/lock evolutions that require more DP
+#### 24B: Evolution Path Preview ✓
+- [x] Show all evolution paths in TowerInfoPanel (sprite, name, stats, ability)
+- [x] DP requirement tags (green=unlocked, red=locked)
+- [x] Dimmed/alpha-reduced locked evolutions (DP not in range)
+- [x] Merge button repositions below evolution preview section
 
 ---
 

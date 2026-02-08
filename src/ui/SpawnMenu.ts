@@ -163,6 +163,57 @@ export class SpawnMenu extends Phaser.GameObjects.Container {
     const stageLabel = this.scene.add.text(15, 48, 'Stage:', TEXT_STYLES.PANEL_LABEL);
     this.add(stageLabel);
 
+    // Origin system info "?" icon with hover tooltip
+    const originHelp = this.scene.add.text(65, 48, '?', {
+      fontFamily: FONTS.MONO,
+      fontSize: '12px',
+      color: COLORS.TEXT_DIM,
+      backgroundColor: '#2a1e36',
+      padding: { x: 4, y: 1 },
+      resolution: 2,
+    }).setInteractive({ useHandCursor: true });
+    this.add(originHelp);
+
+    // Origin tooltip container (hidden by default)
+    const originTipContainer = this.scene.add.container(15, 0);
+    originTipContainer.setVisible(false);
+
+    const originTipBg = this.scene.add.graphics();
+    originTipBg.fillStyle(0x1e1428, 0.97);
+    originTipBg.fillRoundedRect(0, 0, 270, 80, 6);
+    originTipBg.lineStyle(1, 0xff9944, 0.5);
+    originTipBg.strokeRoundedRect(0, 0, 270, 80, 6);
+    originTipContainer.add(originTipBg);
+
+    const originTipTitle = this.scene.add.text(10, 6, 'Origin System', {
+      fontFamily: FONTS.MONO,
+      fontSize: '11px',
+      color: '#ff9944',
+      fontStyle: 'bold',
+      resolution: 2,
+    });
+    originTipContainer.add(originTipTitle);
+
+    const originTipBody = this.scene.add.text(10, 22,
+      'Spawn stage limits max evolution:\n\u2022 In-Training \u2192 up to Champion\n\u2022 Rookie \u2192 up to Ultimate\n\u2022 Champion \u2192 up to Mega', {
+      fontFamily: FONTS.MONO,
+      fontSize: '10px',
+      color: '#ccaa88',
+      lineSpacing: 2,
+      resolution: 2,
+    });
+    originTipContainer.add(originTipBody);
+
+    this.add(originTipContainer);
+
+    originHelp.on('pointerover', () => {
+      originTipContainer.setPosition(15, -85);
+      originTipContainer.setVisible(true);
+    });
+    originHelp.on('pointerout', () => {
+      originTipContainer.setVisible(false);
+    });
+
     // Stage buttons (Container + Graphics)
     const spawnStages = [Stage.IN_TRAINING, Stage.ROOKIE, Stage.CHAMPION] as const;
     spawnStages.forEach((stage, i) => {
@@ -231,6 +282,32 @@ export class SpawnMenu extends Phaser.GameObjects.Container {
       this.doSpawn();
     });
     this.add(this.spawnBtn);
+
+    // Attribute triangle quick reference (colored text segments)
+    const attrY = h - 12;
+    const attrSegments: { text: string; color: string }[] = [
+      { text: 'V', color: ATTRIBUTE_COLORS_STR[Attribute.VACCINE] },
+      { text: '>', color: COLORS.TEXT_DIM },
+      { text: 'X', color: ATTRIBUTE_COLORS_STR[Attribute.VIRUS] },
+      { text: '>', color: COLORS.TEXT_DIM },
+      { text: 'D', color: ATTRIBUTE_COLORS_STR[Attribute.DATA] },
+      { text: '>', color: COLORS.TEXT_DIM },
+      { text: 'V', color: ATTRIBUTE_COLORS_STR[Attribute.VACCINE] },
+      { text: '  ', color: COLORS.TEXT_DIM },
+      { text: 'F', color: ATTRIBUTE_COLORS_STR[Attribute.FREE] },
+      { text: '=neutral', color: COLORS.TEXT_DIM },
+    ];
+    let attrX = 50;
+    for (const seg of attrSegments) {
+      const t = this.scene.add.text(attrX, attrY, seg.text, {
+        fontFamily: FONTS.MONO,
+        fontSize: '10px',
+        color: seg.color,
+        resolution: 2,
+      });
+      this.add(t);
+      attrX += t.width + 2;
+    }
 
     // Initial state
     this.selectStage(Stage.IN_TRAINING);
@@ -311,6 +388,7 @@ export class SpawnMenu extends Phaser.GameObjects.Container {
       for (const starterId of this.selectedStarters) {
         const stats = DIGIMON_DATABASE.towers[starterId];
         if (!stats) continue;
+        const statInfo = `FREE | DMG:${stats.baseDamage} SPD:${stats.baseSpeed.toFixed(1)} RNG:${stats.range.toFixed(1)}`;
         this.addDigimonOption(
           starterId,
           stats.name,
@@ -318,7 +396,7 @@ export class SpawnMenu extends Phaser.GameObjects.Container {
           startY + nextIndex * itemHeight,
           nextIndex,
           undefined,
-          'FREE Starter',
+          statInfo,
         );
         nextIndex++;
       }

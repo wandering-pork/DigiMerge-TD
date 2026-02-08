@@ -111,6 +111,7 @@ export class GameScene extends Phaser.Scene {
 
   // Ghost preview
   private ghostSprite: Phaser.GameObjects.Image | null = null;
+  private ghostRangeCircle: Phaser.GameObjects.Graphics | null = null;
 
   // Wave preview
   private wavePreviewText: Phaser.GameObjects.Text | null = null;
@@ -127,9 +128,6 @@ export class GameScene extends Phaser.Scene {
 
   // Starter display (hideable after first placement)
   private starterDisplayObjects: Phaser.GameObjects.GameObject[] = [];
-
-  // Visibility change handler for auto-pause on tab blur
-  private visibilityHandler: (() => void) | null = null;
 
   // Low lives warning vignette
   private dangerVignette: Phaser.GameObjects.Graphics | null = null;
@@ -285,9 +283,6 @@ export class GameScene extends Phaser.Scene {
     // Setup ghost preview sprite (hidden by default)
     this.setupGhostPreview();
 
-    // Auto-pause when browser tab loses focus
-    this.setupVisibilityHandler();
-
     // Load saved game if applicable
     this.loadSavedGame();
 
@@ -365,10 +360,14 @@ export class GameScene extends Phaser.Scene {
     EventBus.off(GameEvents.TOWER_EVOLVED, this.onTowerEvolved, this);
     EventBus.off(GameEvents.TOWER_SOLD, this.onTowerSold, this);
 
-    // Remove visibility change listener
-    if (this.visibilityHandler) {
-      document.removeEventListener('visibilitychange', this.visibilityHandler);
-      this.visibilityHandler = null;
+    // Clean up ghost preview
+    if (this.ghostSprite) {
+      this.ghostSprite.destroy();
+      this.ghostSprite = null;
+    }
+    if (this.ghostRangeCircle) {
+      this.ghostRangeCircle.destroy();
+      this.ghostRangeCircle = null;
     }
 
     // Clean up warning overlays
@@ -658,8 +657,9 @@ export class GameScene extends Phaser.Scene {
   // ============================================================
 
   private setupGhostPreview(): void {
-    // Ghost sprite is created on demand when hovering over empty slots
+    // Ghost sprite and range circle are created on demand when hovering over empty slots
     this.ghostSprite = null;
+    this.ghostRangeCircle = null;
   }
 
   private updateGhostPreview(pointerX: number, pointerY: number): void {
@@ -685,6 +685,24 @@ export class GameScene extends Phaser.Scene {
         this.ghostSprite.setScale(1.75);
         this.ghostSprite.setPosition(cellX, cellY - 4);
         this.ghostSprite.setVisible(true);
+
+        // Show range preview circle
+        const starterStats = DIGIMON_DATABASE.towers[starters[0]];
+        if (starterStats) {
+          const range = (starterStats.range + 1.0) * GRID.CELL_SIZE;
+
+          if (!this.ghostRangeCircle) {
+            this.ghostRangeCircle = this.add.graphics();
+            this.ghostRangeCircle.setDepth(4);
+          }
+
+          this.ghostRangeCircle.clear();
+          this.ghostRangeCircle.fillStyle(COLORS.TEAL, 0.05);
+          this.ghostRangeCircle.fillCircle(cellX, cellY, range);
+          this.ghostRangeCircle.lineStyle(1.5, COLORS.TEAL, 0.25);
+          this.ghostRangeCircle.strokeCircle(cellX, cellY, range);
+          this.ghostRangeCircle.setVisible(true);
+        }
       } else {
         this.hideGhostPreview();
       }
@@ -697,20 +715,9 @@ export class GameScene extends Phaser.Scene {
     if (this.ghostSprite) {
       this.ghostSprite.setVisible(false);
     }
-  }
-
-  // ============================================================
-  // Visibility (auto-pause on tab blur)
-  // ============================================================
-
-  private setupVisibilityHandler(): void {
-    this.visibilityHandler = () => {
-      if (document.hidden && !this.scene.isPaused()) {
-        this.scene.launch('PauseScene');
-        this.scene.pause();
-      }
-    };
-    document.addEventListener('visibilitychange', this.visibilityHandler);
+    if (this.ghostRangeCircle) {
+      this.ghostRangeCircle.setVisible(false);
+    }
   }
 
   // ============================================================
@@ -1611,11 +1618,11 @@ export class GameScene extends Phaser.Scene {
     drawSeparator(waveSepGfx, leftColX - 5, previewY, leftColX + contentW - 5);
 
     this.add.text(leftColX, previewY + 6, 'Next Wave:', {
-      ...TEXT_STYLES.HUD_LABEL, fontSize: '10px',
+      ...TEXT_STYLES.HUD_LABEL, fontSize: '12px',
     }).setDepth(10);
     this.wavePreviewText = this.add.text(leftColX, previewY + 20, '', {
       fontFamily: FONTS.MONO,
-      fontSize: '10px',
+      fontSize: '12px',
       color: COLORS.TEXT_DIM,
       wordWrap: { width: contentW - 10 },
       lineSpacing: 2,
@@ -1692,7 +1699,7 @@ export class GameScene extends Phaser.Scene {
       // Name + count
       const nameText = this.add.text(previewX + 28, rowY, `${enemyStats.name} x${entry.count}`, {
         fontFamily: FONTS.MONO,
-        fontSize: '11px',
+        fontSize: '13px',
         color: '#cccccc',
         resolution: 2,
       }).setDepth(10);
@@ -1703,9 +1710,9 @@ export class GameScene extends Phaser.Scene {
         const typeColor = TYPE_COLORS[enemyStats.type] ?? '#888888';
         const typeText = this.add.text(previewX + 28, rowY + 13, enemyStats.type, {
           fontFamily: FONTS.MONO,
-          fontSize: '9px',
+          fontSize: '11px',
           color: typeColor,
-          resolution: 2,
+          resolution: 3,
         }).setDepth(10);
         this.wavePreviewSprites.push(typeText);
       }
@@ -1725,7 +1732,7 @@ export class GameScene extends Phaser.Scene {
       if (yOffset > 300) {
         const moreText = this.add.text(previewX + 28, previewBaseY + yOffset, '...', {
           fontFamily: FONTS.MONO,
-          fontSize: '11px',
+          fontSize: '13px',
           color: COLORS.TEXT_DIM,
           resolution: 2,
         }).setDepth(10);
@@ -1749,7 +1756,7 @@ export class GameScene extends Phaser.Scene {
 
         const bossText = this.add.text(previewX + 28, rowY, `BOSS: ${bossStats.name}`, {
           fontFamily: FONTS.MONO,
-          fontSize: '11px',
+          fontSize: '13px',
           color: '#ffaa44',
           fontStyle: 'bold',
           resolution: 2,
@@ -1759,10 +1766,10 @@ export class GameScene extends Phaser.Scene {
         if (bossStats.bossAbility) {
           const abilityText = this.add.text(previewX + 28, rowY + 13, bossStats.bossAbility.name, {
             fontFamily: FONTS.MONO,
-            fontSize: '9px',
+            fontSize: '11px',
             color: '#ff8844',
             fontStyle: 'italic',
-            resolution: 2,
+            resolution: 3,
           }).setDepth(10);
           this.wavePreviewSprites.push(abilityText);
         }
@@ -1868,7 +1875,7 @@ export class GameScene extends Phaser.Scene {
     const attrColor = ATTRIBUTE_COLORS_STR[enemy.attribute] ?? '#ffffff';
     const nameText = this.add.text(contentStartX, 8, enemy.name, {
       fontFamily: FONTS.MONO,
-      fontSize: '13px',
+      fontSize: '14px',
       color: attrColor,
       fontStyle: 'bold',
       resolution: 2,
@@ -1879,7 +1886,7 @@ export class GameScene extends Phaser.Scene {
     const stageAttr = `${STAGE_NAMES[enemy.stageTier]} | ${ATTRIBUTE_NAMES[enemy.attribute]}`;
     const stageText = this.add.text(contentStartX, 24, stageAttr, {
       fontFamily: FONTS.MONO,
-      fontSize: '10px',
+      fontSize: '11px',
       color: COLORS.TEXT_DIM,
       resolution: 2,
     });
@@ -1898,10 +1905,10 @@ export class GameScene extends Phaser.Scene {
     statLines.forEach((stat, i) => {
       const y = statsY + i * 16;
       container.add(this.add.text(12, y, stat.label, {
-        fontFamily: FONTS.MONO, fontSize: '10px', color: COLORS.TEXT_DIM, resolution: 2,
+        fontFamily: FONTS.MONO, fontSize: '11px', color: COLORS.TEXT_DIM, resolution: 2,
       }));
       container.add(this.add.text(80, y, stat.value, {
-        fontFamily: FONTS.MONO, fontSize: '10px', color: stat.color, resolution: 2,
+        fontFamily: FONTS.MONO, fontSize: '11px', color: stat.color, resolution: 2,
       }));
     });
 
@@ -1909,17 +1916,17 @@ export class GameScene extends Phaser.Scene {
     if (isBoss && enemy.bossAbility) {
       const abilityY = statsY + statLines.length * 16 + 4;
       container.add(this.add.text(12, abilityY, enemy.bossAbility.name, {
-        fontFamily: FONTS.MONO, fontSize: '11px', color: '#ff8844', fontStyle: 'bold', resolution: 2,
+        fontFamily: FONTS.MONO, fontSize: '12px', color: '#ff8844', fontStyle: 'bold', resolution: 2,
       }));
       container.add(this.add.text(12, abilityY + 14, enemy.bossAbility.description, {
-        fontFamily: FONTS.MONO, fontSize: '9px', color: '#cc6633', wordWrap: { width: tooltipW - 24 }, resolution: 2,
+        fontFamily: FONTS.MONO, fontSize: '11px', color: '#cc6633', wordWrap: { width: tooltipW - 24 }, resolution: 3,
       }));
     }
 
     // Pin indicator
     if (pin) {
       container.add(this.add.text(tooltipW - 16, 4, '[x]', {
-        fontFamily: FONTS.MONO, fontSize: '9px', color: COLORS.TEXT_DIM, resolution: 2,
+        fontFamily: FONTS.MONO, fontSize: '10px', color: COLORS.TEXT_DIM, resolution: 2,
       }));
     }
 
@@ -2089,15 +2096,36 @@ export class GameScene extends Phaser.Scene {
         console.warn('[GameScene] Error computing MVP tower:', e);
       }
 
-      this.time.delayedCall(100, () => {
-        this.scene.start('GameOverScene', {
-          wave: this.currentWave,
-          won: false,
-          lives: 0,
-          statistics: { ...this.statistics, playtimeSeconds: Math.floor(this.playtimeMs / 1000) },
-          mvpTower,
-        });
-      });
+      const sceneData = {
+        wave: this.currentWave,
+        won: false,
+        lives: 0,
+        statistics: { ...this.statistics, playtimeSeconds: Math.floor(this.playtimeMs / 1000) },
+        mvpTower,
+      };
+
+      console.warn('[GameScene] Game Over triggered, transitioning to GameOverScene');
+
+      // Use native setTimeout (immune to Phaser scene clock pausing/stopping)
+      setTimeout(() => {
+        try {
+          this.scene.start('GameOverScene', sceneData);
+        } catch (e) {
+          console.error('[GameScene] Failed to start GameOverScene:', e);
+        }
+      }, 50);
+
+      // Safety fallback: if GameOverScene hasn't started after 500ms, force it
+      setTimeout(() => {
+        try {
+          if (this.scene.isActive('GameScene')) {
+            console.warn('[GameScene] Safety fallback: forcing GameOverScene transition');
+            this.scene.start('GameOverScene', sceneData);
+          }
+        } catch (e) {
+          console.error('[GameScene] Safety fallback failed:', e);
+        }
+      }, 500);
     }
   }
 
@@ -2301,15 +2329,36 @@ export class GameScene extends Phaser.Scene {
         console.warn('[GameScene] Error computing MVP tower:', e);
       }
 
-      this.time.delayedCall(100, () => {
-        this.scene.start('GameOverScene', {
-          wave: this.currentWave,
-          won: true,
-          lives: this.lives,
-          statistics: { ...this.statistics, playtimeSeconds: Math.floor(this.playtimeMs / 1000) },
-          mvpTower,
-        });
-      });
+      const sceneData = {
+        wave: this.currentWave,
+        won: true,
+        lives: this.lives,
+        statistics: { ...this.statistics, playtimeSeconds: Math.floor(this.playtimeMs / 1000) },
+        mvpTower,
+      };
+
+      console.warn('[GameScene] Victory triggered, transitioning to GameOverScene');
+
+      // Use native setTimeout (immune to Phaser scene clock pausing/stopping)
+      setTimeout(() => {
+        try {
+          this.scene.start('GameOverScene', sceneData);
+        } catch (e) {
+          console.error('[GameScene] Failed to start GameOverScene:', e);
+        }
+      }, 50);
+
+      // Safety fallback: if GameOverScene hasn't started after 500ms, force it
+      setTimeout(() => {
+        try {
+          if (this.scene.isActive('GameScene')) {
+            console.warn('[GameScene] Safety fallback: forcing GameOverScene transition');
+            this.scene.start('GameOverScene', sceneData);
+          }
+        } catch (e) {
+          console.error('[GameScene] Safety fallback failed:', e);
+        }
+      }, 500);
       return;
     }
 

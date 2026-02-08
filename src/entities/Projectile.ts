@@ -134,6 +134,59 @@ export class Projectile extends Phaser.GameObjects.Container {
   }
 
   // -------------------------------------------------------------------------
+  // Pool support — reset for reuse
+  // -------------------------------------------------------------------------
+
+  /**
+   * Reset this projectile for reuse from the pool.
+   * Reinitialises all state so the projectile behaves exactly like a freshly
+   * constructed instance without allocating a new Container/Graphics pair.
+   */
+  public reset(
+    x: number,
+    y: number,
+    damage: number,
+    target: ProjectileTarget,
+    sourceAttribute: Attribute,
+  ): void {
+    this.setPosition(x, y);
+    this.damage = damage;
+    this.speed = DEFAULT_SPEED;
+    this.target = target;
+    this.sourceAttribute = sourceAttribute;
+    this.isActive = true;
+    this.effectType = null;
+    this.sourceDamage = 0;
+    this.attributeMultiplier = 1;
+    this.sourceTowerID = '';
+    this.prevX = x;
+    this.prevY = y;
+    this.trailPositions = [];
+
+    this.setScale(1);
+    this.setAlpha(1);
+    this.setVisible(true);
+    this.setActive(true);
+
+    // Kill any leftover tweens from a previous lifecycle
+    this.scene.tweens.killTweensOf(this);
+
+    // Redraw body with correct attribute colour
+    const color = ATTRIBUTE_COLORS[sourceAttribute] ?? 0xffffff;
+    this.bodyGraphics.clear();
+    this.bodyGraphics.fillStyle(color, 0.15);
+    this.bodyGraphics.fillCircle(0, 0, BODY_RADIUS * 2.5);
+    this.bodyGraphics.fillStyle(color, 0.3);
+    this.bodyGraphics.fillCircle(0, 0, BODY_RADIUS * 1.5);
+    this.bodyGraphics.fillStyle(color, 1);
+    this.bodyGraphics.fillCircle(0, 0, BODY_RADIUS);
+
+    // Clear trail
+    this.trailGraphics.clear();
+    this.trailGraphics.setVisible(true);
+  }
+
+  // -------------------------------------------------------------------------
   // Update
   // -------------------------------------------------------------------------
 
@@ -215,21 +268,8 @@ export class Projectile extends Phaser.GameObjects.Container {
       }
     }
 
-    this.isActive = false;
-    this.target = null;
-
-    // Brief hit effect: scale up + fade out, then destroy.
-    this.scene.tweens.add({
-      targets: this,
-      scaleX: 2,
-      scaleY: 2,
-      alpha: 0,
-      duration: 120,
-      ease: 'Quad.easeOut',
-      onComplete: () => {
-        this.cleanup();
-      },
-    });
+    // Return to pool immediately — hit particles already provide visual feedback
+    this.cleanup();
   }
 
   /**
@@ -336,19 +376,7 @@ export class Projectile extends Phaser.GameObjects.Container {
   // -------------------------------------------------------------------------
 
   public deactivate(): void {
-    this.isActive = false;
-    this.target = null;
-
-    // Fade out quickly, then destroy.
-    this.scene.tweens.add({
-      targets: this,
-      alpha: 0,
-      duration: 80,
-      ease: 'Linear',
-      onComplete: () => {
-        this.cleanup();
-      },
-    });
+    this.cleanup();
   }
 
   // -------------------------------------------------------------------------
@@ -395,13 +423,23 @@ export class Projectile extends Phaser.GameObjects.Container {
   // -------------------------------------------------------------------------
 
   /**
-   * Remove this projectile and its associated graphics from the scene.
+   * Return this projectile to the pool. Hides it and marks it inactive
+   * so the CombatManager can reuse it via {@link reset}.
    */
   private cleanup(): void {
+    this.isActive = false;
+    this.target = null;
+
+    // Kill any running tweens on this object
+    this.scene.tweens.killTweensOf(this);
+
+    // Clear and hide the trail (world-space graphics — keep alive for reuse)
     if (this.trailGraphics) {
       this.trailGraphics.clear();
-      this.trailGraphics.destroy();
+      this.trailGraphics.setVisible(false);
     }
-    this.destroy();
+
+    this.setVisible(false);
+    this.setActive(false);
   }
 }

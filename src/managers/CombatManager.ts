@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { Attribute } from '@/types';
 import { Tower } from '@/entities/Tower';
 import { Enemy } from '@/entities/Enemy';
 import { Projectile } from '@/entities/Projectile';
@@ -27,6 +28,36 @@ export class CombatManager {
     this.towerContainer = towerContainer;
     this.enemyContainer = enemyContainer;
     this.projectileContainer = projectileContainer;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Projectile pooling
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Obtain a projectile, reusing an inactive one from the container if available,
+   * or creating a fresh instance when the pool is empty (lazy pooling).
+   */
+  private getProjectile(
+    x: number,
+    y: number,
+    damage: number,
+    target: Enemy,
+    sourceAttribute: Attribute,
+  ): Projectile {
+    // Scan for an inactive projectile that can be recycled
+    const projectiles = this.projectileContainer.list as Projectile[];
+    for (const p of projectiles) {
+      if (!p.isActive && !p.visible) {
+        p.reset(x, y, damage, target, sourceAttribute);
+        return p;
+      }
+    }
+
+    // No recyclable projectile — allocate a new one and add to the container
+    const projectile = new Projectile(this.scene, x, y, damage, target, sourceAttribute);
+    this.projectileContainer.add(projectile);
+    return projectile;
   }
 
   // ---------------------------------------------------------------------------
@@ -73,10 +104,12 @@ export class CombatManager {
       }
     }
 
-    // Update all active projectiles
+    // Update only active projectiles (inactive ones are pooled for reuse)
     const projectiles = this.projectileContainer.list as Projectile[];
     for (const projectile of projectiles) {
-      projectile.update(_time, _delta);
+      if (projectile.isActive) {
+        projectile.update(_time, _delta);
+      }
     }
   }
 
@@ -119,8 +152,7 @@ export class CombatManager {
         const offsetX = isMultiHit ? (Math.random() - 0.5) * 12 : 0;
         const offsetY = isMultiHit ? (Math.random() - 0.5) * 12 : 0;
 
-        const projectile = new Projectile(
-          this.scene,
+        const projectile = this.getProjectile(
           tower.x + offsetX,
           tower.y + offsetY,
           damagePerProjectile,
@@ -161,7 +193,6 @@ export class CombatManager {
           }
         }
 
-        this.projectileContainer.add(projectile);
       };
 
       if (delay === 0) {
@@ -198,11 +229,17 @@ export class CombatManager {
   // ---------------------------------------------------------------------------
 
   /**
-   * Destroy all active projectiles. Called when resetting or ending the game.
+   * Destroy all projectiles (active and pooled). Called when resetting or
+   * ending the game. This fully destroys the Graphics objects so they are
+   * garbage-collected; the pool is emptied.
    */
   public cleanup(): void {
     const projectiles = [...this.projectileContainer.list] as Projectile[];
     for (const projectile of projectiles) {
+      // Destroy world-space trail graphics that live outside the container
+      if (projectile.trailGraphics) {
+        projectile.trailGraphics.destroy();
+      }
       projectile.destroy();
     }
   }

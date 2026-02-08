@@ -324,6 +324,9 @@ export class Enemy extends Phaser.GameObjects.Container {
       });
     }
 
+    // Death particles: small colored burst
+    this.spawnDeathParticles();
+
     // Death animation: fade out and shrink
     this.scene.tweens.add({
       targets: this,
@@ -336,6 +339,45 @@ export class Enemy extends Phaser.GameObjects.Container {
         this.destroy();
       },
     });
+  }
+
+  /**
+   * Spawn small colored particles on death for visual feedback.
+   */
+  private spawnDeathParticles(): void {
+    const ATTR_DEATH_COLORS: Record<Attribute, number> = {
+      [Attribute.VACCINE]: 0x44aaff,
+      [Attribute.DATA]: 0x44ff44,
+      [Attribute.VIRUS]: 0xff4444,
+      [Attribute.FREE]: 0xffff44,
+    };
+    const color = ATTR_DEATH_COLORS[this.attribute] ?? 0xffffff;
+    const count = this.isBoss ? 12 : 6;
+    const spread = this.isBoss ? 24 : 16;
+
+    for (let i = 0; i < count; i++) {
+      const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.5;
+      const dist = spread + Math.random() * spread;
+      const endX = this.x + Math.cos(angle) * dist;
+      const endY = this.y + Math.sin(angle) * dist;
+      const radius = this.isBoss ? 3 + Math.random() * 2 : 2 + Math.random() * 2;
+
+      const g = this.scene.add.graphics();
+      g.fillStyle(color, 0.9);
+      g.fillCircle(0, 0, radius);
+      g.setPosition(this.x, this.y);
+      g.setDepth(5);
+
+      this.scene.tweens.add({
+        targets: g,
+        x: endX,
+        y: endY,
+        alpha: 0,
+        duration: 250 + Math.random() * 150,
+        ease: 'Quad.easeOut',
+        onComplete: () => g.destroy(),
+      });
+    }
   }
 
   /**
