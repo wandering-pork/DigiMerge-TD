@@ -1975,9 +1975,11 @@ PAUSE MENU (In-Game)
 #### Accessibility Settings
 | Setting | Type | Default | Options | Description |
 |---------|------|---------|---------|-------------|
-| Colorblind Mode | Dropdown | Off | Off, Protanopia, Deuteranopia, Tritanopia | Color adjustments |
+| Colorblind Mode | Toggle | OFF | ON/OFF | Shows attribute symbols (V/D/X/F) on tower and enemy sprites |
 | Text Size | Dropdown | Medium | Small, Medium, Large | UI text scaling |
 | Reduced Motion | Toggle | OFF | ON/OFF | Minimize animations |
+
+> **Implementation note**: Colorblind mode is implemented as a simple ON/OFF toggle (not per-deficiency dropdown). When ON, single-letter attribute symbols (V=Vaccine, D=Data, X=Virus, F=Free) appear on all tower and enemy sprites, providing a non-color way to identify attributes.
 
 ### Default Configuration
 ```typescript
@@ -3317,7 +3319,7 @@ After **Sprint 6**, the game is playable:
 ## 18. Resources & References
 
 ### Project Documentation
-- **[DIGIMON_STATS_DATABASE.md](./DIGIMON_STATS_DATABASE.md)** - Complete roster of ~150 Digimon with stats, effects, and evolution paths
+- **[DIGIMON_STATS_DATABASE.md](./DIGIMON_STATS_DATABASE.md)** - Complete roster of ~257 Digimon (171 towers + 86 enemies) with stats, effects, and evolution paths
 - **[ENEMY_SPAWN_DESIGN.md](./ENEMY_SPAWN_DESIGN.md)** - Detailed wave-by-wave enemy spawn design for 100 waves + endless mode
 
 ### Sprite Resources

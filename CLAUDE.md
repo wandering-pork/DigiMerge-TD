@@ -490,7 +490,7 @@ cost = Math.ceil(3 * currentLevel * stageMultiplier);
 | Feature | Status | Notes |
 |---------|--------|-------|
 | Core TD loop | ✅ | Spawn, place, attack, waves |
-| 8 starters + evolutions | ✅ | ~40 tower Digimon, ~65 enemy Digimon |
+| 8 starters + evolutions | ✅ | ~171 tower Digimon, ~86 enemy Digimon |
 | 100 Waves + Endless | ✅ | 5 phases, 12 bosses, endless mode 101+ |
 | Level up system | ✅ | Pay DB to increase level |
 | Digivolve system | ✅ | At max level, choose path |
@@ -513,46 +513,35 @@ cost = Math.ceil(3 * currentLevel * stageMultiplier);
 | Floating damage numbers | ✅ | Color-coded by effectiveness, toggleable |
 | Health bar toggle | ✅ | All / Bosses Only / Off in Settings |
 | Wave preview | ✅ | Next wave composition in HUD |
-| 21 starter lines | ✅ | Tier 1+2 roster expansion (~105 tower Digimon) |
+| 21 starter lines | ✅ | Tier 1+2 roster expansion + Sprint 25 (~171 tower Digimon) |
 | Boss abilities | ✅ | 10 unique abilities (stun, drain, heal, shield, spawn, etc.) |
 | Tutorial | ✅ | 8-step overlay with highlights, skip, localStorage persistence |
 | Encyclopedia | ✅ | Browsable Digimon catalog with filters, pagination, detail view |
 | Enhanced wave preview | ✅ | Enemy sprites, type tags, boss ability names |
+| Statistics & post-game | ✅ | Per-tower tracking, MVP tower, high scores |
+| Keyboard shortcuts | ✅ | S/Del=sell, U=level up, D=deselect, Tab=cycle |
+| Range preview | ✅ | Teal range circle + ghost sprite on placement hover |
+| Object pooling | ✅ | Lazy pooling for projectiles and enemies |
+| Visual polish | ✅ | Boss death effects, tower attack animation, evolution preview |
+| Roster expansion | ✅ | ~171 towers including Ultra tier entries |
+| Colorblind mode | ✅ | V/D/X/F attribute symbols on sprites, toggle in Settings |
+| Game speed indicator | ✅ | Persistent badge over grid (amber 2x, red 3x) |
+
+### Completed Sprints (Post-MVP)
+- **Sprint 20**: Boss sprite fix, statistics tracking, sell formula (✅)
+- **Sprint 21**: Range preview, tooltips, warnings, keyboard shortcuts (✅)
+- **Sprint 22**: Per-tower tracking, post-game stats, high scores (✅)
+- **Sprint 23-Pre**: Wave preview text fix, removed auto-pause, robust game over (✅)
+- **Sprint 23A**: Object pooling for projectiles and enemies (✅)
+- **Sprint 24**: Boss death effects, tower attack animation, evolution path preview (✅)
+- **Sprint 25**: Roster expansion to ~171 towers + Ultra tier (✅)
+- **Sprint 27**: Colorblind mode (V/D/X/F symbols), game speed indicator (✅)
 
 ### Remaining Work
-
-**Bug Fixes & Foundation (Sprint 20):**
-- Wave 20 boss `boss_greymon_evolved` has missing sprite (key `greymon_evolved` not loaded)
-- Tower effect audit — playtest all 6 status effects
-- Wire up statistics tracking (GameStatistics interface exists but never populated)
-- Move sell value formula to Constants.ts (currently hardcoded `level * 25` in TowerInfoPanel)
-
-**Quality of Life (Sprint 21):**
-- Range preview + tower ghost on placement hover
-- SpawnMenu tooltips (attribute triangle, origin system, Digimon stats preview)
-- Low lives warning, boss incoming warning, critical state indicator
-- Keyboard shortcuts (sell, level up, deselect, cycle towers)
-
-**Statistics & Post-Game (Sprint 22):**
-- Per-tower kill count and damage tracking
-- Post-game stats screen (run summary, MVP tower, records)
-- Run history and high scores (localStorage)
-
-**Performance (Sprint 23):**
-- Object pooling for projectiles, enemies, and particles
-- Sprite sheet atlases (pack ~149 individual PNGs into atlases)
-
-**Visual Polish (Sprint 24):**
-- Boss/enemy death effects, tower attack animations
-- Evolution path preview with stat comparison in TowerInfoPanel
-
-**Content (Sprints 25-26):**
-- Roster expansion (~141 → 150+ tower Digimon)
-- DNA Digivolution system (Ultra tier, combine two Megas)
-
-**Accessibility (Sprint 27):**
-- Colorblind mode with attribute icons/symbols
-- High-contrast option, persistent game speed indicator
+- **Sprint 20B**: Tower effect audit (manual playtest of all 6 status effects)
+- **Sprint 23B**: Sprite sheet atlases (pack ~192 individual PNGs into atlases)
+- **Sprint 26**: DNA Digivolution system (Ultra tier, combine two Megas)
+- **Sprint 27 partial**: High-contrast mode, colorblind-friendly palette
 
 ---
 

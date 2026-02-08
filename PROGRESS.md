@@ -7,7 +7,7 @@
 Live at: https://wandering-pork.github.io/DigiMerge-TD/
 
 ### What's Built
-- ~171 tower Digimon (21 starter lines + alternate evolutions + Ultra tier), ~76 enemy Digimon, 12 bosses with unique abilities
+- ~171 tower Digimon (21 starter lines + alternate evolutions + Ultra tier), ~86 enemy Digimon, 12 bosses with unique abilities
 - 100 main waves across 5 phases + endless mode (101+)
 - Full merge, digivolve, DP, and origin systems + merge ability inheritance (bonus effects)
 - Status effects (burn, poison, slow, freeze, stun, armor break) with visual feedback
@@ -18,7 +18,7 @@ Live at: https://wandering-pork.github.io/DigiMerge-TD/
 - Background music (menu + battle themes), game speed (1x/2x/3x)
 - Visual merge effect (particle burst), right-click cancel, placement cancel
 - Credits scene with disclaimer, version v1.0.0
-- Sprout Lands tileset, 149 loaded sprites, 17 SFX, 2 music tracks
+- Sprout Lands tileset, 192 loaded sprites, 17 SFX, 2 music tracks
 - Volume persistence across scenes (localStorage), improved UI text readability
 - Statistics tracking (kills, towers, merges, digivolutions, DB earned, playtime)
 - Per-tower kill count and damage tracking, MVP tower in post-game
@@ -257,7 +257,7 @@ Live at: https://wandering-pork.github.io/DigiMerge-TD/
 - [ ] Pack enemy sprites into atlas(es) by phase
 - [ ] Pack UI/effect sprites into atlas
 - [ ] Update PreloadScene to load atlases instead of individual PNGs
-- [ ] Measure load time improvement (currently ~149 individual sprite loads)
+- [ ] Measure load time improvement (currently ~192 individual sprite loads)
 
 ---
 
