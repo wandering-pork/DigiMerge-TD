@@ -19,7 +19,7 @@ export const GRID_OFFSET_Y = 36;
 export const SPAWN_COSTS = {
   [Stage.IN_TRAINING]: { random: 75, specific: 120 },
   [Stage.ROOKIE]: { random: 225, specific: 350 },
-  [Stage.CHAMPION]: { random: 600, specific: 900 },
+  [Stage.CHAMPION]: { random: 750, specific: 1100 },
 } as const;
 
 // Digivolve Costs per stage transition
@@ -46,9 +46,9 @@ export const ORIGIN_MAX_STAGE: Record<Stage, Stage> = {
 };
 
 // Game Defaults
-export const STARTING_LIVES = 20;
-export const MAX_LIVES = 20;
-export const STARTING_DIGIBYTES = 500;
+export const STARTING_LIVES = 25;
+export const MAX_LIVES = 25;
+export const STARTING_DIGIBYTES = 750;
 export const TOTAL_WAVES_MVP = 100;
 
 // Stage multipliers for level up cost
@@ -56,15 +56,15 @@ export const STAGE_LEVEL_COST_MULTIPLIER: Record<Stage, number> = {
   [Stage.IN_TRAINING]: 1,
   [Stage.ROOKIE]: 1.5,
   [Stage.CHAMPION]: 2,
-  [Stage.ULTIMATE]: 3,
-  [Stage.MEGA]: 4,
-  [Stage.ULTRA]: 5,
+  [Stage.ULTIMATE]: 2.5,
+  [Stage.MEGA]: 3,
+  [Stage.ULTRA]: 3.5,
 };
 
-// Level up cost formula: 3 * currentLevel * stageMultiplier
+// Level up cost formula: 2 * currentLevel * stageMultiplier
 export function getLevelUpCost(currentLevel: number, stage?: Stage): number {
   const multiplier = stage !== undefined ? STAGE_LEVEL_COST_MULTIPLIER[stage] : 1;
-  return Math.ceil(3 * currentLevel * multiplier);
+  return Math.ceil(2 * currentLevel * multiplier);
 }
 
 // All 21 starter Digimon IDs (In-Training stage)
@@ -82,7 +82,7 @@ export const GAME_SPEEDS = [1, 2, 3] as const;
 
 // Damage formula
 export function calculateDamage(baseDamage: number, level: number, attributeMultiplier: number): number {
-  return baseDamage * (1 + level * 0.02) * attributeMultiplier;
+  return baseDamage * (1 + level * 0.03) * attributeMultiplier;
 }
 
 // Max level formula
@@ -202,7 +202,7 @@ export function getSellPrice(level: number, stage: Stage): number {
   let levelUpInvestment = 0;
   const multiplier = STAGE_LEVEL_COST_MULTIPLIER[stage] ?? 1;
   for (let lv = 1; lv < level; lv++) {
-    levelUpInvestment += Math.ceil(3 * lv * multiplier);
+    levelUpInvestment += Math.ceil(2 * lv * multiplier);
   }
 
   const totalInvestment = baseCost + levelUpInvestment;
