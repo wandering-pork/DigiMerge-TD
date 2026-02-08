@@ -7,7 +7,7 @@
 Live at: https://wandering-pork.github.io/DigiMerge-TD/
 
 ### What's Built
-- ~141 tower Digimon (21 starter lines + 36 alternate evolution towers), ~65 enemy Digimon, 12 bosses with unique abilities
+- ~171 tower Digimon (21 starter lines + alternate evolutions + Ultra tier), ~76 enemy Digimon, 12 bosses with unique abilities
 - 100 main waves across 5 phases + endless mode (101+)
 - Full merge, digivolve, DP, and origin systems + merge ability inheritance (bonus effects)
 - Status effects (burn, poison, slow, freeze, stun, armor break) with visual feedback
@@ -285,14 +285,19 @@ Live at: https://wandering-pork.github.io/DigiMerge-TD/
 
 ---
 
-### Sprint 25 — Roster Expansion
+### Sprint 25 — Roster Expansion ✓
 
-- [ ] Audit current roster: ~141 towers across 21 lines, identify gaps
-- [ ] Add more alternate evolution paths using available sprites (842 total, ~149 used)
-- [ ] Target: 150+ tower Digimon
-- [ ] Add new enemy variants for underrepresented types (flying, regen, splitter)
+- [x] Audited roster: 153 towers across 21 lines, identified attribute imbalance (FREE underrepresented)
+- [x] Added 18 new tower Digimon using available sprites (842 total, ~181 now loaded)
+- [x] Added first Ultra-tier towers (5 entries: Susanoomon, AncientGreymon, AncientGarurumon, Examon + more)
+- [x] New Virus towers: Wormmon, Stingmon, Jewelbeemon, Titamon (Pagumon/Gigimon alt branches)
+- [x] New Free towers: Hawkmon, Aquilamon, Silphymon, Magnamon, Susanoomon (Chocomon/DemiVeemon branches)
+- [x] New Vaccine towers: MarineAngemon, Dynasmon, KaiserGreymon, AncientGreymon (Pukamon/Caprimon/Koromon branches)
+- [x] New Data towers: UlforceVdramon, Craniummon, MagnaGarurumon, Examon, AncientGarurumon (DemiVeemon/Caprimon/Tsunomon/Dorimon branches)
+- [x] Connected all new entries to existing starter evolution paths
+- [x] Loaded 18 new sprites in PreloadScene
+- [ ] Add new enemy variants for underrepresented types
 - [ ] Balance new entries against existing towers at each stage
-- [ ] Update tests for new database entries
 
 ---
 

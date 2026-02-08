@@ -51,6 +51,7 @@ export const EVOLUTION_PATHS: Record<string, EvolutionPath[]> = {
 
   metalgreymon: [
     { resultId: 'wargreymon', minDP: 0, maxDP: 999, isDefault: true },
+    { resultId: 'kaisergreymon', minDP: 3, maxDP: 999, isDefault: false },
   ],
 
   // ========================================
@@ -74,6 +75,7 @@ export const EVOLUTION_PATHS: Record<string, EvolutionPath[]> = {
 
   weregarurumon: [
     { resultId: 'metalgarurumon', minDP: 0, maxDP: 999, isDefault: true },
+    { resultId: 'magnagarurumon', minDP: 3, maxDP: 999, isDefault: false },
   ],
 
   // ========================================
@@ -118,6 +120,7 @@ export const EVOLUTION_PATHS: Record<string, EvolutionPath[]> = {
 
   wargrowlmon: [
     { resultId: 'gallantmon', minDP: 0, maxDP: 5, isDefault: true },
+    { resultId: 'titamon', minDP: 3, maxDP: 999, isDefault: false },
     { resultId: 'megidramon', minDP: 12, maxDP: 999, isDefault: false },
     { resultId: 'chaosgallantmon', minDP: 9, maxDP: 999, isDefault: false },
   ],
@@ -160,10 +163,12 @@ export const EVOLUTION_PATHS: Record<string, EvolutionPath[]> = {
 
   exveemon: [
     { resultId: 'paildramon', minDP: 0, maxDP: 999, isDefault: true },
+    { resultId: 'magnamon', minDP: 3, maxDP: 999, isDefault: false },
   ],
 
   paildramon: [
     { resultId: 'imperialdramon_fm', minDP: 0, maxDP: 999, isDefault: true },
+    { resultId: 'ulforcevdramon', minDP: 3, maxDP: 999, isDefault: false },
   ],
 
   // ========================================
@@ -172,6 +177,7 @@ export const EVOLUTION_PATHS: Record<string, EvolutionPath[]> = {
 
   pagumon: [
     { resultId: 'demidevimon', minDP: 0, maxDP: 999, isDefault: true },
+    { resultId: 'wormmon', minDP: 1, maxDP: 3, isDefault: false },
     { resultId: 'gazimon_tower', minDP: 3, maxDP: 4, isDefault: false },
     { resultId: 'betamon_tower', minDP: 5, maxDP: 7, isDefault: false },
     { resultId: 'kunemon_tower', minDP: 8, maxDP: 10, isDefault: false },
@@ -259,6 +265,7 @@ export const EVOLUTION_PATHS: Record<string, EvolutionPath[]> = {
 
   chocomon: [
     { resultId: 'lopmon', minDP: 0, maxDP: 999, isDefault: true },
+    { resultId: 'hawkmon', minDP: 1, maxDP: 3, isDefault: false },
   ],
 
   lopmon: [
@@ -331,6 +338,7 @@ export const EVOLUTION_PATHS: Record<string, EvolutionPath[]> = {
 
   zudomon_tower: [
     { resultId: 'plesiomon', minDP: 0, maxDP: 999, isDefault: true },
+    { resultId: 'marineangemon', minDP: 3, maxDP: 999, isDefault: false },
   ],
 
   // ========================================
@@ -351,6 +359,10 @@ export const EVOLUTION_PATHS: Record<string, EvolutionPath[]> = {
 
   doruguremon: [
     { resultId: 'alphamon', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  alphamon: [
+    { resultId: 'examon', minDP: 0, maxDP: 999, isDefault: true },
   ],
 
   // ========================================
@@ -471,6 +483,56 @@ export const EVOLUTION_PATHS: Record<string, EvolutionPath[]> = {
 
   saviorhackmon: [
     { resultId: 'jesmon', minDP: 0, maxDP: 999, isDefault: true },
+    { resultId: 'dynasmon', minDP: 3, maxDP: 999, isDefault: false },
+    { resultId: 'craniummon', minDP: 5, maxDP: 999, isDefault: false },
+  ],
+
+  // ========================================
+  // Roster Expansion — Wormmon Line (Virus)
+  // ========================================
+
+  wormmon: [
+    { resultId: 'stingmon', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  stingmon: [
+    { resultId: 'jewelbeemon', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  // ========================================
+  // Roster Expansion — Hawkmon Line (Free)
+  // ========================================
+
+  hawkmon: [
+    { resultId: 'aquilamon', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  aquilamon: [
+    { resultId: 'silphymon', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  // ========================================
+  // Roster Expansion — Magnamon → Susanoomon (Free)
+  // ========================================
+
+  magnamon: [
+    { resultId: 'susanoomon', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  // ========================================
+  // Roster Expansion — KaiserGreymon → AncientGreymon (Vaccine)
+  // ========================================
+
+  kaisergreymon: [
+    { resultId: 'ancientgreymon', minDP: 0, maxDP: 999, isDefault: true },
+  ],
+
+  // ========================================
+  // Roster Expansion — MagnaGarurumon → AncientGarurumon (Data)
+  // ========================================
+
+  magnagarurumon: [
+    { resultId: 'ancientgarurumon', minDP: 0, maxDP: 999, isDefault: true },
   ],
 
   // ========================================

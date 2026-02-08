@@ -218,6 +218,32 @@ export class PreloadScene extends Phaser.Scene {
       saviorhackmon: 'SaviorHackmon.png',
       jesmon: 'Jesmon.png',
 
+      // Roster Expansion — Virus
+      wormmon: 'Wormmon.png',
+      stingmon: 'Stingmon.png',
+      Jewelbeemon: 'Jewelbeemon.png',
+      Titamon: 'Titamon.png',
+
+      // Roster Expansion — Free
+      Hawkmon: 'Hawkmon.png',
+      Aquilamon: 'Aquilamon.png',
+      Silphymon: 'Silphymon.png',
+      Magnamon: 'Magnamon.png',
+      Susanoomon: 'Susanoomon.png',
+
+      // Roster Expansion — Vaccine
+      MarineAngemon: 'MarineAngemon.png',
+      Dynasmon: 'Dynasmon.png',
+      KaiserGreymon: 'KaiserGreymon.png',
+      AncientGreymon: 'AncientGreymon.png',
+
+      // Roster Expansion — Data
+      'UlforceV-dramon': 'UlforceV-dramon.png',
+      Craniummon: 'Craniummon.png',
+      MagnaGarurumon: 'MagnaGarurumon.png',
+      Examon: 'Examon.png',
+      AncientGarurumon: 'AncientGarurumon.png',
+
       // Enemy-only sprites
       goblimon: 'Goblimon.png',
       gazimon: 'Gazimon.png',
