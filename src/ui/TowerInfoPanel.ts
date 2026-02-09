@@ -11,7 +11,7 @@ import { STATUS_EFFECTS, STATUS_EFFECT_CONFIGS } from '@/data/StatusEffects';
 import { COLORS, ATTRIBUTE_COLORS_STR, TEXT_STYLES, FONTS, ANIM } from './UITheme';
 import { drawPanel, drawButton, drawSeparator, animateSlideIn, animateSlideOut, animateButtonHover, animateButtonPress } from './UIHelpers';
 import { canDisplaySprite, getStaticFrame } from '@/utils/SpriteAnimHelper';
-import { DIGIMON_DESCRIPTIONS } from '@/data/DigimonDescriptions';
+// DIGIMON_DESCRIPTIONS import removed — skill info shown in header instead of lore
 
 /**
  * Parse a compound effect type (e.g., 'burn_aoe', 'slow_pierce') into
@@ -211,6 +211,9 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
   private mergeBtnBg!: Phaser.GameObjects.Graphics;
   private mergeBtnText!: Phaser.GameObjects.Text;
 
+  // Separator before action buttons (repositioned dynamically)
+  private actionSeparator!: Phaser.GameObjects.Graphics;
+
   // Bonus effects from merge inheritance
   private bonusEffectTexts: Phaser.GameObjects.Text[] = [];
 
@@ -288,11 +291,11 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
     });
     this.add(this.nameText);
 
-    // Description subtitle
+    // Skill description subtitle (shows effect info instead of lore)
     this.descText = this.scene.add.text(75, 44, '', {
       fontFamily: FONTS.BODY,
       fontSize: '10px',
-      color: '#7788aa',
+      color: '#ffaa44',
       wordWrap: { width: w - 90 },
       maxLines: 2,
       resolution: 2,
@@ -343,39 +346,18 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
     this.totalDmgText = this.createStatRow('Total Dmg', statsX, statsValueX, statsY);
     statsY += lineH;
 
-    // Skill display row
-    this.skillNameText = this.scene.add.text(statsX, statsY, '', {
-      ...TEXT_STYLES.PANEL_LABEL,
-      color: '#ffaa44',
-      fontSize: '13px',
-      resolution: 2,
-    });
+    // Skill display rows (hidden — skill info now in header description)
+    this.skillNameText = this.scene.add.text(0, 0, '', { fontSize: '1px', resolution: 2 }).setVisible(false);
     this.add(this.skillNameText);
-
-    this.skillChanceText = this.scene.add.text(statsValueX, statsY, '', {
-      ...TEXT_STYLES.PANEL_VALUE,
-      color: '#ffaa44',
-      fontSize: '13px',
-      resolution: 2,
-    }).setOrigin(1, 0);
+    this.skillChanceText = this.scene.add.text(0, 0, '', { fontSize: '1px', resolution: 2 }).setVisible(false);
     this.add(this.skillChanceText);
-    statsY += 18;
-
-    // Skill description (below skill name row)
-    this.skillDescText = this.scene.add.text(statsX, statsY, '', {
-      ...TEXT_STYLES.PANEL_LABEL,
-      color: '#bbaa77',
-      fontSize: '11px',
-      wordWrap: { width: w - 30 },
-      resolution: 2,
-    });
+    this.skillDescText = this.scene.add.text(0, 0, '', { fontSize: '1px', resolution: 2 }).setVisible(false);
     this.add(this.skillDescText);
-    statsY += 18;
 
-    // Third separator
-    const separator3 = this.scene.add.graphics();
-    drawSeparator(separator3, 10, statsY + 2, w - 10);
-    this.add(separator3);
+    // Action separator (repositioned dynamically in refresh())
+    this.actionSeparator = this.scene.add.graphics();
+    drawSeparator(this.actionSeparator, 10, statsY + 2, w - 10);
+    this.add(this.actionSeparator);
     statsY += 14;
 
     // --- Level Up Button ---
@@ -398,16 +380,17 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
     statsY += 42;
 
     // --- Level Up +5 and Max buttons (side by side) ---
-    const smallBtnW = 95;
+    const smallBtnW = 90;
     const smallBtnH = 30;
+    const smallBtnGap = 8;
 
     // +5 button (left)
-    this.levelUp5Btn = this.scene.add.container(w / 2 - smallBtnW / 2 - 3, statsY);
+    this.levelUp5Btn = this.scene.add.container(w / 2 - smallBtnW / 2 - smallBtnGap / 2, statsY);
     this.levelUp5BtnBg = this.scene.add.graphics();
     drawButton(this.levelUp5BtnBg, smallBtnW, smallBtnH, COLORS.SUCCESS);
     this.levelUp5Btn.add(this.levelUp5BtnBg);
 
-    this.levelUp5BtnText = this.scene.add.text(0, 0, 'Lv +5', { ...TEXT_STYLES.BUTTON_SM, fontSize: '11px' }).setOrigin(0.5);
+    this.levelUp5BtnText = this.scene.add.text(0, 0, 'Lv +5', { ...TEXT_STYLES.BUTTON_SM, fontSize: '10px' }).setOrigin(0.5);
     this.levelUp5Btn.add(this.levelUp5BtnText);
 
     const lv5HitArea = new Phaser.Geom.Rectangle(-smallBtnW / 2, -smallBtnH / 2, smallBtnW, smallBtnH);
@@ -419,12 +402,12 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
     this.add(this.levelUp5Btn);
 
     // Max button (right)
-    this.levelUpMaxBtn = this.scene.add.container(w / 2 + smallBtnW / 2 + 3, statsY);
+    this.levelUpMaxBtn = this.scene.add.container(w / 2 + smallBtnW / 2 + smallBtnGap / 2, statsY);
     this.levelUpMaxBtnBg = this.scene.add.graphics();
     drawButton(this.levelUpMaxBtnBg, smallBtnW, smallBtnH, COLORS.SPECIAL);
     this.levelUpMaxBtn.add(this.levelUpMaxBtnBg);
 
-    this.levelUpMaxBtnText = this.scene.add.text(0, 0, 'Lv MAX', { ...TEXT_STYLES.BUTTON_SM, fontSize: '11px' }).setOrigin(0.5);
+    this.levelUpMaxBtnText = this.scene.add.text(0, 0, 'Lv MAX', { ...TEXT_STYLES.BUTTON_SM, fontSize: '10px' }).setOrigin(0.5);
     this.levelUpMaxBtn.add(this.levelUpMaxBtnText);
 
     const lvMaxHitArea = new Phaser.Geom.Rectangle(-smallBtnW / 2, -smallBtnH / 2, smallBtnW, smallBtnH);
@@ -619,8 +602,11 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
     // Header
     this.nameText.setText(tower.stats.name);
 
-    // Description
-    const desc = DIGIMON_DESCRIPTIONS[tower.digimonId] || tower.stats.description || '';
+    // Description — show skill info in header instead of lore
+    const skillInfo = getSkillDisplay(tower.stats.effectType, tower.stats.effectChance);
+    const desc = skillInfo
+      ? `${skillInfo.name} (${skillInfo.chance})\n${skillInfo.description}`
+      : '';
     this.descText.setText(desc);
     this.descText.setVisible(!!desc);
 
@@ -664,68 +650,80 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
       ? `${(tower.totalDamageDealt / 1000).toFixed(1)}K`
       : `${Math.round(tower.totalDamageDealt)}`);
 
-    // Skill display
-    const skillInfo = getSkillDisplay(tower.stats.effectType, tower.stats.effectChance);
-    if (skillInfo) {
-      this.skillNameText.setText(skillInfo.name);
-      this.skillChanceText.setText(skillInfo.chance);
-      this.skillDescText.setText(skillInfo.description);
-      this.skillNameText.setVisible(true);
-      this.skillChanceText.setVisible(true);
-      this.skillDescText.setVisible(true);
-    } else {
-      this.skillNameText.setVisible(false);
-      this.skillChanceText.setVisible(false);
-      this.skillDescText.setVisible(false);
-    }
+    // Skill display rows hidden — info now in header description
+    this.skillNameText.setVisible(false);
+    this.skillChanceText.setVisible(false);
+    this.skillDescText.setVisible(false);
 
     // Bonus effects display (from merge inheritance)
     if (this.bonusEffectTexts) {
       for (const t of this.bonusEffectTexts) t.destroy();
     }
     this.bonusEffectTexts = [];
+
+    // --- Fluid layout: position everything below stats dynamically ---
+    const w = TowerInfoPanel.PANEL_WIDTH;
+    let actionY = this.totalDmgText.y + 26;
+
+    // Bonus effects go right after Total Dmg
     if (tower.bonusEffects && tower.bonusEffects.length > 0) {
-      let bonusY = (skillInfo ? this.skillDescText.y + 18 : this.skillNameText.y);
       for (const bonus of tower.bonusEffects) {
         const bonusInfo = getSkillDisplay(bonus.effectType, bonus.effectChance);
         if (bonusInfo) {
           const bonusText = this.scene.add.text(
-            10, bonusY,
+            10, actionY,
             `+ ${bonusInfo.name} (${bonusInfo.chance})`,
             { fontFamily: 'monospace', fontSize: '13px', color: '#88ddaa', resolution: 2 }
           );
           this.add(bonusText);
           this.bonusEffectTexts.push(bonusText);
-          bonusY += 16;
+          actionY += 16;
         }
       }
+      actionY += 4;
     }
 
-    // Level Up buttons
+    // Separator
+    this.actionSeparator.clear();
+    drawSeparator(this.actionSeparator, 10, actionY + 2, w - 10);
+    actionY += 14;
+
+    // Level Up button
+    this.levelUpBtn.y = actionY;
     this.refreshLevelUpButton(maxLevel);
+    actionY += 38;
+
+    // +5 / Max buttons
+    const isMaxed = !canLevelUp(tower.level, maxLevel);
+    this.levelUp5Btn.y = actionY;
+    this.levelUpMaxBtn.y = actionY;
     this.refreshMultiLevelButtons(maxLevel);
+    if (!isMaxed) actionY += 38;
 
     // Target priority
+    this.priorityLabel.y = actionY;
+    this.priorityBtn.y = actionY + 10;
     this.priorityBtnText.setText(TARGET_PRIORITY_LABELS[tower.targetPriority]);
+    actionY += 46;
 
     // Sell button
+    this.sellBtn.y = actionY;
     const sellPrice = this.getSellPrice();
     this.sellBtnText.setText(`Sell [S] (+${sellPrice} DB)`);
+    actionY += 44;
 
     // Digivolve button - show only at max level with evolution paths
-    const isMaxed = !canLevelUp(tower.level, maxLevel);
     const evolutions = getEvolutions(tower.digimonId, tower.dp);
     if (isMaxed && evolutions.length > 0) {
       this.digivolveBtn.setVisible(true);
+      this.digivolveBtn.y = actionY;
+      actionY += 44;
     } else {
       this.digivolveBtn.setVisible(false);
     }
 
-    // Merge button — position after digivolve (if visible) or sell
-    const mergeY = this.digivolveBtn.visible
-      ? this.digivolveBtn.y + 44
-      : this.sellBtn.y + 44;
-    this.mergeBtn.y = mergeY;
+    // Merge button
+    this.mergeBtn.y = actionY;
     this.mergeBtn.setVisible(true);
     this.mergeBtnText.setText('Merge...');
   }
@@ -831,18 +829,18 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
     if (canAffordAll5) {
       const levels5 = targetLv5 - tower.level;
       this.levelUp5BtnText.setText(`+${levels5} (${cost5})`);
-      drawButton(this.levelUp5BtnBg, 95, 30, COLORS.SUCCESS);
+      drawButton(this.levelUp5BtnBg, 90, 30, COLORS.SUCCESS);
       this.levelUp5BtnText.setColor('#ffffff');
     } else if (canAffordSome5) {
       const affordableLevels = affordable5 - tower.level;
       const partialCost5 = getTotalLevelUpCost(tower.level, affordable5, tower.stage);
       this.levelUp5BtnText.setText(`+${affordableLevels} (${partialCost5})`);
-      drawButton(this.levelUp5BtnBg, 95, 30, COLORS.SUCCESS);
+      drawButton(this.levelUp5BtnBg, 90, 30, COLORS.SUCCESS);
       this.levelUp5BtnText.setColor('#ffffff');
     } else {
       const levels5 = targetLv5 - tower.level;
       this.levelUp5BtnText.setText(`+${levels5} (${cost5})`);
-      drawButton(this.levelUp5BtnBg, 95, 30, COLORS.DISABLED);
+      drawButton(this.levelUp5BtnBg, 90, 30, COLORS.DISABLED);
       this.levelUp5BtnText.setColor(COLORS.TEXT_LIVES);
     }
 
@@ -854,16 +852,16 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
 
     if (canAffordAll) {
       this.levelUpMaxBtnText.setText(`MAX (${costMax})`);
-      drawButton(this.levelUpMaxBtnBg, 95, 30, COLORS.SPECIAL);
+      drawButton(this.levelUpMaxBtnBg, 90, 30, COLORS.SPECIAL);
       this.levelUpMaxBtnText.setColor('#ffffff');
     } else if (canAffordSome) {
       const partialCost = getTotalLevelUpCost(tower.level, affordableMax, tower.stage);
       this.levelUpMaxBtnText.setText(`→${affordableMax} (${partialCost})`);
-      drawButton(this.levelUpMaxBtnBg, 95, 30, COLORS.SPECIAL);
+      drawButton(this.levelUpMaxBtnBg, 90, 30, COLORS.SPECIAL);
       this.levelUpMaxBtnText.setColor('#ffffff');
     } else {
       this.levelUpMaxBtnText.setText(`MAX (${costMax})`);
-      drawButton(this.levelUpMaxBtnBg, 95, 30, COLORS.DISABLED);
+      drawButton(this.levelUpMaxBtnBg, 90, 30, COLORS.DISABLED);
       this.levelUpMaxBtnText.setColor(COLORS.TEXT_LIVES);
     }
   }

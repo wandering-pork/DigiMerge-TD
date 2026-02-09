@@ -1449,16 +1449,17 @@ export class GameScene extends Phaser.Scene {
       });
     }
 
-    // Start Wave button
-    const btnW = 200;
-    const btnH = 36;
-    this.startWaveBtn = this.add.container(btnCenterX, hudY + 155);
+    // Start Wave button + Auto-Start toggle (same row)
+    const btnW = 140;
+    const btnH = 30;
+    const waveRowY = hudY + 142;
+    this.startWaveBtn = this.add.container(btnCenterX - 30, waveRowY);
     this.startWaveBtnBg = this.add.graphics();
     drawButton(this.startWaveBtnBg, btnW, btnH, COLORS.PRIMARY);
     this.startWaveBtn.add(this.startWaveBtnBg);
 
     this.startWaveBtnText = this.add.text(0, 0, 'Start Wave', {
-      ...TEXT_STYLES.BUTTON, fontSize: '14px',
+      ...TEXT_STYLES.BUTTON, fontSize: '13px',
     }).setOrigin(0.5);
     this.startWaveBtn.add(this.startWaveBtnText);
 
@@ -1486,16 +1487,16 @@ export class GameScene extends Phaser.Scene {
       }
     });
 
-    // Auto-start toggle
-    const autoW = 200;
-    const autoH = 24;
-    const autoContainer = this.add.container(btnCenterX, hudY + 192);
+    // Auto-start toggle (compact, right of Start Wave)
+    const autoW = 50;
+    const autoH = 30;
+    const autoContainer = this.add.container(btnCenterX + btnW / 2 - 5, waveRowY);
     this.autoStartBtnBg = this.add.graphics();
     drawButton(this.autoStartBtnBg, autoW, autoH, COLORS.BG_PANEL_LIGHT);
     autoContainer.add(this.autoStartBtnBg);
 
-    this.autoStartBtnText = this.add.text(0, 0, 'Auto Start: OFF', {
-      ...TEXT_STYLES.BUTTON_SM, fontSize: '11px',
+    this.autoStartBtnText = this.add.text(0, 0, 'Auto', {
+      ...TEXT_STYLES.BUTTON_SM, fontSize: '10px',
     }).setOrigin(0.5);
     autoContainer.add(this.autoStartBtnText);
 
@@ -1516,33 +1517,36 @@ export class GameScene extends Phaser.Scene {
       this.updateAutoStartDisplay();
     });
 
-    // Pause & Settings buttons side by side
-    const smallBtnW = 95;
-    const smallBtnH = 30;
-    const btnRowY = hudY + 228;
+    // Pause, Settings, Encyclopedia — single row of 3 compact buttons
+    const triW = 65;
+    const triH = 26;
+    const triY = hudY + 176;
+    const triGap = 5;
+    const triTotalW = triW * 3 + triGap * 2;
+    const triStartX = btnCenterX - triTotalW / 2 + triW / 2;
 
-    // Pause button (left)
-    const pauseContainer = this.add.container(btnCenterX - smallBtnW / 2 - 6, btnRowY);
+    // Pause button
+    const pauseContainer = this.add.container(triStartX, triY);
     const pauseBtnBg = this.add.graphics();
-    drawButton(pauseBtnBg, smallBtnW, smallBtnH, COLORS.PRIMARY);
+    drawButton(pauseBtnBg, triW, triH, COLORS.PRIMARY);
     pauseContainer.add(pauseBtnBg);
 
     const pauseBtnText = this.add.text(0, 0, '|| Pause', {
-      ...TEXT_STYLES.BUTTON_SM, fontSize: '12px',
+      ...TEXT_STYLES.BUTTON_SM, fontSize: '11px',
     }).setOrigin(0.5);
     pauseContainer.add(pauseBtnText);
 
-    const pauseHitArea = new Phaser.Geom.Rectangle(-smallBtnW / 2, -smallBtnH / 2, smallBtnW, smallBtnH);
+    const pauseHitArea = new Phaser.Geom.Rectangle(-triW / 2, -triH / 2, triW, triH);
     pauseContainer.setInteractive(pauseHitArea, Phaser.Geom.Rectangle.Contains);
     pauseContainer.input!.cursor = 'pointer';
     pauseContainer.setDepth(10);
 
     pauseContainer.on('pointerover', () => {
-      drawButton(pauseBtnBg, smallBtnW, smallBtnH, COLORS.PRIMARY_HOVER, { glowRing: true });
+      drawButton(pauseBtnBg, triW, triH, COLORS.PRIMARY_HOVER, { glowRing: true });
       animateButtonHover(this, pauseContainer, true);
     });
     pauseContainer.on('pointerout', () => {
-      drawButton(pauseBtnBg, smallBtnW, smallBtnH, COLORS.PRIMARY);
+      drawButton(pauseBtnBg, triW, triH, COLORS.PRIMARY);
       animateButtonHover(this, pauseContainer, false);
     });
     pauseContainer.on('pointerdown', () => {
@@ -1551,28 +1555,28 @@ export class GameScene extends Phaser.Scene {
       this.scene.pause();
     });
 
-    // Settings button (right)
-    const settingsContainer = this.add.container(btnCenterX + smallBtnW / 2 + 6, btnRowY);
+    // Settings button
+    const settingsContainer = this.add.container(triStartX + triW + triGap, triY);
     const settingsBtnBg = this.add.graphics();
-    drawButton(settingsBtnBg, smallBtnW, smallBtnH, COLORS.BG_PANEL_LIGHT);
+    drawButton(settingsBtnBg, triW, triH, COLORS.BG_PANEL_LIGHT);
     settingsContainer.add(settingsBtnBg);
 
-    const settingsBtnText = this.add.text(0, 0, '\u2699 Settings', {
-      ...TEXT_STYLES.BUTTON_SM, fontSize: '12px',
+    const settingsBtnText = this.add.text(0, 0, '\u2699 Set', {
+      ...TEXT_STYLES.BUTTON_SM, fontSize: '11px',
     }).setOrigin(0.5);
     settingsContainer.add(settingsBtnText);
 
-    const settingsHitArea = new Phaser.Geom.Rectangle(-smallBtnW / 2, -smallBtnH / 2, smallBtnW, smallBtnH);
+    const settingsHitArea = new Phaser.Geom.Rectangle(-triW / 2, -triH / 2, triW, triH);
     settingsContainer.setInteractive(settingsHitArea, Phaser.Geom.Rectangle.Contains);
     settingsContainer.input!.cursor = 'pointer';
     settingsContainer.setDepth(10);
 
     settingsContainer.on('pointerover', () => {
-      drawButton(settingsBtnBg, smallBtnW, smallBtnH, COLORS.BG_HOVER, { glowRing: true });
+      drawButton(settingsBtnBg, triW, triH, COLORS.BG_HOVER, { glowRing: true });
       animateButtonHover(this, settingsContainer, true);
     });
     settingsContainer.on('pointerout', () => {
-      drawButton(settingsBtnBg, smallBtnW, smallBtnH, COLORS.BG_PANEL_LIGHT);
+      drawButton(settingsBtnBg, triW, triH, COLORS.BG_PANEL_LIGHT);
       animateButtonHover(this, settingsContainer, false);
     });
     settingsContainer.on('pointerdown', () => {
@@ -1580,30 +1584,28 @@ export class GameScene extends Phaser.Scene {
       this.scene.launch('SettingsScene');
     });
 
-    // Encyclopedia button (full width, below Pause/Settings row)
-    const encBtnW = 200;
-    const encBtnH = 28;
-    const encContainer = this.add.container(btnCenterX, hudY + 254);
+    // Encyclopedia button (compact)
+    const encContainer = this.add.container(triStartX + (triW + triGap) * 2, triY);
     const encBtnBg = this.add.graphics();
-    drawButton(encBtnBg, encBtnW, encBtnH, COLORS.BG_PANEL_LIGHT);
+    drawButton(encBtnBg, triW, triH, COLORS.BG_PANEL_LIGHT);
     encContainer.add(encBtnBg);
 
-    const encBtnText = this.add.text(0, 0, '\ud83d\udcd6 Encyclopedia', {
-      ...TEXT_STYLES.BUTTON_SM, fontSize: '12px',
+    const encBtnText = this.add.text(0, 0, '\ud83d\udcd6 Dex', {
+      ...TEXT_STYLES.BUTTON_SM, fontSize: '11px',
     }).setOrigin(0.5);
     encContainer.add(encBtnText);
 
-    const encHitArea = new Phaser.Geom.Rectangle(-encBtnW / 2, -encBtnH / 2, encBtnW, encBtnH);
+    const encHitArea = new Phaser.Geom.Rectangle(-triW / 2, -triH / 2, triW, triH);
     encContainer.setInteractive(encHitArea, Phaser.Geom.Rectangle.Contains);
     encContainer.input!.cursor = 'pointer';
     encContainer.setDepth(10);
 
     encContainer.on('pointerover', () => {
-      drawButton(encBtnBg, encBtnW, encBtnH, COLORS.BG_HOVER, { glowRing: true });
+      drawButton(encBtnBg, triW, triH, COLORS.BG_HOVER, { glowRing: true });
       animateButtonHover(this, encContainer, true);
     });
     encContainer.on('pointerout', () => {
-      drawButton(encBtnBg, encBtnW, encBtnH, COLORS.BG_PANEL_LIGHT);
+      drawButton(encBtnBg, triW, triH, COLORS.BG_PANEL_LIGHT);
       animateButtonHover(this, encContainer, false);
     });
     encContainer.on('pointerdown', () => {
@@ -1612,16 +1614,17 @@ export class GameScene extends Phaser.Scene {
       this.scene.pause();
     });
 
-    // Speed control buttons (1x / 2x / 3x)
-    this.add.text(leftColX, hudY + 286, 'SPEED', {
+    // Speed control: label + buttons in a single row
+    const speedRowY = hudY + 210;
+    this.add.text(leftColX, speedRowY, 'SPEED', {
       ...TEXT_STYLES.HUD_LABEL, fontSize: '10px',
-    }).setDepth(10);
+    }).setDepth(10).setOrigin(0, 0.5);
 
     GAME_SPEEDS.forEach((speed, i) => {
       const sBtnW = 55;
       const sBtnH = 26;
-      const sBtnX = leftColX + 12 + i * 68 + sBtnW / 2;
-      const sBtnY = hudY + 312;
+      const sBtnX = leftColX + 50 + i * 62 + sBtnW / 2;
+      const sBtnY = speedRowY;
 
       const sContainer = this.add.container(sBtnX, sBtnY);
       const sBg = this.add.graphics();
@@ -1681,7 +1684,7 @@ export class GameScene extends Phaser.Scene {
     }
 
     // Wave preview section
-    const previewY = hudY + 341;
+    const previewY = hudY + 234;
     const waveSepGfx = this.add.graphics().setDepth(10);
     drawSeparator(waveSepGfx, leftColX - 5, previewY, leftColX + contentW - 5);
 
@@ -2061,19 +2064,19 @@ export class GameScene extends Phaser.Scene {
 
   private updateAutoStartDisplay(): void {
     if (this.autoStartWave) {
-      this.autoStartBtnText.setText('Auto Start: ON');
-      drawButton(this.autoStartBtnBg, 200, 24, COLORS.CYAN);
+      this.autoStartBtnText.setText('Auto');
+      drawButton(this.autoStartBtnBg, 50, 30, COLORS.CYAN);
     } else {
-      this.autoStartBtnText.setText('Auto Start: OFF');
-      drawButton(this.autoStartBtnBg, 200, 24, COLORS.BG_PANEL_LIGHT);
+      this.autoStartBtnText.setText('Auto');
+      drawButton(this.autoStartBtnBg, 50, 30, COLORS.BG_PANEL_LIGHT);
     }
   }
 
   private startNextWave(): void {
     if (this.isWaveActive) return;
     this.isWaveActive = true;
-    drawButton(this.startWaveBtnBg, 200, 36, COLORS.DISABLED);
-    this.startWaveBtnText.setText('Wave in progress...');
+    drawButton(this.startWaveBtnBg, 140, 30, COLORS.DISABLED);
+    this.startWaveBtnText.setText('In progress...');
     this.startWaveBtnText.setColor(COLORS.DISABLED_TEXT);
     this.waveManager.startWave(this.currentWave);
   }
@@ -2498,7 +2501,7 @@ export class GameScene extends Phaser.Scene {
     // Re-enable start wave button
     this.startWaveBtnText.setText('Start Wave');
     this.startWaveBtnText.setColor(COLORS.TEXT_WHITE);
-    drawButton(this.startWaveBtnBg, 200, 36, COLORS.PRIMARY);
+    drawButton(this.startWaveBtnBg, 140, 30, COLORS.PRIMARY);
 
     // Auto-start next wave after a brief delay
     if (this.autoStartWave) {
