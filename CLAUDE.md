@@ -411,7 +411,7 @@ interface SaveData {
 ### Other Assets
 - **UI Elements**: Built with Phaser Graphics + UITheme.ts design tokens
 - **Effects**: Simple shapes (particles, tweens)
-- **Music**: 2 MP3 files in `public/assets/music/` (menu_theme.mp3, battle_theme.mp3)
+- **Music**: 2 MP3 files in `public/assets/music/` (menu_theme.mp3, butterfly-no-back-vocals.mp3)
 
 ---
 
@@ -548,6 +548,9 @@ cost = Math.ceil(3 * currentLevel * stageMultiplier);
 | Game speed indicator | ✅ | Persistent badge over grid (amber 2x, red 3x) |
 | Background tab support | ✅ | Web Worker tick keeps game running when tab is hidden |
 | UI polish | ✅ | Dynamic main menu layout, improved starter select cards |
+| Screen centering | ✅ | GAME_WIDTH 1280→940, no dead space |
+| Player name high scores | ✅ | HTML DOM input on game over, Name column in scores |
+| Digimon descriptions | ✅ | 257 lore-based entries in Encyclopedia + TowerInfoPanel |
 
 ### Completed Sprints (Post-MVP)
 - **Sprint 20**: Boss sprite fix, statistics tracking, sell formula (✅)
@@ -561,10 +564,13 @@ cost = Math.ceil(3 * currentLevel * stageMultiplier);
 - **Sprint 23B**: Texture atlases + sprite idle animations (✅)
 - **Sprint 28**: Background tab support (Web Worker), main menu + starter select UI polish (✅)
 - **Sprint 29**: Effect audit fixes, armor_pierce/holy/heal, armor bar, DoT numbers, in-game Encyclopedia, TowerInfoPanel cleanup (✅)
+- **Sprint 23/24 (merged)**: Screen centering (940px), player name high scores, 257 Digimon descriptions (✅)
 
 ### Remaining Work
+- **Sprint 25 (balance)**: Boss-only waves, boss lives penalty, stealth/healer enemies, armor-as-shield
 - **Sprint 26**: DNA Digivolution system (Ultra tier, combine two Megas)
 - **Sprint 27 partial**: High-contrast mode, colorblind-friendly palette
+- Particle pool, FPS measurement, enhanced boss ability visuals
 - Manual playtest of all proc rates and bonus effect inheritance
 
 ---

@@ -9,14 +9,14 @@ The user wants to reorganize remaining sprints and add new features/fixes. Sprin
 ### Mark as Done
 - **Sprint 20B**: Manual playtest — done, will re-test after balancing
 
-### Merged Sprint 23/24 — Performance, Visual Polish & UI Fixes
+### Merged Sprint 23/24 — Performance, Visual Polish & UI Fixes ✅ DONE
 Combines remaining items from Sprint 23A + Sprint 24A + new items:
-- [x] Screen centering fix (reduce GAME_WIDTH, eliminate 362px dead space)
-- [x] Update all Digimon/skill descriptions (auto-generate ~257 entries)
-- [x] Player name entry for high scores
-- [ ] Particle pool (merge effects, hit particles, status visuals) — *deferred from 23A*
-- [ ] Enhanced boss ability visual feedback — *deferred from 24A*
-- [ ] FPS measurement on late-game waves — *deferred from 23A*
+- [x] Screen centering fix (reduce GAME_WIDTH 1280→940, eliminate 362px dead space)
+- [x] Update all Digimon/skill descriptions (auto-generate 257 entries in DigimonDescriptions.ts)
+- [x] Player name entry for high scores (HTML DOM input, localStorage persistence, Name column)
+- [ ] Particle pool (merge effects, hit particles, status visuals) — *deferred*
+- [ ] Enhanced boss ability visual feedback — *deferred*
+- [ ] FPS measurement on late-game waves — *deferred*
 
 ### Updated Sprint 25 — Balance & Mechanics Overhaul
 Existing items + new requirements:
@@ -29,9 +29,9 @@ Existing items + new requirements:
 
 ---
 
-## Implementation Plan (Sprint 23/24)
+## Implementation Plan (Sprint 23/24) — ✅ COMPLETED
 
-### Step 1: Screen Centering Fix
+### Step 1: Screen Centering Fix ✅
 
 **Problem**: GAME_WIDTH=1280 but content is only ~918px wide → 362px dead space on right.
 
@@ -62,7 +62,7 @@ Existing items + new requirements:
 
 ---
 
-### Step 2: Player Name for High Scores
+### Step 2: Player Name for High Scores ✅
 
 **Files**:
 
@@ -86,7 +86,7 @@ Existing items + new requirements:
 
 ---
 
-### Step 3: Auto-Generate Digimon Descriptions
+### Step 3: Auto-Generate Digimon Descriptions ✅
 
 **Files**:
 
@@ -111,7 +111,7 @@ Existing items + new requirements:
 
 ---
 
-## Implementation Plan (Sprint 25)
+## Implementation Plan (Sprint 25) — TODO
 
 ### Step 4: Boss-Only Waves (Simplest, do first)
 
@@ -210,25 +210,25 @@ WaveManager already handles empty enemy arrays correctly (boss spawns independen
 
 ---
 
-## Update PROGRESS.md
+## Update PROGRESS.md ✅
 
 After implementation, update PROGRESS.md:
-- Mark Sprint 20B as complete
-- Replace Sprint 23A/24A sections with merged "Sprint 23/24"
-- Update Sprint 25 with new requirements
-- Update Sprint 27 remaining items
-- Add Sprint 26 (DNA Digivolution) — unchanged, still pending
+- [x] Mark Sprint 20B as complete
+- [x] Replace Sprint 23A/24A sections with merged "Sprint 23/24"
+- [x] Update Sprint 25 with new requirements
+- [x] Update Sprint 27 remaining items
+- [x] Add Sprint 26 (DNA Digivolution) — unchanged, still pending
 
 ---
 
 ## Verification
 
-### Sprint 23/24
-1. `npm run build` — TypeScript clean
-2. `npm run test` — all tests pass
-3. `npm run dev` — visual check:
+### Sprint 23/24 ✅ VERIFIED
+1. `npm run build` — TypeScript clean ✅
+2. `npm run test` — 527 tests pass ✅
+3. `npm run dev` — visual check needed:
    - Game canvas properly centered, no dead space on right
-   - All scenes (MainMenu, StarterSelect, Game, Encyclopedia, Credits, HighScores, Settings) render correctly within narrower canvas
+   - All scenes render correctly within narrower 940px canvas
    - High scores: enter name on game over, see name in high scores table
    - Encyclopedia: descriptions visible in detail view
 
