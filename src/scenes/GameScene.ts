@@ -107,6 +107,7 @@ export class GameScene extends Phaser.Scene {
   private bossAbilityText: Phaser.GameObjects.Text | null = null;
   private bossShieldIndicator: Phaser.GameObjects.Graphics | null = null;
   private bossHudObjects: Phaser.GameObjects.GameObject[] = [];
+  private attrTriangleObjects: Phaser.GameObjects.GameObject[] = [];
 
   // Game speed
   private gameSpeed: number = 1;
@@ -1079,6 +1080,9 @@ export class GameScene extends Phaser.Scene {
     if (this.bossShieldIndicator) { this.bossShieldIndicator.destroy(); this.bossShieldIndicator = null; }
     for (const obj of this.bossHudObjects) obj.destroy();
     this.bossHudObjects = [];
+
+    // Restore the attribute triangle
+    for (const obj of this.attrTriangleObjects) (obj as any).setVisible(true);
   }
 
   // ============================================================
@@ -1463,49 +1467,51 @@ export class GameScene extends Phaser.Scene {
     for (const obj of this.bossHudObjects) obj.destroy();
     this.bossHudObjects = [];
 
+    // Hide the attribute triangle while boss info is shown
+    for (const obj of this.attrTriangleObjects) (obj as any).setVisible(false);
+
     const bossX = 35; // leftColX
-    const bossInfoY = GAME_HEIGHT - 90;
+    const stack = new LayoutStack(GAME_HEIGHT - 138);
 
     // Separator
     const sep = this.add.graphics().setDepth(10);
-    drawSeparator(sep, bossX - 5, bossInfoY, bossX + 245);
+    drawSeparator(sep, bossX - 5, stack.y, bossX + 245);
     this.bossHudObjects.push(sep);
+    stack.gap(6);
 
-    // "BOSS" label
-    const label = this.add.text(bossX, bossInfoY + 8, 'ACTIVE BOSS', {
+    // "ACTIVE BOSS" label
+    const label = this.add.text(bossX, 0, 'ACTIVE BOSS', {
       ...TEXT_STYLES.HUD_LABEL,
       color: '#ff6666',
     }).setDepth(10);
+    stack.add(label, undefined, true, 2);
     this.bossHudObjects.push(label);
 
     // Boss name
-    const nameText = this.add.text(bossX, bossInfoY + 24, bossName, {
+    const nameText = this.add.text(bossX, 0, bossName, {
       fontFamily: FONTS.MONO,
       fontSize: '14px',
       color: '#ff8844',
       fontStyle: 'bold',
       resolution: 2,
     }).setDepth(10);
+    stack.add(nameText, undefined, true, 4);
     this.bossHudObjects.push(nameText);
 
     // Ability info
     if (bossStats?.bossAbility) {
-      const abilityLabel = this.add.text(bossX, bossInfoY + 44, 'Ability:', {
-        fontFamily: FONTS.BODY,
-        fontSize: '10px',
-        color: '#7788aa',
-        resolution: 2,
+      const abilityLabel = this.add.text(bossX, 0, 'Ability:', {
+        ...TEXT_STYLES.HUD_LABEL, fontSize: '10px',
       }).setDepth(10);
-      this.bossHudObjects.push(abilityLabel);
-
-      const abilityName = this.add.text(bossX + 42, bossInfoY + 44, bossStats.bossAbility.name, {
+      const abilityName = this.add.text(bossX + 42, 0, bossStats.bossAbility.name, {
         fontFamily: FONTS.MONO,
         fontSize: '11px',
         color: '#ffcc66',
         fontStyle: 'bold',
         resolution: 2,
       }).setDepth(10);
-      this.bossHudObjects.push(abilityName);
+      stack.addRow([abilityLabel, abilityName], undefined, true, 2);
+      this.bossHudObjects.push(abilityLabel, abilityName);
 
       // Trigger type
       const triggerType = bossStats.bossAbility.triggerType;
@@ -1513,12 +1519,10 @@ export class GameScene extends Phaser.Scene {
         : triggerType === 'passive' ? 'Passive'
         : triggerType === 'hp_threshold' ? `At ${(bossStats.bossAbility.hpThreshold ?? 0) * 100}% HP`
         : triggerType;
-      const triggerText = this.add.text(bossX, bossInfoY + 58, triggerLabel, {
-        fontFamily: FONTS.MONO,
-        fontSize: '10px',
-        color: '#667799',
-        resolution: 2,
+      const triggerText = this.add.text(bossX, 0, triggerLabel, {
+        ...TEXT_STYLES.HUD_LABEL, fontSize: '10px', color: '#667799',
       }).setDepth(10);
+      stack.add(triggerText);
       this.bossHudObjects.push(triggerText);
     }
   }
@@ -1965,6 +1969,7 @@ export class GameScene extends Phaser.Scene {
 
     // --- Attribute Triangle (bottom of left panel) ---
     {
+      const tri = this.attrTriangleObjects;
       const triCenterX = btnCenterX;
       const triSpreadX = 55;
       const triHeight = 40;
@@ -1977,6 +1982,7 @@ export class GameScene extends Phaser.Scene {
       // Separator
       const attrSepGfx = this.add.graphics().setDepth(10);
       drawSeparator(attrSepGfx, leftColX - 5, stack.y, leftColX + contentW - 5);
+      tri.push(attrSepGfx);
       stack.gap(4);
 
       // Title
@@ -1984,12 +1990,14 @@ export class GameScene extends Phaser.Scene {
         ...TEXT_STYLES.HUD_LABEL,
       }).setOrigin(0.5, 0).setDepth(10);
       stack.add(titleText, undefined, true, 2);
+      tri.push(titleText);
 
       // Vaccine label (in the flow, above triangle)
       const vaccineLabel = this.add.text(triCenterX, 0, 'Vaccine', {
         ...triLabelStyle, color: ATTRIBUTE_COLORS_STR[0],
       }).setOrigin(0.5, 0).setDepth(10);
       stack.add(vaccineLabel, undefined, true, 2);
+      tri.push(vaccineLabel);
 
       // Triangle graphic region — capture Y, then skip past it
       const triTopY = stack.y;
@@ -2002,6 +2010,7 @@ export class GameScene extends Phaser.Scene {
       triGfx.beginPath(); triGfx.moveTo(vx, vy); triGfx.lineTo(xx + 14, xy - 6); triGfx.stroke();
       triGfx.beginPath(); triGfx.moveTo(xx + 20, xy); triGfx.lineTo(dx - 20, dy); triGfx.stroke();
       triGfx.beginPath(); triGfx.moveTo(dx - 14, dy - 6); triGfx.lineTo(vx, vy); triGfx.stroke();
+      tri.push(triGfx);
 
       // Arrowheads
       const drawArrowHead = (fromX: number, fromY: number, toX: number, toY: number, color: number) => {
@@ -2020,8 +2029,9 @@ export class GameScene extends Phaser.Scene {
       drawArrowHead(dx - 14, dy - 6, vx, vy, COLORS.DATA);
 
       // "beats" labels on left and right edges
-      this.add.text((vx + xx) / 2 - 14, (vy + xy) / 2 - 2, 'beats', edgeLabelStyle).setOrigin(0.5).setDepth(10);
-      this.add.text((dx + vx) / 2 + 14, (dy + vy) / 2 - 2, 'beats', edgeLabelStyle).setOrigin(0.5).setDepth(10);
+      const beatsL = this.add.text((vx + xx) / 2 - 14, (vy + xy) / 2 - 2, 'beats', edgeLabelStyle).setOrigin(0.5).setDepth(10);
+      const beatsR = this.add.text((dx + vx) / 2 + 14, (dy + vy) / 2 - 2, 'beats', edgeLabelStyle).setOrigin(0.5).setDepth(10);
+      tri.push(beatsL, beatsR);
 
       // Advance past triangle
       stack.gap(triHeight);
@@ -2031,18 +2041,21 @@ export class GameScene extends Phaser.Scene {
       const beatsBottom = this.add.text(triCenterX, 0, 'beats', edgeLabelStyle).setOrigin(0.5, 0).setDepth(10);
       const dataLabel = this.add.text(dx, 0, 'Data', { ...triLabelStyle, color: ATTRIBUTE_COLORS_STR[1] }).setOrigin(0.5, 0).setDepth(10);
       stack.addRow([virusLabel, beatsBottom, dataLabel], undefined, true, 2);
+      tri.push(virusLabel, beatsBottom, dataLabel);
 
       // Free = neutral
       const freeRow = this.add.text(triCenterX, 0, 'Free = neutral', {
         ...TEXT_STYLES.HUD_LABEL, fontSize: '11px',
       }).setOrigin(0.5, 0).setDepth(10);
       stack.add(freeRow, undefined, true, 2);
+      tri.push(freeRow);
 
       // Holy +25% to all
       const holyRow = this.add.text(triCenterX, 0, '\u2727 +25% to all', {
         ...TEXT_STYLES.HUD_LABEL, fontSize: '11px', color: '#ffee88',
       }).setOrigin(0.5, 0).setDepth(10);
       stack.add(holyRow);
+      tri.push(holyRow);
     }
   }
 
