@@ -88,7 +88,8 @@ digimerge-td/
 │   ├── utils/
 │   │   ├── EventBus.ts            # Global event system
 │   │   ├── GridUtils.ts           # Grid/pixel conversion, path positions
-│   │   └── SpriteAnimHelper.ts   # Atlas lookup, idle animation, sprite display helpers
+│   │   ├── SpriteAnimHelper.ts   # Atlas lookup, idle animation, sprite display helpers
+│   │   └── ParticlePool.ts      # Graphics object pool for particle effects
 │   └── types/
 │       ├── DigimonTypes.ts        # Type definitions
 │       ├── GameTypes.ts           # Game state types
@@ -551,14 +552,17 @@ cost = Math.ceil(3 * currentLevel * stageMultiplier);
 | Screen centering | ✅ | GAME_WIDTH 1280→940, no dead space |
 | Player name high scores | ✅ | HTML DOM input on game over, Name column in scores |
 | Digimon descriptions | ✅ | 257 lore-based entries in Encyclopedia + TowerInfoPanel |
+| Particle pool | ✅ | Graphics object pooling for merge/hit/death particles |
+| FPS counter | ✅ | Toggleable overlay (bottom-right), color-coded, Settings toggle |
+| Boss ability visuals | ✅ | 9 distinct effects (impact circles, flame ring, shockwave, portal, shield flash) |
 
 ### Completed Sprints (Post-MVP)
 - **Sprint 20**: Boss sprite fix, statistics tracking, sell formula (✅)
 - **Sprint 21**: Range preview, tooltips, warnings, keyboard shortcuts (✅)
 - **Sprint 22**: Per-tower tracking, post-game stats, high scores (✅)
 - **Sprint 23-Pre**: Wave preview text fix, removed auto-pause, robust game over (✅)
-- **Sprint 23A**: Object pooling for projectiles and enemies (✅)
-- **Sprint 24**: Boss death effects, tower attack animation (✅)
+- **Sprint 23A**: Object pooling for projectiles, enemies, and particles + FPS counter (✅)
+- **Sprint 24**: Boss death effects, tower attack animation, enhanced boss ability visuals (✅)
 - **Sprint 25**: Roster expansion to ~171 towers + Ultra tier (✅)
 - **Sprint 27**: Colorblind mode (V/D/X/F symbols), game speed indicator (✅)
 - **Sprint 23B**: Texture atlases + sprite idle animations (✅)
@@ -570,7 +574,6 @@ cost = Math.ceil(3 * currentLevel * stageMultiplier);
 - **Sprint 25 (balance)**: Boss-only waves, boss lives penalty, stealth/healer enemies, armor-as-shield
 - **Sprint 26**: DNA Digivolution system (Ultra tier, combine two Megas)
 - **Sprint 27 partial**: High-contrast mode, colorblind-friendly palette
-- Particle pool, FPS measurement, enhanced boss ability visuals
 - Manual playtest of all proc rates and bonus effect inheritance
 
 ---

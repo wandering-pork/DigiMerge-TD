@@ -49,6 +49,9 @@ Live at: https://wandering-pork.github.io/DigiMerge-TD/
 - DoT damage floating numbers (orange for burn, purple for poison)
 - armor_pierce (bypass armor entirely), holy (+25% bonus damage), heal (restore player lives) effects
 - Cleaner TowerInfoPanel (evolution preview removed, players use Encyclopedia instead)
+- Particle pool (ParticlePool utility) — pools Graphics objects for merge effects, hit/death particles, boss death ring
+- FPS counter — toggleable overlay (bottom-right), color-coded by performance, toggle in Settings
+- Enhanced boss ability visuals — 9 distinct effects (impact circles, flame ring, shockwave, portal, shield flash, etc.)
 - Screen centering fix: GAME_WIDTH reduced from 1280 to 940, eliminates 362px dead space
 - Player name entry for high scores (HTML input on game over, persists across sessions)
 - Digimon descriptions: 257 entries with lore-based 1-2 sentence descriptions
@@ -161,7 +164,7 @@ Live at: https://wandering-pork.github.io/DigiMerge-TD/
 
 ---
 
-## File Inventory (50 source files)
+## File Inventory (51 source files)
 
 - **config/**: Constants.ts, GameConfig.ts
 - **data/**: DigimonDatabase.ts, DigimonDescriptions.ts, EvolutionPaths.ts, StatusEffects.ts, WaveData.ts, SpriteAtlasData.ts (auto-generated)
@@ -170,7 +173,7 @@ Live at: https://wandering-pork.github.io/DigiMerge-TD/
 - **scenes/**: BootScene.ts, PreloadScene.ts, MainMenuScene.ts, StarterSelectScene.ts, GameScene.ts, PauseScene.ts, SettingsScene.ts, GameOverScene.ts, HighScoresScene.ts, EncyclopediaScene.ts, CreditsScene.ts
 - **systems/**: AttributeSystem.ts, BossAbilitySystem.ts, DPSystem.ts, LevelSystem.ts, MergeSystem.ts, OriginSystem.ts, TargetingSystem.ts
 - **ui/**: SpawnMenu.ts, TowerInfoPanel.ts, EvolutionModal.ts, MergeModal.ts, TutorialOverlay.ts, UITheme.ts, UIHelpers.ts
-- **utils/**: EventBus.ts, GridUtils.ts, SpriteAnimHelper.ts
+- **utils/**: EventBus.ts, GridUtils.ts, SpriteAnimHelper.ts, ParticlePool.ts
 - **types/**: DigimonTypes.ts, GameTypes.ts, index.ts
 - main.ts
 
@@ -264,8 +267,8 @@ Live at: https://wandering-pork.github.io/DigiMerge-TD/
 - [x] `WaveManager.getEnemy()` scans for inactive enemies before allocating
 - [x] Splitter children also use enemy pool
 - [x] `WaveManager.cleanup()` destroys all pooled enemies on game reset
-- [ ] Particle pool — reuse for merge effects, hit particles, status effect visuals
-- [ ] Measure before/after FPS on late-game waves (80+) with many towers
+- [x] Particle pool — `ParticlePool` utility class pools Graphics objects for merge effects, hit particles, death particles
+- [x] FPS counter — toggleable overlay in GameScene (bottom-right), color-coded (green/yellow/red), toggle in Settings
 
 #### 23B: Texture Atlases + Sprite Animations ✓
 - [x] Atlas generation script (`scripts/generate-atlases.ts`) using `sharp` — extracts 12 frames per sprite sheet, packs into grid atlases
@@ -294,7 +297,7 @@ Live at: https://wandering-pork.github.io/DigiMerge-TD/
 - [x] Enemy death particles (attribute-colored burst on kill, 6 particles standard, 12 for bosses)
 - [x] Tower attack animation (brief upward sprite jump when firing)
 - [x] Boss-only waves — boss waves (10, 20, 30, ..., 100 + endless every 10) spawn only the boss, no regular mobs
-- [ ] Enhanced boss ability visual feedback (screen shake, overlays, area indicators)
+- [x] Enhanced boss ability visual feedback — 9 distinct effects: impact circles (stun), flame ring (speed boost), dark flash (drain), heal glow, shockwave (projectile destroy), portal (spawn), shield flash, staggered impacts (multi-stun), double shockwave (annihilation)
 
 #### 24B: Evolution Path Preview ✓ (removed in Sprint 29)
 - [x] ~~Show all evolution paths in TowerInfoPanel~~ — removed in Sprint 29 (players use Encyclopedia instead)

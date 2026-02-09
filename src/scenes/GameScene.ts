@@ -35,6 +35,7 @@ import { BossAbilityAction, getCooldownProgress } from '@/systems/BossAbilitySys
 import { Projectile } from '@/entities/Projectile';
 import { TutorialOverlay } from '@/ui/TutorialOverlay';
 import { canDisplaySprite, getStaticFrame } from '@/utils/SpriteAnimHelper';
+import { ParticlePool } from '@/utils/ParticlePool';
 
 export class GameScene extends Phaser.Scene {
   // Graphics
@@ -141,6 +142,13 @@ export class GameScene extends Phaser.Scene {
   // Boss incoming warning text
   private bossWarningText: Phaser.GameObjects.Text | null = null;
 
+  // FPS counter
+  private fpsText: Phaser.GameObjects.Text | null = null;
+  private fpsUpdateTimer: number = 0;
+
+  // Particle pool for Graphics-based particles (merge effects, hit particles, death particles)
+  private particlePool!: ParticlePool;
+
   constructor() {
     super({ key: 'GameScene' });
   }
@@ -236,6 +244,10 @@ export class GameScene extends Phaser.Scene {
     this.audioManager = new AudioManager(this);
     this.registry.set('audioManager', this.audioManager);
 
+    // Initialize particle pool for Graphics-based particles
+    this.particlePool = new ParticlePool(this);
+    this.registry.set('particlePool', this.particlePool);
+
     // Stop menu music and start battle music
     this.sound.stopAll();
     this.audioManager.playBattleMusic();
@@ -301,6 +313,9 @@ export class GameScene extends Phaser.Scene {
       });
       this.add.existing(tutorial);
     }
+
+    // Create FPS counter overlay (toggled via Settings)
+    this.createFpsCounter();
   }
 
   update(time: number, delta: number) {
@@ -348,6 +363,20 @@ export class GameScene extends Phaser.Scene {
 
     // Update danger vignette for low lives warning
     this.updateDangerVignette();
+
+    // FPS counter update (every 500ms to avoid flicker)
+    if (this.fpsText?.visible) {
+      this.fpsUpdateTimer += delta;
+      if (this.fpsUpdateTimer >= 500) {
+        this.fpsUpdateTimer = 0;
+        const fps = Math.round(this.game.loop.actualFps);
+        this.fpsText.setText(`${fps} FPS`);
+        // Color code: green >= 50, yellow >= 30, red < 30
+        if (fps >= 50) this.fpsText.setColor('#44ff44');
+        else if (fps >= 30) this.fpsText.setColor('#ffcc00');
+        else this.fpsText.setColor('#ff4444');
+      }
+    }
   }
 
   shutdown() {
@@ -388,10 +417,34 @@ export class GameScene extends Phaser.Scene {
       this.bossWarningText = null;
     }
 
+    // Clean up particle pool
+    this.particlePool.destroy();
+
     this.waveManager.cleanup();
     this.combatManager.cleanup();
     this.towerManager.cleanup();
     this.audioManager.cleanup();
+  }
+
+  // ============================================================
+  // FPS Counter
+  // ============================================================
+
+  private createFpsCounter(): void {
+    const show = this.registry.get('showFps') === true;
+    this.fpsText = this.add.text(GAME_WIDTH - 8, GAME_HEIGHT - 8, '', {
+      fontFamily: 'monospace',
+      fontSize: '11px',
+      color: '#44ff44',
+      stroke: '#000000',
+      strokeThickness: 2,
+      resolution: 2,
+    }).setOrigin(1, 1).setDepth(100).setVisible(show);
+
+    // Listen for toggle changes from SettingsScene
+    this.registry.events.on('changedata-showFps', (_parent: unknown, value: boolean) => {
+      if (this.fpsText) this.fpsText.setVisible(value === true);
+    });
   }
 
   // ============================================================
@@ -1005,6 +1058,23 @@ export class GameScene extends Phaser.Scene {
         if (nearest) {
           nearest.applyStun(action.params.stunDuration);
           this.showBossAbilityPopup('Nova Blast!');
+
+          // Impact circle expanding from stunned tower
+          const impactX = GRID_OFFSET_X + nearest.x;
+          const impactY = GRID_OFFSET_Y + nearest.y;
+          const impact = this.add.graphics();
+          impact.setPosition(impactX, impactY);
+          impact.setDepth(25);
+          impact.lineStyle(2, 0xff6600, 0.8);
+          impact.strokeCircle(0, 0, 8);
+          this.tweens.add({
+            targets: impact,
+            scaleX: 3, scaleY: 3,
+            alpha: 0,
+            duration: 400,
+            ease: 'Quad.easeOut',
+            onComplete: () => impact.destroy(),
+          });
         }
         break;
       }
@@ -1035,6 +1105,25 @@ export class GameScene extends Phaser.Scene {
           }
         });
         this.showBossAbilityPopup('Mega Flame!');
+
+        // Expanding flame ring at boss position
+        const bossWorldX = GRID_OFFSET_X + bossX;
+        const bossWorldY = GRID_OFFSET_Y + bossY;
+        const flameRing = this.add.graphics();
+        flameRing.setPosition(bossWorldX, bossWorldY);
+        flameRing.setDepth(25);
+        flameRing.lineStyle(2.5, 0xff4400, 0.7);
+        flameRing.strokeCircle(0, 0, 15);
+        this.tweens.add({
+          targets: flameRing,
+          scaleX: range / 15, scaleY: range / 15,
+          alpha: 0,
+          duration: 600,
+          ease: 'Cubic.easeOut',
+          onComplete: () => flameRing.destroy(),
+        });
+        // Mild screen shake
+        this.cameras.main.shake(150, 0.005);
         break;
       }
 
@@ -1054,6 +1143,9 @@ export class GameScene extends Phaser.Scene {
             duration: 800, ease: 'Power2',
             onComplete: () => drainText.destroy(),
           });
+
+          // Brief dark red vignette flash to indicate DB drain
+          this.cameras.main.flash(150, 80, 0, 0, false);
         }
         break;
       }
@@ -1062,6 +1154,23 @@ export class GameScene extends Phaser.Scene {
         if (this.bossEnemy && this.bossEnemy.isAlive) {
           this.bossEnemy.heal(action.params.healAmount);
           this.showBossAbilityPopup('Crimson Lightning!');
+
+          // Green healing glow at boss position
+          const healX = GRID_OFFSET_X + this.bossEnemy.x;
+          const healY = GRID_OFFSET_Y + this.bossEnemy.y;
+          const healGlow = this.add.graphics();
+          healGlow.setPosition(healX, healY);
+          healGlow.setDepth(25);
+          healGlow.fillStyle(0x44ff44, 0.3);
+          healGlow.fillCircle(0, 0, 20);
+          this.tweens.add({
+            targets: healGlow,
+            scaleX: 2, scaleY: 2,
+            alpha: 0,
+            duration: 500,
+            ease: 'Quad.easeOut',
+            onComplete: () => healGlow.destroy(),
+          });
         }
         break;
       }
@@ -1075,6 +1184,27 @@ export class GameScene extends Phaser.Scene {
         this.showBossAbilityPopup('Ground Zero!');
         // Screen shake
         this.cameras.main.shake(300, 0.01);
+
+        // Expanding shockwave from boss
+        if (this.bossEnemy) {
+          const shockX = GRID_OFFSET_X + this.bossEnemy.x;
+          const shockY = GRID_OFFSET_Y + this.bossEnemy.y;
+          const shockwave = this.add.graphics();
+          shockwave.setPosition(shockX, shockY);
+          shockwave.setDepth(25);
+          shockwave.lineStyle(3, 0xffaa00, 0.8);
+          shockwave.strokeCircle(0, 0, 10);
+          this.tweens.add({
+            targets: shockwave,
+            scaleX: 20, scaleY: 20,
+            alpha: 0,
+            duration: 800,
+            ease: 'Quad.easeOut',
+            onComplete: () => shockwave.destroy(),
+          });
+          // White flash
+          this.cameras.main.flash(200, 255, 255, 200, false);
+        }
         break;
       }
 
@@ -1094,6 +1224,27 @@ export class GameScene extends Phaser.Scene {
           }
         }
         this.showBossAbilityPopup('Venom Infuse!');
+
+        // Dark portal effect at boss position
+        if (this.bossEnemy) {
+          const portalX = GRID_OFFSET_X + this.bossEnemy.x;
+          const portalY = GRID_OFFSET_Y + this.bossEnemy.y;
+          const portal = this.add.graphics();
+          portal.setPosition(portalX, portalY);
+          portal.setDepth(24);
+          portal.fillStyle(0x8800aa, 0.4);
+          portal.fillCircle(0, 0, 5);
+          portal.lineStyle(2, 0xcc44ff, 0.6);
+          portal.strokeCircle(0, 0, 5);
+          this.tweens.add({
+            targets: portal,
+            scaleX: 5, scaleY: 5,
+            alpha: 0,
+            duration: 700,
+            ease: 'Cubic.easeOut',
+            onComplete: () => portal.destroy(),
+          });
+        }
         break;
       }
 
@@ -1109,6 +1260,27 @@ export class GameScene extends Phaser.Scene {
         this.showBossAbilityPopup('Transcendent Sword!');
         // Shield visual on boss bar
         this.showBossShieldIndicator();
+
+        // Golden shield flash at boss
+        if (this.bossEnemy) {
+          const shieldX = GRID_OFFSET_X + this.bossEnemy.x;
+          const shieldY = GRID_OFFSET_Y + this.bossEnemy.y;
+          const shieldFlash = this.add.graphics();
+          shieldFlash.setPosition(shieldX, shieldY);
+          shieldFlash.setDepth(25);
+          shieldFlash.lineStyle(2.5, 0xffdd44, 0.8);
+          shieldFlash.strokeCircle(0, 0, 16);
+          shieldFlash.fillStyle(0xffdd44, 0.15);
+          shieldFlash.fillCircle(0, 0, 16);
+          this.tweens.add({
+            targets: shieldFlash,
+            scaleX: 2.5, scaleY: 2.5,
+            alpha: 0,
+            duration: 600,
+            ease: 'Quad.easeOut',
+            onComplete: () => shieldFlash.destroy(),
+          });
+        }
         break;
       }
 
@@ -1123,6 +1295,27 @@ export class GameScene extends Phaser.Scene {
         }
         this.showBossAbilityPopup('Garuru Cannon!');
         this.cameras.main.flash(200, 100, 150, 255, false);
+
+        // Impact circles on each stunned tower (staggered)
+        for (let i = 0; i < count; i++) {
+          const t = towers[i].tower;
+          const stunImpactX = GRID_OFFSET_X + t.x;
+          const stunImpactY = GRID_OFFSET_Y + t.y;
+          const stunImpact = this.add.graphics();
+          stunImpact.setPosition(stunImpactX, stunImpactY);
+          stunImpact.setDepth(25);
+          stunImpact.lineStyle(2, 0x6644ff, 0.8);
+          stunImpact.strokeCircle(0, 0, 8);
+          this.tweens.add({
+            targets: stunImpact,
+            scaleX: 2.5, scaleY: 2.5,
+            alpha: 0,
+            duration: 400,
+            delay: i * 60,
+            ease: 'Quad.easeOut',
+            onComplete: () => stunImpact.destroy(),
+          });
+        }
         break;
       }
 
@@ -1133,6 +1326,28 @@ export class GameScene extends Phaser.Scene {
         this.showBossAbilityPopup('Total Annihilation!');
         this.cameras.main.shake(500, 0.02);
         this.cameras.main.flash(300, 255, 50, 50, false);
+
+        // Massive red shockwave from boss (two concentric rings)
+        if (this.bossEnemy) {
+          const annihilationX = GRID_OFFSET_X + this.bossEnemy.x;
+          const annihilationY = GRID_OFFSET_Y + this.bossEnemy.y;
+          for (let r = 0; r < 2; r++) {
+            const ring = this.add.graphics();
+            ring.setPosition(annihilationX, annihilationY);
+            ring.setDepth(25);
+            ring.lineStyle(3 - r, 0xff2222, 0.8);
+            ring.strokeCircle(0, 0, 12);
+            this.tweens.add({
+              targets: ring,
+              scaleX: 25, scaleY: 25,
+              alpha: 0,
+              duration: 1000,
+              delay: r * 150,
+              ease: 'Quad.easeOut',
+              onComplete: () => ring.destroy(),
+            });
+          }
+        }
         break;
       }
     }
@@ -2296,7 +2511,8 @@ export class GameScene extends Phaser.Scene {
       const speed = 40 + Math.random() * 40;
       const color = colors[Math.floor(Math.random() * colors.length)];
 
-      const particle = this.add.graphics().setDepth(20);
+      const particle = this.particlePool.acquire();
+      particle.setDepth(20);
       const size = 2 + Math.random() * 3;
       particle.fillStyle(color, 0.9);
       particle.fillCircle(0, 0, size);
@@ -2311,12 +2527,13 @@ export class GameScene extends Phaser.Scene {
         scaleY: 0.2,
         duration: 400 + Math.random() * 200,
         ease: 'Cubic.easeOut',
-        onComplete: () => particle.destroy(),
+        onComplete: () => this.particlePool.release(particle),
       });
     }
 
     // Central flash
-    const flash = this.add.graphics().setDepth(19);
+    const flash = this.particlePool.acquire();
+    flash.setDepth(19);
     flash.fillStyle(0x00ddff, 0.6);
     flash.fillCircle(0, 0, 20);
     flash.setPosition(x, y);
@@ -2328,7 +2545,7 @@ export class GameScene extends Phaser.Scene {
       scaleY: 2,
       duration: 300,
       ease: 'Cubic.easeOut',
-      onComplete: () => flash.destroy(),
+      onComplete: () => this.particlePool.release(flash),
     });
   }
 

@@ -21,6 +21,7 @@ import {
   BossAbilityAction,
 } from '@/systems/BossAbilitySystem';
 import { getAtlasEntry, ensureIdleAnim } from '@/utils/SpriteAnimHelper';
+import { ParticlePool } from '@/utils/ParticlePool';
 
 let enemyCounter = 0;
 
@@ -423,7 +424,8 @@ export class Enemy extends Phaser.GameObjects.Container {
       }
 
       // Expanding ring effect in the attribute's color
-      const ring = this.scene.add.graphics();
+      const ringPool = this.scene.registry.get('particlePool') as ParticlePool | undefined;
+      const ring = ringPool ? ringPool.acquire() : this.scene.add.graphics();
       // Position ring in world space, accounting for container offset
       const worldX = this.x;
       const worldY = this.y;
@@ -444,7 +446,7 @@ export class Enemy extends Phaser.GameObjects.Container {
         alpha: 0,
         duration: 500,
         ease: 'Quad.easeOut',
-        onComplete: () => ring.destroy(),
+        onComplete: () => { if (ringPool) ringPool.release(ring); else ring.destroy(); },
       });
     }
 
@@ -470,6 +472,7 @@ export class Enemy extends Phaser.GameObjects.Container {
     const color = ATTR_DEATH_COLORS[this.attribute] ?? 0xffffff;
     const count = this.isBoss ? 12 : 6;
     const spread = this.isBoss ? 24 : 16;
+    const pool = this.scene.registry.get('particlePool') as ParticlePool | undefined;
 
     for (let i = 0; i < count; i++) {
       const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.5;
@@ -478,7 +481,7 @@ export class Enemy extends Phaser.GameObjects.Container {
       const endY = this.y + Math.sin(angle) * dist;
       const radius = this.isBoss ? 3 + Math.random() * 2 : 2 + Math.random() * 2;
 
-      const g = this.scene.add.graphics();
+      const g = pool ? pool.acquire() : this.scene.add.graphics();
       g.fillStyle(color, 0.9);
       g.fillCircle(0, 0, radius);
       g.setPosition(this.x, this.y);
@@ -491,7 +494,7 @@ export class Enemy extends Phaser.GameObjects.Container {
         alpha: 0,
         duration: 250 + Math.random() * 150,
         ease: 'Quad.easeOut',
-        onComplete: () => g.destroy(),
+        onComplete: () => { if (pool) pool.release(g); else g.destroy(); },
       });
     }
   }

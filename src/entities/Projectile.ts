@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { Attribute } from '@/types';
 import { EventBus, GameEvents } from '@/utils/EventBus';
+import { ParticlePool } from '@/utils/ParticlePool';
 
 // ---------------------------------------------------------------------------
 // Local interfaces to avoid circular dependencies with Tower / Enemy
@@ -356,6 +357,7 @@ export class Projectile extends Phaser.GameObjects.Container {
       else if (this.effectType.includes('armor')) color = 0xcccccc;
     }
 
+    const pool = this.scene.registry.get('particlePool') as ParticlePool | undefined;
     const count = 5;
     for (let i = 0; i < count; i++) {
       const angle = Math.random() * Math.PI * 2;
@@ -364,7 +366,7 @@ export class Projectile extends Phaser.GameObjects.Container {
       const endY = ty + Math.sin(angle) * dist;
       const radius = 2 + Math.random() * 2;
 
-      const g = this.scene.add.graphics();
+      const g = pool ? pool.acquire() : this.scene.add.graphics();
       g.fillStyle(color, 0.8);
       g.fillCircle(0, 0, radius);
       g.setPosition(tx, ty);
@@ -376,7 +378,7 @@ export class Projectile extends Phaser.GameObjects.Container {
         alpha: 0,
         duration: 200 + Math.random() * 100,
         ease: 'Quad.easeOut',
-        onComplete: () => g.destroy(),
+        onComplete: () => { if (pool) pool.release(g); else g.destroy(); },
       });
     }
   }
