@@ -29,7 +29,7 @@ export const STATUS_EFFECTS: Record<string, StatusEffectDef> = {
   lifesteal: { id: 'lifesteal', name: 'Lifesteal', category: 'special', description: 'Heals on damage dealt' },
   pierce: { id: 'pierce', name: 'Pierce', category: 'special', description: 'Hits multiple enemies in a line' },
   chain: { id: 'chain', name: 'Chain', category: 'special', description: 'Jumps to nearby enemies' },
-  holy: { id: 'holy', name: 'Holy', category: 'special', description: 'Bonus damage vs Virus' },
+  holy: { id: 'holy', name: 'Holy', category: 'special', description: '+25% bonus damage to all' },
   crit: { id: 'crit', name: 'Critical', category: 'special', description: 'Chance for multiplied damage' },
   multiHit: { id: 'multiHit', name: 'Multi-Hit', category: 'special', description: 'Multiple projectiles per attack' },
 

@@ -210,6 +210,61 @@ export function animateButtonPress(scene: Phaser.Scene, btn: Phaser.GameObjects.
   });
 }
 
+// --- Layout ---
+
+/**
+ * Lightweight vertical layout helper that tracks Y position.
+ * Chainable — every mutating method returns `this`.
+ *
+ * Usage:
+ *   const stack = new LayoutStack(startY);
+ *   stack.add(label, 20).gap(4).add(button, 36);
+ *   // stack.y is always the *next* available Y position.
+ */
+export class LayoutStack {
+  /** Current Y position — public so callers can capture it for closures. */
+  y: number;
+
+  constructor(startY: number) {
+    this.y = startY;
+  }
+
+  /**
+   * Set `target.y = this.y`, then advance by `height`.
+   * If `height` is omitted, auto-measures from `target.height` (works with Phaser Text/Sprite/Container).
+   * Pass `padding` to add extra space after the element.
+   * Skips if `show` is false.
+   */
+  add(target: { y: number; height?: number }, height?: number, show = true, padding = 0): this {
+    if (!show) return this;
+    target.y = this.y;
+    const h = height ?? (typeof target.height === 'number' ? target.height : 0);
+    this.y += h + padding;
+    return this;
+  }
+
+  /**
+   * Set every target's `.y` to the same current Y, then advance by `height`.
+   * If `height` is omitted, uses the tallest target's `.height`.
+   */
+  addRow(targets: { y: number; height?: number }[], height?: number, show = true, padding = 0): this {
+    if (!show) return this;
+    for (const t of targets) t.y = this.y;
+    const h = height ?? Math.max(0, ...targets.map(t => (typeof t.height === 'number' ? t.height : 0)));
+    this.y += h + padding;
+    return this;
+  }
+
+  /** Advance Y by `px` pixels. Skips if `show` is false. */
+  gap(px: number, show = true): this {
+    if (!show) return this;
+    this.y += px;
+    return this;
+  }
+}
+
+// --- Animations ---
+
 /** Staggered fade-in for a list of game objects */
 export function animateStaggeredEntrance(
   scene: Phaser.Scene,

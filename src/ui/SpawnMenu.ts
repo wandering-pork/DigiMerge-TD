@@ -175,7 +175,7 @@ export class SpawnMenu extends Phaser.GameObjects.Container {
     }).setInteractive({ useHandCursor: true });
     this.add(originHelp);
 
-    // Origin tooltip container (hidden by default)
+    // Origin tooltip container (hidden by default, added to container last so it renders on top)
     const originTipContainer = this.scene.add.container(15, 0);
     originTipContainer.setVisible(false);
 
@@ -205,10 +205,9 @@ export class SpawnMenu extends Phaser.GameObjects.Container {
     });
     originTipContainer.add(originTipBody);
 
-    this.add(originTipContainer);
-
+    // Tooltip added later (after digimon list) so it renders on top
     originHelp.on('pointerover', () => {
-      originTipContainer.setPosition(15, -85);
+      originTipContainer.setPosition(15, 100);
       originTipContainer.setVisible(true);
     });
     originHelp.on('pointerout', () => {
@@ -284,31 +283,8 @@ export class SpawnMenu extends Phaser.GameObjects.Container {
     });
     this.add(this.spawnBtn);
 
-    // Attribute triangle quick reference (colored text segments)
-    const attrY = h - 12;
-    const attrSegments: { text: string; color: string }[] = [
-      { text: 'V', color: ATTRIBUTE_COLORS_STR[Attribute.VACCINE] },
-      { text: '>', color: COLORS.TEXT_DIM },
-      { text: 'X', color: ATTRIBUTE_COLORS_STR[Attribute.VIRUS] },
-      { text: '>', color: COLORS.TEXT_DIM },
-      { text: 'D', color: ATTRIBUTE_COLORS_STR[Attribute.DATA] },
-      { text: '>', color: COLORS.TEXT_DIM },
-      { text: 'V', color: ATTRIBUTE_COLORS_STR[Attribute.VACCINE] },
-      { text: '  ', color: COLORS.TEXT_DIM },
-      { text: 'F', color: ATTRIBUTE_COLORS_STR[Attribute.FREE] },
-      { text: '=neutral', color: COLORS.TEXT_DIM },
-    ];
-    let attrX = 50;
-    for (const seg of attrSegments) {
-      const t = this.scene.add.text(attrX, attrY, seg.text, {
-        fontFamily: FONTS.MONO,
-        fontSize: '10px',
-        color: seg.color,
-        resolution: 2,
-      });
-      this.add(t);
-      attrX += t.width + 2;
-    }
+    // Add origin tooltip last so it renders above the digimon list
+    this.add(originTipContainer);
 
     // Initial state
     this.selectStage(Stage.IN_TRAINING);

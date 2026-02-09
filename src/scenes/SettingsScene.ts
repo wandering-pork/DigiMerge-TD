@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { COLORS, TEXT_STYLES, FONTS } from '@/ui/UITheme';
-import { drawPanel, drawButton, drawSeparator, animateButtonHover, animateButtonPress, animateModalIn } from '@/ui/UIHelpers';
+import { drawPanel, drawButton, drawSeparator, LayoutStack, animateButtonHover, animateButtonPress, animateModalIn } from '@/ui/UIHelpers';
 import { AudioManager } from '@/managers/AudioManager';
 import { SaveManager } from '@/managers/SaveManager';
 import { HighScoreManager } from '@/managers/HighScoreManager';
@@ -34,7 +34,7 @@ export class SettingsScene extends Phaser.Scene {
     // Panel
     const panelWidth = 310;
     const showGameButtons = this.callerScene !== 'MainMenuScene';
-    const panelHeight = showGameButtons ? 598 : 498;
+    const panelHeight = showGameButtons ? 604 : 504;
     const panelX = (width - panelWidth) / 2;
     const panelY = (height - panelHeight) / 2;
 
@@ -61,9 +61,9 @@ export class SettingsScene extends Phaser.Scene {
     const persistedSettings = AudioManager.loadSettings();
     const controlX = panelX + 24;
     const contentWidth = panelWidth - 48;
-    let controlY = panelY + 62;
+    const stack = new LayoutStack(panelY + 62);
 
-    this.add.text(controlX, controlY, 'VOLUME', {
+    this.add.text(controlX, stack.y, 'VOLUME', {
       fontFamily: FONTS.BODY,
       fontSize: '11px',
       color: '#7788aa',
@@ -71,7 +71,7 @@ export class SettingsScene extends Phaser.Scene {
       resolution: 2,
     });
 
-    controlY += 18;
+    stack.gap(18);
 
     const currentVolume = audioManager ? audioManager.getVolume() : persistedSettings.sfxVolume;
     const isSfxMuted = audioManager ? audioManager.isSfxMuted() : persistedSettings.sfxMuted;
@@ -79,7 +79,7 @@ export class SettingsScene extends Phaser.Scene {
     // Slider track
     const sliderWidth = contentWidth - 80; // room for percentage + mute
     const sliderHeight = 6;
-    const volumeSliderY = controlY; // Capture Y for closures
+    const volumeSliderY = stack.y; // Capture Y for closures
     const sliderTrack = this.add.graphics();
     sliderTrack.fillStyle(COLORS.BG_DEEPEST, 1);
     sliderTrack.fillRoundedRect(controlX, volumeSliderY, sliderWidth, sliderHeight, 3);
@@ -221,22 +221,22 @@ export class SettingsScene extends Phaser.Scene {
       }
     });
 
-    controlY += 28;
+    stack.gap(28);
 
     // ---- Music Volume ----
-    this.add.text(controlX, controlY, 'MUSIC', {
+    this.add.text(controlX, stack.y, 'MUSIC', {
       fontFamily: FONTS.BODY,
       fontSize: '11px',
       color: '#7788aa',
       letterSpacing: 2,
       resolution: 2,
     });
-    controlY += 18;
+    stack.gap(18);
 
     // Get current music volume from AudioManager or persisted settings
     let musicVol = audioManager?.getMusicVolume() ?? persistedSettings.musicVolume;
     const isMusicMuted = audioManager ? audioManager.isMusicMuted() : persistedSettings.musicMuted;
-    const musicSliderY = controlY; // Capture Y for closures
+    const musicSliderY = stack.y; // Capture Y for closures
 
     const musicSliderTrack = this.add.graphics();
     musicSliderTrack.fillStyle(COLORS.BG_DEEPEST, 1);
@@ -385,27 +385,27 @@ export class SettingsScene extends Phaser.Scene {
       }
     });
 
-    controlY += 28;
+    stack.gap(28);
 
     // Separator
     const optionsSep = this.add.graphics();
-    drawSeparator(optionsSep, panelX + 20, controlY, panelX + panelWidth - 20);
-    controlY += 12;
+    drawSeparator(optionsSep, panelX + 20, stack.y, panelX + panelWidth - 20);
+    stack.gap(12);
 
     // ---- Display Options ----
-    this.add.text(controlX, controlY, 'DISPLAY', {
+    this.add.text(controlX, stack.y, 'DISPLAY', {
       fontFamily: FONTS.BODY,
       fontSize: '11px',
       color: '#7788aa',
       letterSpacing: 2,
       resolution: 2,
     });
-    controlY += 20;
+    stack.gap(20);
 
     // Damage Numbers Toggle
     const showDmgNumbers = this.registry.get('showDamageNumbers') !== false;
 
-    const dmgRow = this.add.container(0, controlY);
+    const dmgRow = this.add.container(0, stack.y);
     dmgRow.add(this.add.text(controlX, 0, 'Damage Numbers', {
       fontFamily: FONTS.BODY,
       fontSize: '13px',
@@ -442,14 +442,14 @@ export class SettingsScene extends Phaser.Scene {
     });
 
     dmgRow.add(dmgBtnContainer);
-    controlY += 26;
+    stack.gap(26);
 
     // Health Bar Mode Toggle
     const HEALTH_MODES: Array<'all' | 'bosses' | 'off'> = ['all', 'bosses', 'off'];
     const HEALTH_MODE_LABELS: Record<string, string> = { all: 'All', bosses: 'Bosses', off: 'Off' };
     let currentHpMode: string = this.registry.get('healthBarMode') ?? 'all';
 
-    const hpRow = this.add.container(0, controlY);
+    const hpRow = this.add.container(0, stack.y);
     hpRow.add(this.add.text(controlX, 0, 'Health Bars', {
       fontFamily: FONTS.BODY,
       fontSize: '13px',
@@ -486,12 +486,12 @@ export class SettingsScene extends Phaser.Scene {
     });
 
     hpRow.add(hpBtnContainer);
-    controlY += 26;
+    stack.gap(26);
 
     // Colorblind Mode Toggle
     const isColorblind = this.registry.get('colorblindMode') === true;
 
-    const cbRow = this.add.container(0, controlY);
+    const cbRow = this.add.container(0, stack.y);
     cbRow.add(this.add.text(controlX, 0, 'Colorblind Mode', {
       fontFamily: FONTS.BODY,
       fontSize: '13px',
@@ -532,12 +532,12 @@ export class SettingsScene extends Phaser.Scene {
     });
 
     cbRow.add(cbBtnContainer);
-    controlY += 26;
+    stack.gap(26);
 
     // High Contrast Mode Toggle
     const isHighContrast = this.registry.get('highContrastMode') === true;
 
-    const hcRow = this.add.container(0, controlY);
+    const hcRow = this.add.container(0, stack.y);
     hcRow.add(this.add.text(controlX, 0, 'High Contrast', {
       fontFamily: FONTS.BODY,
       fontSize: '13px',
@@ -578,12 +578,12 @@ export class SettingsScene extends Phaser.Scene {
     });
 
     hcRow.add(hcBtnContainer);
-    controlY += 26;
+    stack.gap(26);
 
     // FPS Counter Toggle
     const showFps = this.registry.get('showFps') === true;
 
-    const fpsRow = this.add.container(0, controlY);
+    const fpsRow = this.add.container(0, stack.y);
     fpsRow.add(this.add.text(controlX, 0, 'FPS Counter', {
       fontFamily: FONTS.BODY,
       fontSize: '13px',
@@ -620,26 +620,26 @@ export class SettingsScene extends Phaser.Scene {
     });
 
     fpsRow.add(fpsBtnContainer);
-    controlY += 26;
+    stack.gap(26);
 
     // Separator before save section
     const saveSep = this.add.graphics();
-    drawSeparator(saveSep, panelX + 20, controlY, panelX + panelWidth - 20);
-    controlY += 12;
+    drawSeparator(saveSep, panelX + 20, stack.y, panelX + panelWidth - 20);
+    stack.gap(12);
 
     // ---- Save Export/Import ----
-    this.add.text(controlX, controlY, 'SAVE DATA', {
+    this.add.text(controlX, stack.y, 'SAVE DATA', {
       fontFamily: FONTS.BODY,
       fontSize: '11px',
       color: '#7788aa',
       letterSpacing: 2,
       resolution: 2,
     });
-    controlY += 24;
+    stack.gap(30); // must clear button half-height (14px) + label text
 
     const halfBtnW = 82;
     // Export button
-    this.createActionButton(width / 2 - halfBtnW / 2 - 6, controlY, halfBtnW, 28, 'Export', COLORS.MERGE, COLORS.MERGE_HOVER, () => {
+    this.createActionButton(width / 2 - halfBtnW / 2 - 6, stack.y, halfBtnW, 28, 'Export', COLORS.MERGE, COLORS.MERGE_HOVER, () => {
       const exported = SaveManager.exportSave();
       if (exported) {
         saveStatusText.setText('Save exported!').setColor('#44cc88');
@@ -650,7 +650,7 @@ export class SettingsScene extends Phaser.Scene {
     });
 
     // Import button
-    this.createActionButton(width / 2 + halfBtnW / 2 + 6, controlY, halfBtnW, 28, 'Import', COLORS.SPECIAL, COLORS.SPECIAL_HOVER, () => {
+    this.createActionButton(width / 2 + halfBtnW / 2 + 6, stack.y, halfBtnW, 28, 'Import', COLORS.SPECIAL, COLORS.SPECIAL_HOVER, () => {
       // Create a hidden file input
       const input = document.createElement('input');
       input.type = 'file';
@@ -679,23 +679,23 @@ export class SettingsScene extends Phaser.Scene {
       input.click();
     });
 
-    controlY += 32;
+    stack.gap(32);
 
     // Status text for import feedback (below Export/Import buttons)
-    const saveStatusText = this.add.text(width / 2, controlY, '', {
+    const saveStatusText = this.add.text(width / 2, stack.y, '', {
       fontFamily: FONTS.MONO,
       fontSize: '10px',
       color: '#44cc88',
       resolution: 2,
     }).setOrigin(0.5);
 
-    controlY += 16;
+    stack.gap(16);
 
     // Clear High Scores button
     if (HighScoreManager.hasHighScores()) {
       const clearHsBtnW = 150;
       const clearHsBtnH = 26;
-      const clearHsContainer = this.add.container(width / 2, controlY);
+      const clearHsContainer = this.add.container(width / 2, stack.y);
       const clearHsBg = this.add.graphics();
       drawButton(clearHsBg, clearHsBtnW, clearHsBtnH, COLORS.BG_PANEL_LIGHT);
       clearHsContainer.add(clearHsBg);
@@ -728,13 +728,13 @@ export class SettingsScene extends Phaser.Scene {
         clearHsContainer.removeInteractive();
       });
 
-      controlY += 32;
+      stack.gap(32);
     }
 
     // Separator before action buttons
     const actionSep = this.add.graphics();
-    drawSeparator(actionSep, panelX + 20, controlY, panelX + panelWidth - 20);
-    controlY += 14;
+    drawSeparator(actionSep, panelX + 20, stack.y, panelX + panelWidth - 20);
+    stack.gap(14);
 
     // ---- Action Buttons ----
     const btnW = 180;
@@ -742,24 +742,24 @@ export class SettingsScene extends Phaser.Scene {
     const btnCenterX = width / 2;
 
     // Close button
-    this.createActionButton(btnCenterX, controlY, btnW, btnH, 'Close', COLORS.PRIMARY, COLORS.PRIMARY_HOVER, () => {
+    this.createActionButton(btnCenterX, stack.y, btnW, btnH, 'Close', COLORS.PRIMARY, COLORS.PRIMARY_HOVER, () => {
       this.scene.stop();
     });
-    controlY += 38;
+    stack.gap(38);
 
     if (showGameButtons) {
       // Restart button
-      this.createActionButton(btnCenterX, controlY, btnW, btnH, 'Restart', COLORS.SPECIAL, COLORS.SPECIAL_HOVER, () => {
+      this.createActionButton(btnCenterX, stack.y, btnW, btnH, 'Restart', COLORS.SPECIAL, COLORS.SPECIAL_HOVER, () => {
         const gameScene = this.scene.get('GameScene');
         this.scene.stop();
         if (gameScene) {
           gameScene.scene.restart();
         }
       });
-      controlY += 38;
+      stack.gap(38);
 
       // Main Menu button
-      this.createActionButton(btnCenterX, controlY, btnW, btnH, 'Main Menu', COLORS.DANGER, COLORS.DANGER_HOVER, () => {
+      this.createActionButton(btnCenterX, stack.y, btnW, btnH, 'Main Menu', COLORS.DANGER, COLORS.DANGER_HOVER, () => {
         this.scene.stop('GameScene');
         this.scene.stop();
         this.scene.start('MainMenuScene');

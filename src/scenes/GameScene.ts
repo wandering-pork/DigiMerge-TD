@@ -31,7 +31,7 @@ import { DIGIMON_DATABASE } from '@/data/DigimonDatabase';
 import { getWaveConfig } from '@/data/WaveData';
 import { Stage, TargetPriority, Attribute, ATTRIBUTE_NAMES, STAGE_NAMES, EnemyStats, GameStatistics } from '@/types';
 import { COLORS, TEXT_STYLES, FONTS, ANIM, ATTRIBUTE_COLORS_STR } from '@/ui/UITheme';
-import { drawPanel, drawButton, drawSeparator, drawDigitalGrid, animateButtonHover, animateButtonPress } from '@/ui/UIHelpers';
+import { drawPanel, drawButton, drawSeparator, drawDigitalGrid, animateButtonHover, animateButtonPress, LayoutStack } from '@/ui/UIHelpers';
 import { BossAbilityAction, getCooldownProgress } from '@/systems/BossAbilitySystem';
 import { Projectile } from '@/entities/Projectile';
 import { TutorialOverlay } from '@/ui/TutorialOverlay';
@@ -1192,9 +1192,6 @@ export class GameScene extends Phaser.Scene {
             duration: 800, ease: 'Power2',
             onComplete: () => drainText.destroy(),
           });
-
-          // Brief dark red vignette flash to indicate DB drain
-          this.cameras.main.flash(150, 80, 0, 0, false);
         }
         break;
       }
@@ -1965,6 +1962,88 @@ export class GameScene extends Phaser.Scene {
     }).setDepth(10);
 
     this.updateWavePreview();
+
+    // --- Attribute Triangle (bottom of left panel) ---
+    {
+      const triCenterX = btnCenterX;
+      const triSpreadX = 55;
+      const triHeight = 40;
+      const triLabelStyle = { ...TEXT_STYLES.HUD_LABEL, fontSize: '11px', fontStyle: 'bold' as const };
+      const edgeLabelStyle = { ...TEXT_STYLES.HUD_LABEL, fontSize: '10px' };
+
+      // LayoutStack: every element flows through the stack (all origins Y=0)
+      const stack = new LayoutStack(GAME_HEIGHT - 138);
+
+      // Separator
+      const attrSepGfx = this.add.graphics().setDepth(10);
+      drawSeparator(attrSepGfx, leftColX - 5, stack.y, leftColX + contentW - 5);
+      stack.gap(4);
+
+      // Title
+      const titleText = this.add.text(triCenterX, 0, 'Attribute Triangle', {
+        ...TEXT_STYLES.HUD_LABEL,
+      }).setOrigin(0.5, 0).setDepth(10);
+      stack.add(titleText, undefined, true, 2);
+
+      // Vaccine label (in the flow, above triangle)
+      const vaccineLabel = this.add.text(triCenterX, 0, 'Vaccine', {
+        ...triLabelStyle, color: ATTRIBUTE_COLORS_STR[0],
+      }).setOrigin(0.5, 0).setDepth(10);
+      stack.add(vaccineLabel, undefined, true, 2);
+
+      // Triangle graphic region — capture Y, then skip past it
+      const triTopY = stack.y;
+      const vx = triCenterX, vy = triTopY;
+      const xx = triCenterX - triSpreadX, xy = triTopY + triHeight;
+      const dx = triCenterX + triSpreadX, dy = triTopY + triHeight;
+
+      const triGfx = this.add.graphics().setDepth(10);
+      triGfx.lineStyle(2, 0x667788, 0.6);
+      triGfx.beginPath(); triGfx.moveTo(vx, vy); triGfx.lineTo(xx + 14, xy - 6); triGfx.stroke();
+      triGfx.beginPath(); triGfx.moveTo(xx + 20, xy); triGfx.lineTo(dx - 20, dy); triGfx.stroke();
+      triGfx.beginPath(); triGfx.moveTo(dx - 14, dy - 6); triGfx.lineTo(vx, vy); triGfx.stroke();
+
+      // Arrowheads
+      const drawArrowHead = (fromX: number, fromY: number, toX: number, toY: number, color: number) => {
+        const mx = (fromX + toX) / 2, my = (fromY + toY) / 2;
+        const angle = Math.atan2(toY - fromY, toX - fromX);
+        const len = 6;
+        triGfx.fillStyle(color, 0.9);
+        triGfx.fillTriangle(
+          mx + Math.cos(angle) * len, my + Math.sin(angle) * len,
+          mx + Math.cos(angle + 2.4) * len, my + Math.sin(angle + 2.4) * len,
+          mx + Math.cos(angle - 2.4) * len, my + Math.sin(angle - 2.4) * len,
+        );
+      };
+      drawArrowHead(vx, vy, xx + 14, xy - 6, COLORS.VACCINE);
+      drawArrowHead(xx + 20, xy, dx - 20, dy, COLORS.VIRUS);
+      drawArrowHead(dx - 14, dy - 6, vx, vy, COLORS.DATA);
+
+      // "beats" labels on left and right edges
+      this.add.text((vx + xx) / 2 - 14, (vy + xy) / 2 - 2, 'beats', edgeLabelStyle).setOrigin(0.5).setDepth(10);
+      this.add.text((dx + vx) / 2 + 14, (dy + vy) / 2 - 2, 'beats', edgeLabelStyle).setOrigin(0.5).setDepth(10);
+
+      // Advance past triangle
+      stack.gap(triHeight);
+
+      // Virus — beats — Data row
+      const virusLabel = this.add.text(xx, 0, 'Virus', { ...triLabelStyle, color: ATTRIBUTE_COLORS_STR[2] }).setOrigin(0.5, 0).setDepth(10);
+      const beatsBottom = this.add.text(triCenterX, 0, 'beats', edgeLabelStyle).setOrigin(0.5, 0).setDepth(10);
+      const dataLabel = this.add.text(dx, 0, 'Data', { ...triLabelStyle, color: ATTRIBUTE_COLORS_STR[1] }).setOrigin(0.5, 0).setDepth(10);
+      stack.addRow([virusLabel, beatsBottom, dataLabel], undefined, true, 2);
+
+      // Free = neutral
+      const freeRow = this.add.text(triCenterX, 0, 'Free = neutral', {
+        ...TEXT_STYLES.HUD_LABEL, fontSize: '11px',
+      }).setOrigin(0.5, 0).setDepth(10);
+      stack.add(freeRow, undefined, true, 2);
+
+      // Holy +25% to all
+      const holyRow = this.add.text(triCenterX, 0, '\u2727 +25% to all', {
+        ...TEXT_STYLES.HUD_LABEL, fontSize: '11px', color: '#ffee88',
+      }).setOrigin(0.5, 0).setDepth(10);
+      stack.add(holyRow);
+    }
   }
 
   // ============================================================

@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { GameStatistics } from '@/types';
 import { COLORS, TEXT_STYLES, FONTS, ANIM } from '@/ui/UITheme';
-import { drawDigitalGrid, drawPanel, drawButton, drawSeparator, createDigitalParticles, animateButtonHover, animateButtonPress, animateStaggeredEntrance } from '@/ui/UIHelpers';
+import { drawDigitalGrid, drawPanel, drawButton, drawSeparator, LayoutStack, createDigitalParticles, animateButtonHover, animateButtonPress, animateStaggeredEntrance } from '@/ui/UIHelpers';
 import { HighScoreManager, calculateScore, HighScoreEntry, getLastPlayerName, setLastPlayerName } from '@/managers/HighScoreManager';
 
 export class GameOverScene extends Phaser.Scene {
@@ -157,10 +157,10 @@ export class GameOverScene extends Phaser.Scene {
     });
 
     // Statistics section
-    let statsEndY = panelY + 240;
+    const stack = new LayoutStack(panelY + 240);
     const stats = this.gameData.statistics;
     if (stats) {
-      const statsBaseY = panelY + 240;
+      const statsBaseY = stack.y;
       const leftX = panelX + 40;
       const rightX = panelX + panelW / 2 + 20;
       const valueOffsetX = 150;
@@ -214,31 +214,36 @@ export class GameOverScene extends Phaser.Scene {
         });
       });
 
-      statsEndY = statsBaseY + 3 * lineH + 5;
+      stack.y = statsBaseY + 3 * lineH + 5;
 
       // MVP Tower section
       const mvp = this.gameData.mvpTower;
-      if (mvp) {
-        const mvpY = statsEndY + 5;
+      const hasMvpData = !!mvp;
+      if (hasMvpData) {
+        stack.gap(5);
+        const mvpSepY = stack.y;
 
         // Separator
         const mvpSepGfx = this.add.graphics();
-        drawSeparator(mvpSepGfx, panelX + 30, mvpY, panelX + panelW - 30, isVictory ? COLORS.GOLD : COLORS.DANGER);
+        drawSeparator(mvpSepGfx, panelX + 30, mvpSepY, panelX + panelW - 30, isVictory ? COLORS.GOLD : COLORS.DANGER);
 
-        const mvpTitle = this.add.text(width / 2, mvpY + 10, 'MVP Tower', {
+        stack.gap(10);
+        const mvpTitle = this.add.text(width / 2, stack.y, 'MVP Tower', {
           fontFamily: FONTS.MONO,
           fontSize: '11px',
           color: '#ffdd44',
           resolution: 2,
         }).setOrigin(0.5, 0).setAlpha(0);
+        stack.gap(16);
 
-        const mvpInfo = this.add.text(width / 2, mvpY + 26, `${mvp.name}  -  ${mvp.kills} kills, ${mvp.damage} dmg`, {
+        const mvpInfo = this.add.text(width / 2, stack.y, `${mvp!.name}  -  ${mvp!.kills} kills, ${mvp!.damage} dmg`, {
           fontFamily: FONTS.MONO,
           fontSize: '13px',
           color: '#ffffff',
           fontStyle: 'bold',
           resolution: 2,
         }).setOrigin(0.5, 0).setAlpha(0);
+        stack.gap(22);
 
         this.tweens.add({
           targets: [mvpTitle, mvpInfo],
@@ -246,13 +251,12 @@ export class GameOverScene extends Phaser.Scene {
           duration: 400,
           delay: 1200,
         });
-
-        statsEndY = mvpY + 48;
       }
     }
 
     // --- Name Input & Save Section ---
-    const nameInputY = statsEndY + 15;
+    stack.gap(15);
+    const nameInputY = stack.y;
 
     // "Enter your name:" label
     const nameLabel = this.add.text(width / 2, nameInputY, 'Enter your name:', {
@@ -324,10 +328,11 @@ export class GameOverScene extends Phaser.Scene {
       delay: 1000,
     });
 
-    statsEndY = nameInputY + 110;
+    stack.y = nameInputY + 110;
 
     // Action buttons with staggered entrance
-    const btnStartY = statsEndY + 20;
+    stack.gap(20);
+    const btnStartY = stack.y;
     const buttons: Phaser.GameObjects.Container[] = [];
 
     buttons.push(this.createMenuButton(

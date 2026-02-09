@@ -417,6 +417,43 @@ interface SaveData {
 
 ---
 
+## UI Layout Helpers
+
+### LayoutStack (REQUIRED for vertical UI layout)
+**Location**: `src/ui/UIHelpers.ts` — **Always use LayoutStack when arranging text/UI elements vertically to prevent overlap.**
+
+```typescript
+import { LayoutStack } from '@/ui/UIHelpers';
+
+const stack = new LayoutStack(startY);
+stack.add(titleText);                     // Auto-measure height from titleText.height
+stack.gap(4);                             // 4px spacing
+stack.addRow([label, value]);             // Same Y, advance by tallest element
+stack.add(button, undefined, true, 8);    // Auto-measure + 8px padding after
+stack.add(hiddenThing, undefined, false); // Skipped when show=false
+// stack.y is always the next available Y position
+```
+
+**API:**
+- `add(target, height?, show?, padding?)` — set target.y, advance by height (auto-measured from `target.height` if omitted) + padding
+- `addRow(targets[], height?, show?, padding?)` — all targets same Y, advance by tallest (auto-measured if omitted) + padding
+- `gap(px, show?)` — advance Y without placing anything
+
+**Rules:**
+- Never hard-code Y positions for sequential UI elements — use LayoutStack
+- All text objects in a LayoutStack must use `.setOrigin(_, 0)` so Y = top edge
+- Prefer omitting `height` to let auto-measurement prevent overlap
+
+### TEXT_STYLES (from UITheme.ts)
+Use these consistent styles instead of custom font/color objects:
+- `TEXT_STYLES.HUD_LABEL` — `12px, #ccaa88, FONTS.BODY` (section headers, labels)
+- `TEXT_STYLES.HUD_VALUE` — `20px bold, #fff8f0, FONTS.MONO` (numbers, values)
+- `TEXT_STYLES.PANEL_LABEL` — `14px, #ccaa88, FONTS.BODY` (panel text)
+- `TEXT_STYLES.PANEL_VALUE` — `15px, #fff8f0, FONTS.MONO` (panel numbers)
+- `TEXT_STYLES.BUTTON` / `BUTTON_SM` — bold white for buttons
+
+---
+
 ## Development Guidelines
 
 ### Test-Driven Development (TDD)

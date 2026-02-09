@@ -4,7 +4,7 @@ import { EVOLUTION_PATHS } from '@/data/EvolutionPaths';
 import { DigimonStats, EnemyStats, Stage, Attribute, STAGE_NAMES, ATTRIBUTE_NAMES } from '@/types';
 import { GAME_WIDTH, GAME_HEIGHT } from '@/config/Constants';
 import { COLORS, TEXT_STYLES, FONTS, ANIM } from '@/ui/UITheme';
-import { drawPanel, drawButton, drawDigitalGrid, drawSeparator, animateButtonHover, animateButtonPress, animateModalIn, animateModalOut, createDigitalParticles } from '@/ui/UIHelpers';
+import { drawPanel, drawButton, drawDigitalGrid, drawSeparator, LayoutStack, animateButtonHover, animateButtonPress, animateModalIn, animateModalOut, createDigitalParticles } from '@/ui/UIHelpers';
 import { ATTRIBUTE_COLORS_STR } from '@/ui/UITheme';
 import { canDisplaySprite, getStaticFrame } from '@/utils/SpriteAnimHelper';
 import { DIGIMON_DESCRIPTIONS } from '@/data/DigimonDescriptions';
@@ -463,9 +463,9 @@ export class EncyclopediaScene extends Phaser.Scene {
     }
 
     // Stats separator
-    let statsY = cardY + 125 + descHeight;
+    const stack = new LayoutStack(cardY + 125 + descHeight);
     const sepGfx = this.add.graphics();
-    drawSeparator(sepGfx, cardX + 20, statsY - 5, cardX + cardW - 20);
+    drawSeparator(sepGfx, cardX + 20, stack.y - 5, cardX + cardW - 20);
     panelCont.add(sepGfx);
 
     if (entry.isTower) {
@@ -479,48 +479,49 @@ export class EncyclopediaScene extends Phaser.Scene {
         statLines.push({ label: 'Skill', value: `${getSkillDisplayName(ts.effectType)} (${Math.round((ts.effectChance ?? 0) * 100)}%)` });
       }
       for (const stat of statLines) {
-        panelCont.add(this.add.text(cardX + 30, statsY, stat.label, {
+        panelCont.add(this.add.text(cardX + 30, stack.y, stat.label, {
           fontFamily: FONTS.BODY,
           fontSize: '14px',
           color: '#7788aa',
           resolution: 2,
         }));
-        panelCont.add(this.add.text(cardX + cardW - 30, statsY, stat.value, {
+        panelCont.add(this.add.text(cardX + cardW - 30, stack.y, stat.value, {
           fontFamily: FONTS.MONO,
           fontSize: '15px',
           color: '#ddddee',
           resolution: 2,
         }).setOrigin(1, 0));
-        statsY += 28;
+        stack.gap(28);
       }
 
       // Evolution Chain section (towers only)
-      if (evoChain && hasEvoData) {
-        statsY += 8;
+      const showEvo = !!(evoChain && hasEvoData);
+      if (showEvo) {
+        stack.gap(8);
         const evoSep = this.add.graphics();
-        drawSeparator(evoSep, cardX + 20, statsY, cardX + cardW - 20, COLORS.CYAN);
+        drawSeparator(evoSep, cardX + 20, stack.y, cardX + cardW - 20, COLORS.CYAN);
         panelCont.add(evoSep);
-        statsY += 12;
+        stack.gap(12);
 
-        panelCont.add(this.add.text(cardX + 30, statsY, 'Evolution Chain', {
+        panelCont.add(this.add.text(cardX + 30, stack.y, 'Evolution Chain', {
           fontFamily: FONTS.DISPLAY,
           fontSize: '14px',
           color: '#00ddff',
           fontStyle: 'bold',
           resolution: 2,
         }));
-        statsY += 24;
+        stack.gap(24);
 
         // "From:" row - previous evolutions
-        panelCont.add(this.add.text(cardX + 30, statsY, 'From:', {
+        panelCont.add(this.add.text(cardX + 30, stack.y, 'From:', {
           fontFamily: FONTS.BODY,
           fontSize: '11px',
           color: '#7788aa',
           resolution: 2,
         }));
 
-        if (evoChain.prevIds.length === 0) {
-          panelCont.add(this.add.text(cardX + 80, statsY, '\u2014', {
+        if (evoChain!.prevIds.length === 0) {
+          panelCont.add(this.add.text(cardX + 80, stack.y, '\u2014', {
             fontFamily: FONTS.MONO,
             fontSize: '13px',
             color: '#556677',
@@ -528,13 +529,13 @@ export class EncyclopediaScene extends Phaser.Scene {
           }));
         } else {
           let prevX = cardX + 80;
-          for (const prevId of evoChain.prevIds) {
+          for (const prevId of evoChain!.prevIds) {
             const prevEntry = this.entries.find(e => e.id === prevId && e.isTower);
             if (!prevEntry) continue;
             const prevSpriteKey = (prevEntry.stats as DigimonStats).spriteKey ?? prevEntry.id;
 
             // Clickable sprite + name group
-            const evoContainer = this.add.container(prevX + 20, statsY + 22);
+            const evoContainer = this.add.container(prevX + 20, stack.y + 22);
 
             if (canDisplaySprite(this, prevSpriteKey)) {
               const prevStaticFrame = getStaticFrame(prevSpriteKey);
@@ -573,18 +574,18 @@ export class EncyclopediaScene extends Phaser.Scene {
             prevX += 85;
           }
         }
-        statsY += 50;
+        stack.gap(50);
 
         // "To:" row - next evolutions
-        panelCont.add(this.add.text(cardX + 30, statsY, 'To:', {
+        panelCont.add(this.add.text(cardX + 30, stack.y, 'To:', {
           fontFamily: FONTS.BODY,
           fontSize: '11px',
           color: '#7788aa',
           resolution: 2,
         }));
 
-        if (evoChain.nextIds.length === 0) {
-          panelCont.add(this.add.text(cardX + 80, statsY, '\u2014', {
+        if (evoChain!.nextIds.length === 0) {
+          panelCont.add(this.add.text(cardX + 80, stack.y, '\u2014', {
             fontFamily: FONTS.MONO,
             fontSize: '13px',
             color: '#556677',
@@ -592,13 +593,13 @@ export class EncyclopediaScene extends Phaser.Scene {
           }));
         } else {
           let nextX = cardX + 80;
-          for (const nextId of evoChain.nextIds) {
+          for (const nextId of evoChain!.nextIds) {
             const nextEntry = this.entries.find(e => e.id === nextId && e.isTower);
             if (!nextEntry) continue;
             const nextSpriteKey = (nextEntry.stats as DigimonStats).spriteKey ?? nextEntry.id;
 
             // Clickable sprite + name group
-            const evoContainer = this.add.container(nextX + 20, statsY + 22);
+            const evoContainer = this.add.container(nextX + 20, stack.y + 22);
 
             if (canDisplaySprite(this, nextSpriteKey)) {
               const nextStaticFrame = getStaticFrame(nextSpriteKey);
@@ -648,35 +649,36 @@ export class EncyclopediaScene extends Phaser.Scene {
         { label: 'Reward', value: `${es.reward} DB` },
       ];
       for (const stat of statLines) {
-        panelCont.add(this.add.text(cardX + 30, statsY, stat.label, {
+        panelCont.add(this.add.text(cardX + 30, stack.y, stat.label, {
           fontFamily: FONTS.BODY,
           fontSize: '14px',
           color: '#7788aa',
           resolution: 2,
         }));
-        panelCont.add(this.add.text(cardX + cardW - 30, statsY, stat.value, {
+        panelCont.add(this.add.text(cardX + cardW - 30, stack.y, stat.value, {
           fontFamily: FONTS.MONO,
           fontSize: '15px',
           color: '#ddddee',
           resolution: 2,
         }).setOrigin(1, 0));
-        statsY += 28;
+        stack.gap(28);
       }
-      if (es.bossAbility) {
-        statsY += 5;
+      const hasBoss = !!es.bossAbility;
+      if (hasBoss) {
+        stack.gap(5);
         const abilitySep = this.add.graphics();
-        drawSeparator(abilitySep, cardX + 20, statsY, cardX + cardW - 20, COLORS.GOLD);
+        drawSeparator(abilitySep, cardX + 20, stack.y, cardX + cardW - 20, COLORS.GOLD);
         panelCont.add(abilitySep);
-        statsY += 10;
-        panelCont.add(this.add.text(cardX + 30, statsY, `Ability: ${es.bossAbility.name}`, {
+        stack.gap(10);
+        panelCont.add(this.add.text(cardX + 30, stack.y, `Ability: ${es.bossAbility!.name}`, {
           fontFamily: FONTS.DISPLAY,
           fontSize: '14px',
           color: '#ffaa44',
           fontStyle: 'bold',
           resolution: 2,
         }));
-        statsY += 20;
-        panelCont.add(this.add.text(cardX + 30, statsY, es.bossAbility.description, {
+        stack.gap(20);
+        panelCont.add(this.add.text(cardX + 30, stack.y, es.bossAbility!.description, {
           fontFamily: FONTS.BODY,
           fontSize: '14px',
           color: '#cc9944',

@@ -9,7 +9,7 @@ import { canMerge, MergeCandidate } from '@/systems/MergeSystem';
 import { GRID, GRID_OFFSET_X, getSellPrice as calculateSellPrice } from '@/config/Constants';
 import { STATUS_EFFECTS, STATUS_EFFECT_CONFIGS } from '@/data/StatusEffects';
 import { COLORS, ATTRIBUTE_COLORS_STR, TEXT_STYLES, FONTS, ANIM } from './UITheme';
-import { drawPanel, drawButton, drawSeparator, animateSlideIn, animateSlideOut, animateButtonHover, animateButtonPress } from './UIHelpers';
+import { drawPanel, drawButton, drawSeparator, LayoutStack, animateSlideIn, animateSlideOut, animateButtonHover, animateButtonPress } from './UIHelpers';
 import { canDisplaySprite, getStaticFrame } from '@/utils/SpriteAnimHelper';
 // DIGIMON_DESCRIPTIONS import removed — skill info shown in header instead of lore
 
@@ -150,6 +150,10 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
   // Panel dimensions (right of grid)
   private static readonly PANEL_WIDTH = 300;
   private static readonly PANEL_HEIGHT = 680;
+
+  private static readonly BUTTON_H = 36;
+  private static readonly SMALL_BUTTON_H = 30;
+  private static readonly STAT_ROW_H = 26;
 
   // Panel position X (saved for animations)
   private panelBaseX: number;
@@ -697,7 +701,7 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
 
     // --- Fluid layout: position everything below stats dynamically ---
     const w = TowerInfoPanel.PANEL_WIDTH;
-    let actionY = this.totalDmgText.y + 26;
+    const stack = new LayoutStack(this.totalDmgText.y + TowerInfoPanel.STAT_ROW_H);
 
     // Bonus effects go right after Total Dmg
     if (tower.bonusEffects && tower.bonusEffects.length > 0) {
@@ -705,71 +709,59 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
         const bonusInfo = getSkillDisplay(bonus.effectType, bonus.effectChance);
         if (bonusInfo) {
           const bonusText = this.scene.add.text(
-            10, actionY,
+            10, stack.y,
             `+ ${bonusInfo.name} (${bonusInfo.chance})`,
             { fontFamily: 'monospace', fontSize: '13px', color: '#88ddaa', resolution: 2 }
           );
           this.add(bonusText);
           this.bonusEffectTexts.push(bonusText);
-          actionY += 16;
+          stack.gap(16);
         }
       }
-      actionY += 4;
+      stack.gap(4);
     }
 
     // Separator
     this.actionSeparator.clear();
-    drawSeparator(this.actionSeparator, 10, actionY + 2, w - 10);
-    actionY += 14;
+    drawSeparator(this.actionSeparator, 10, stack.y + 2, w - 10);
+    stack.gap(24); // must be >= button half-height (18) + padding to avoid overlap
 
     // Level Up button
-    this.levelUpBtn.y = actionY;
+    stack.add(this.levelUpBtn, 38);
     this.refreshLevelUpButton(maxLevel);
-    actionY += 38;
 
     // +5 / Max buttons
     const isMaxed = !canLevelUp(tower.level, maxLevel);
-    this.levelUp5Btn.y = actionY;
-    this.levelUpMaxBtn.y = actionY;
+    stack.addRow([this.levelUp5Btn, this.levelUpMaxBtn], 38, !isMaxed);
     this.refreshMultiLevelButtons(maxLevel);
-    if (!isMaxed) actionY += 38;
 
     // Target priority
-    this.priorityLabel.y = actionY;
-    this.priorityBtn.y = actionY + 10;
+    this.priorityLabel.y = stack.y;
+    this.priorityBtn.y = stack.y + 10;
     this.priorityBtnText.setText(TARGET_PRIORITY_LABELS[tower.targetPriority]);
-    actionY += 46;
+    stack.gap(46);
 
     // Sell button
-    this.sellBtn.y = actionY;
     const sellPrice = this.getSellPrice();
     this.sellBtnText.setText(`Sell [S] (+${sellPrice} DB)`);
-    actionY += 44;
+    stack.add(this.sellBtn, 44);
 
     // Digivolve button - show only at max level with evolution paths
     const evolutions = getEvolutions(tower.digimonId, tower.dp);
-    if (isMaxed && evolutions.length > 0) {
-      this.digivolveBtn.setVisible(true);
-      this.digivolveBtn.y = actionY;
-      actionY += 44;
-    } else {
-      this.digivolveBtn.setVisible(false);
-    }
+    const showDigivolve = isMaxed && evolutions.length > 0;
+    this.digivolveBtn.setVisible(showDigivolve);
+    stack.add(this.digivolveBtn, 44, showDigivolve);
 
     // Merge button
-    this.mergeBtn.y = actionY;
     this.mergeBtn.setVisible(true);
     this.mergeBtnText.setText('Merge...');
-    actionY += 44;
+    stack.add(this.mergeBtn, 44);
 
     // DNA Fuse button — show for Mega towers at max level that have DNA pairs
     const hasDNAPairs = tower.stage === Stage.MEGA && getDNAPairsFor(tower.digimonId).length > 0;
-    if (isMaxed && hasDNAPairs) {
-      this.dnaFuseBtn.setVisible(true);
-      this.dnaFuseBtn.y = actionY;
-    } else {
-      this.dnaFuseBtn.setVisible(false);
-    }
+    const showDNA = isMaxed && hasDNAPairs;
+    this.dnaFuseBtn.setVisible(showDNA);
+    stack.add(this.dnaFuseBtn, 44, showDNA);
   }
 
   // ---------------------------------------------------------------------------
