@@ -120,6 +120,7 @@ export const WAVE_DATA: Record<number, WaveConfig> = {
     spawnInterval: 1800,
     boss: 'boss_greymon',
     reward: 100,
+    bossLiveCost: 2,
   },
 
   // ========================================
@@ -220,6 +221,7 @@ export const WAVE_DATA: Record<number, WaveConfig> = {
     spawnInterval: 1800,
     boss: 'boss_greymon_evolved',
     reward: 200,
+    bossLiveCost: 5,
   },
 
   // ========================================
@@ -315,6 +317,7 @@ export const WAVE_DATA: Record<number, WaveConfig> = {
     spawnInterval: 1500,
     boss: 'boss_devimon',
     reward: 150,
+    bossLiveCost: 2,
   },
 
   // Waves 31-35: Mixed Pressure
@@ -415,6 +418,7 @@ export const WAVE_DATA: Record<number, WaveConfig> = {
     spawnInterval: 1500,
     boss: 'boss_myotismon',
     reward: 300,
+    bossLiveCost: 5,
   },
 
   // ========================================
@@ -515,6 +519,7 @@ export const WAVE_DATA: Record<number, WaveConfig> = {
     spawnInterval: 1400,
     boss: 'boss_skullgreymon',
     reward: 350,
+    bossLiveCost: 2,
   },
 
   // Waves 51-55: Intensifying
@@ -619,6 +624,7 @@ export const WAVE_DATA: Record<number, WaveConfig> = {
     spawnInterval: 1400,
     boss: 'boss_venommyotismon',
     reward: 600,
+    bossLiveCost: 5,
   },
 
   // ========================================
@@ -725,6 +731,7 @@ export const WAVE_DATA: Record<number, WaveConfig> = {
     spawnInterval: 1200,
     boss: 'boss_machinedramon',
     reward: 500,
+    bossLiveCost: 2,
   },
 
   // Waves 71-75: High Pressure
@@ -833,6 +840,7 @@ export const WAVE_DATA: Record<number, WaveConfig> = {
     spawnInterval: 1200,
     boss: 'boss_omegamon',
     reward: 750,
+    bossLiveCost: 5,
   },
 
   // ========================================
@@ -945,6 +953,7 @@ export const WAVE_DATA: Record<number, WaveConfig> = {
     spawnInterval: 1000,
     boss: 'boss_omegamon_zwart',
     reward: 750,
+    bossLiveCost: 2,
   },
 
   // Waves 91-95: Survival Mode
@@ -1053,6 +1062,7 @@ export const WAVE_DATA: Record<number, WaveConfig> = {
     spawnInterval: 1000,
     boss: 'boss_apocalymon',
     reward: 1500,
+    bossLiveCost: 5,
   },
 };
 
@@ -1142,6 +1152,7 @@ export function generateEndlessWave(waveNumber: number): WaveConfig {
     const bossIndex = Math.floor((waveNumber / 10) % ENDLESS_BOSS_POOL.length);
     config.boss = ENDLESS_BOSS_POOL[bossIndex];
     config.reward = 500 + wavesIntoEndless * 10;
+    config.bossLiveCost = 2;
   }
 
   return config;

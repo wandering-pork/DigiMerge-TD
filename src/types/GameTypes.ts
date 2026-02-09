@@ -52,6 +52,7 @@ export interface WaveConfig {
   spawnInterval: number;
   boss?: string;
   reward?: number;
+  bossLiveCost?: number;
 }
 
 export interface EvolutionPath {

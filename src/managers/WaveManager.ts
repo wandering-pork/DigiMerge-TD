@@ -42,6 +42,9 @@ export class WaveManager {
   /** HP multiplier that scales within Phase 1. */
   private waveScaling: number = 1;
 
+  /** Current wave config (for boss liveCost lookup). */
+  private currentWaveConfig: WaveConfig | null = null;
+
   constructor(scene: Phaser.Scene, enemyContainer: Phaser.GameObjects.Container) {
     this.scene = scene;
     this.enemyContainer = enemyContainer;
@@ -67,6 +70,7 @@ export class WaveManager {
     }
 
     this.currentWave = waveNumber;
+    this.currentWaveConfig = waveConfig;
 
     // Scaling: +3% HP per wave for waves 1-100, exponential for endless (101+)
     if (waveNumber <= 100) {
@@ -161,6 +165,7 @@ export class WaveManager {
     this.currentWave = 0;
     this.spawnTimer = 0;
     this.waveScaling = 1;
+    this.currentWaveConfig = null;
     EventBus.off(GameEvents.SPLITTER_DIED, this.onSplitterDied, this);
   }
 
@@ -207,8 +212,13 @@ export class WaveManager {
       this.checkWaveComplete();
     });
 
-    // Emit boss or regular spawn event
+    // Set boss live cost from wave config
     const isBoss = digimonId.startsWith('boss_');
+    if (isBoss && this.currentWaveConfig?.bossLiveCost) {
+      enemy.liveCost = this.currentWaveConfig.bossLiveCost;
+    }
+
+    // Emit boss or regular spawn event
     if (isBoss) {
       EventBus.emit(GameEvents.BOSS_SPAWNED, {
         enemyID: enemy.enemyID,

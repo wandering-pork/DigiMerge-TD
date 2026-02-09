@@ -96,6 +96,28 @@ describe('WaveData', () => {
     }
   });
 
+  it('mid-phase boss waves should have bossLiveCost of 2', () => {
+    const midPhaseBossWaves = [10, 30, 50, 70, 90];
+    for (const wave of midPhaseBossWaves) {
+      expect(WAVE_DATA[wave].bossLiveCost, `Wave ${wave} bossLiveCost`).toBe(2);
+    }
+  });
+
+  it('phase boss waves should have bossLiveCost of 5', () => {
+    const phaseBossWaves = [20, 40, 60, 80, 100];
+    for (const wave of phaseBossWaves) {
+      expect(WAVE_DATA[wave].bossLiveCost, `Wave ${wave} bossLiveCost`).toBe(5);
+    }
+  });
+
+  it('non-boss waves should not have bossLiveCost set', () => {
+    const bossWaves = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
+    for (let i = 1; i <= 100; i++) {
+      if (bossWaves.includes(i)) continue;
+      expect(WAVE_DATA[i].bossLiveCost, `Wave ${i} should not have bossLiveCost`).toBeUndefined();
+    }
+  });
+
   it('spawn intervals should decrease across phases', () => {
     // Phase 1: 2000-1800, Phase 2: 1500, Phase 3: 1200, Phase 4: 1000, Phase 5: 800
     expect(WAVE_DATA[1].spawnInterval).toBeGreaterThan(WAVE_DATA[25].spawnInterval);
@@ -183,6 +205,20 @@ describe('generateEndlessWave', () => {
       if (config.boss) {
         expect(enemies[config.boss], `Endless boss "${config.boss}" not in database`).toBeDefined();
       }
+    }
+  });
+
+  it('endless boss waves should have bossLiveCost of 2', () => {
+    for (let w = 110; w <= 150; w += 10) {
+      const config = generateEndlessWave(w);
+      expect(config.bossLiveCost, `Endless wave ${w} bossLiveCost`).toBe(2);
+    }
+  });
+
+  it('endless non-boss waves should not have bossLiveCost', () => {
+    for (const w of [101, 105, 115, 123]) {
+      const config = generateEndlessWave(w);
+      expect(config.bossLiveCost, `Endless wave ${w} should not have bossLiveCost`).toBeUndefined();
     }
   });
 

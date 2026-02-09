@@ -2522,10 +2522,11 @@ export class GameScene extends Phaser.Scene {
     this.statistics.totalDigibytesEarned += data.reward;
   }
 
-  private onEnemyReachedBase() {
+  private onEnemyReachedBase(data?: { enemyID?: string; digimonId?: string; liveCost?: number }) {
     if (this.gameOverTriggered) return;
 
-    this.lives -= 1;
+    const penalty = data?.liveCost ?? 1;
+    this.lives = Math.max(0, this.lives - penalty);
     this.livesText.setText(`${this.lives}`);
 
     // Low lives warning: flash HUD when lives <= 5

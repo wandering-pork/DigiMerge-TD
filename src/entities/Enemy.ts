@@ -56,6 +56,7 @@ export class Enemy extends Phaser.GameObjects.Container {
   // State
   public isAlive: boolean = true;
   public isBoss: boolean;
+  public liveCost: number = 1;
   public isSplitChild: boolean = false;
 
   // Kill attribution: ID of the tower that last hit this enemy
@@ -510,6 +511,7 @@ export class Enemy extends Phaser.GameObjects.Container {
     EventBus.emit(GameEvents.ENEMY_REACHED_BASE, {
       enemyID: this.enemyID,
       digimonId: this.digimonId,
+      liveCost: this.liveCost,
     });
 
     this.returnToPool();
@@ -588,6 +590,7 @@ export class Enemy extends Phaser.GameObjects.Container {
 
     // Reset state flags
     this.isAlive = true;
+    this.liveCost = 1;
     this.isSplitChild = false;
     this.lastHitByTowerID = undefined;
     this.activeEffects = new Map();

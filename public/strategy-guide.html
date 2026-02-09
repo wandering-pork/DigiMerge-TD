@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DigiMerge TD — Strategy Guide</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --bg-card: #161b22;
+    --bg-card-alt: #1c2333;
+    --border: #30363d;
+    --text: #e6edf3;
+    --text-dim: #8b949e;
+    --text-gold: #e8b84b;
+    --cyan: #58a6ff;
+    --green: #3fb950;
+    --red: #f85149;
+    --orange: #d29922;
+    --purple: #bc8cff;
+    --pink: #f778ba;
+    --vaccine: #44bb55;
+    --data: #4488ee;
+    --virus: #cc4444;
+    --free: #bbbb44;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 24px 16px 80px;
+  }
+
+  h1 {
+    font-size: 2rem;
+    text-align: center;
+    margin-bottom: 4px;
+    background: linear-gradient(135deg, var(--cyan), var(--text-gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .subtitle {
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 0.95rem;
+    margin-bottom: 32px;
+  }
+
+  h2 {
+    font-size: 1.35rem;
+    color: var(--cyan);
+    margin: 40px 0 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  h3 {
+    font-size: 1.1rem;
+    color: var(--text-gold);
+    margin: 24px 0 10px;
+  }
+
+  h4 {
+    font-size: 0.95rem;
+    color: var(--text);
+    margin: 16px 0 6px;
+    font-weight: 600;
+  }
+
+  p, li { font-size: 0.92rem; }
+  p { margin-bottom: 10px; }
+  ul, ol { padding-left: 20px; margin-bottom: 12px; }
+  li { margin-bottom: 4px; }
+
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-bottom: 16px;
+  }
+
+  .card-highlight {
+    border-left: 3px solid var(--cyan);
+  }
+
+  .card-warning {
+    border-left: 3px solid var(--orange);
+    background: #1c1a10;
+  }
+
+  .card-danger {
+    border-left: 3px solid var(--red);
+    background: #1c1010;
+  }
+
+  .card-success {
+    border-left: 3px solid var(--green);
+    background: #101c10;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0 16px;
+    font-size: 0.85rem;
+  }
+
+  th, td {
+    padding: 8px 10px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+
+  th {
+    background: var(--bg-card-alt);
+    color: var(--text-gold);
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  tr:hover td { background: rgba(88, 166, 255, 0.04); }
+
+  .attr-vaccine { color: var(--vaccine); font-weight: 600; }
+  .attr-data { color: var(--data); font-weight: 600; }
+  .attr-virus { color: var(--virus); font-weight: 600; }
+  .attr-free { color: var(--free); font-weight: 600; }
+
+  .tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    vertical-align: middle;
+  }
+
+  .tag-s { background: #1a3a1a; color: var(--green); border: 1px solid #2a5a2a; }
+  .tag-a { background: #1a2a3a; color: var(--cyan); border: 1px solid #2a4a6a; }
+  .tag-b { background: #2a2a1a; color: var(--orange); border: 1px solid #4a4a2a; }
+  .tag-c { background: #2a1a2a; color: var(--purple); border: 1px solid #4a2a4a; }
+
+  .phase-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .phase-meta {
+    font-size: 0.82rem;
+    color: var(--text-dim);
+  }
+
+  .build-order {
+    counter-reset: step;
+    list-style: none;
+    padding-left: 0;
+  }
+
+  .build-order li {
+    counter-increment: step;
+    position: relative;
+    padding-left: 36px;
+    margin-bottom: 10px;
+  }
+
+  .build-order li::before {
+    content: counter(step);
+    position: absolute;
+    left: 0;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--bg-card-alt);
+    border: 1px solid var(--border);
+    color: var(--cyan);
+    font-size: 0.78rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    line-height: 24px;
+  }
+
+  .dps-bar {
+    display: inline-block;
+    height: 8px;
+    border-radius: 4px;
+    background: var(--cyan);
+    vertical-align: middle;
+    margin-left: 6px;
+  }
+
+  .cost { color: var(--text-gold); font-weight: 600; }
+  .hp { color: var(--red); font-weight: 600; }
+  .dps-val { color: var(--green); font-weight: 600; }
+  .effect { color: var(--purple); }
+  .name { color: #fff; font-weight: 600; }
+
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  @media (max-width: 640px) {
+    .grid-2 { grid-template-columns: 1fr; }
+  }
+
+  .formula {
+    background: var(--bg-card-alt);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 8px 14px;
+    font-family: 'Consolas', 'Fira Code', monospace;
+    font-size: 0.82rem;
+    color: var(--cyan);
+    margin: 8px 0 12px;
+    overflow-x: auto;
+  }
+
+  .tier-label {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 3px;
+    vertical-align: middle;
+    margin-left: 4px;
+  }
+
+  .tier-it { background: #2a2a1a; color: #cca; }
+  .tier-r { background: #1a2a1a; color: #aca; }
+  .tier-c { background: #1a1a2a; color: #aac; }
+  .tier-u { background: #2a1a2a; color: #cac; }
+  .tier-m { background: #2a1a1a; color: #caa; }
+  .tier-ultra { background: #2a2a00; color: #ee8; }
+
+  .toc {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin-bottom: 32px;
+  }
+
+  .toc h3 { margin-top: 0; color: var(--text); }
+
+  .toc ol {
+    columns: 2;
+    column-gap: 24px;
+  }
+
+  .toc a {
+    color: var(--cyan);
+    text-decoration: none;
+    font-size: 0.88rem;
+  }
+
+  .toc a:hover { text-decoration: underline; }
+
+  .verdict-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .verdict-item {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px 14px;
+  }
+
+  .verdict-item .label {
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+  }
+
+  .verdict-item .value {
+    font-size: 1.1rem;
+    font-weight: 700;
+  }
+
+  .easy { color: var(--green); }
+  .moderate { color: var(--cyan); }
+  .hard { color: var(--orange); }
+  .very-hard { color: var(--red); }
+
+  .timeline {
+    position: relative;
+    padding-left: 20px;
+    border-left: 2px solid var(--border);
+    margin: 16px 0 16px 10px;
+  }
+
+  .timeline-item {
+    position: relative;
+    margin-bottom: 20px;
+    padding-left: 16px;
+  }
+
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -26px;
+    top: 6px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 2px solid var(--cyan);
+  }
+
+  .timeline-item.boss::before {
+    border-color: var(--red);
+    background: var(--red);
+  }
+
+  .timeline-wave {
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    font-weight: 600;
+  }
+
+  .evo-chain {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-wrap: wrap;
+    font-size: 0.85rem;
+    margin: 6px 0;
+  }
+
+  .evo-chain .arrow {
+    color: var(--text-dim);
+    font-size: 0.75rem;
+  }
+
+  .evo-chain .evo-name {
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: var(--bg-card-alt);
+    border: 1px solid var(--border);
+    font-weight: 500;
+  }
+
+  .evo-chain .evo-active {
+    border-color: var(--cyan);
+    color: #fff;
+  }
+
+  .summary-box {
+    background: linear-gradient(135deg, #111820, #161b22);
+    border: 1px solid var(--text-gold);
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin: 24px 0;
+  }
+
+  .summary-box h3 {
+    color: var(--text-gold);
+    margin-top: 0;
+  }
+</style>
+</head>
+<body>
+
+<h1>DigiMerge TD Strategy Guide</h1>
+<p class="subtitle">Complete walkthrough to beat all 100 waves — with specific build orders, tower picks, and economy tips</p>
+
+<nav class="toc">
+  <h3>Contents</h3>
+  <ol>
+    <li><a href="#formulas">Key Formulas</a></li>
+    <li><a href="#starter">Starter Pick</a></li>
+    <li><a href="#effects">Effect Tier List</a></li>
+    <li><a href="#towers">Best Towers by Stage</a></li>
+    <li><a href="#phase1">Phase 1: Waves 1–20</a></li>
+    <li><a href="#phase2">Phase 2: Waves 21–40</a></li>
+    <li><a href="#phase3">Phase 3: Waves 41–60</a></li>
+    <li><a href="#phase4">Phase 4: Waves 61–80</a></li>
+    <li><a href="#phase5">Phase 5: Waves 81–100</a></li>
+    <li><a href="#dna">DNA Digivolution Priority</a></li>
+    <li><a href="#economy">Economy Cheat Sheet</a></li>
+    <li><a href="#verdict">Balance Verdict</a></li>
+  </ol>
+</nav>
+
+<!-- ===================================================================== -->
+<h2 id="formulas">Key Formulas</h2>
+<!-- ===================================================================== -->
+
+<div class="grid-2">
+  <div class="card">
+    <h4>Damage per hit</h4>
+    <div class="formula">baseDmg &times; (1 + level &times; 0.03)</div>
+    <p style="font-size:0.82rem;color:var(--text-dim)">Then multiplied by attribute matchup (0.75&times; / 1.0&times; / 1.5&times;)</p>
+  </div>
+  <div class="card">
+    <h4>Attacks per second</h4>
+    <div class="formula">baseSpd &times; (1 + level &times; 0.01)</div>
+    <p style="font-size:0.82rem;color:var(--text-dim)">DPS = damage &times; attack speed</p>
+  </div>
+  <div class="card">
+    <h4>Level-up cost</h4>
+    <div class="formula">ceil(2 &times; currentLevel &times; stageMult)</div>
+    <p style="font-size:0.82rem;color:var(--text-dim)">Stage multipliers: IT&times;1 &middot; R&times;1.5 &middot; C&times;2 &middot; U&times;2.5 &middot; M&times;3 &middot; Ultra&times;3.5</p>
+  </div>
+  <div class="card">
+    <h4>Max level</h4>
+    <div class="formula">baseMax + (DP &times; dpBonus) + originBonus</div>
+    <p style="font-size:0.82rem;color:var(--text-dim)">Origin bonus = (currentStage &minus; originStage) &times; 5. DP bonus per stage: IT&times;1, R&times;2, C&times;3, U&times;4, M&times;5, Ultra&times;5</p>
+  </div>
+</div>
+
+<div class="card card-highlight">
+  <h4>Critical rules</h4>
+  <ul>
+    <li><strong>Evolution resets level to 1.</strong> You must re-level from scratch after each digivolution.</li>
+    <li><strong>Merge keeps the higher level.</strong> Fodder doesn't need leveling &mdash; merge level 1 sacrifices into your leveled main tower.</li>
+    <li><strong>Origin caps evolution:</strong> In-Training origin &rarr; max Champion. Rookie origin &rarr; max Ultimate. Champion origin &rarr; max Mega.</li>
+    <li><strong>AoE splash</strong> deals 50% damage to all enemies within 50px of the primary target. This is the #1 DPS multiplier in the game.</li>
+    <li><strong>Boss lives penalty:</strong> Mid-phase bosses (waves 10, 30, 50, 70, 90) cost <strong>2 lives</strong>. Phase bosses (waves 20, 40, 60, 80, 100) cost <strong>5 lives</strong>. Never let a phase boss through!</li>
+  </ul>
+</div>
+
+<!-- ===================================================================== -->
+<h2 id="starter">Starter Pick</h2>
+<!-- ===================================================================== -->
+
+<p>You pick <strong>1 starter</strong> (placed for free). All other spawns draw from all 21 lines regardless of your pick. Your starter choice sets your early-game direction and one guaranteed free tower.</p>
+
+<div class="grid-2">
+  <div class="card card-success">
+    <h4>Best Pick: <span class="name">Dorimon</span> <span class="attr-data">(Data)</span></h4>
+    <div class="evo-chain">
+      <span class="evo-name evo-active">Dorimon</span>
+      <span class="arrow">&rarr;</span>
+      <span class="evo-name">Dorumon</span>
+      <span class="arrow">&rarr;</span>
+      <span class="evo-name">Dorugamon</span>
+      <span class="arrow">&rarr;</span>
+      <span class="evo-name">DoruGremon</span>
+      <span class="arrow">&rarr;</span>
+      <span class="evo-name" style="color:var(--text-gold)">Alphamon</span>
+    </div>
+    <p>100% armor pierce at every stage. Alphamon is the <strong>highest Mega DPS</strong> (45.0 base) with pierce + AoE + execute. Also a DNA partner for Alphamon Ouryuken (Ultra).</p>
+  </div>
+  <div class="card">
+    <h4>Runner-up: <span class="name">Koromon</span> <span class="attr-vaccine">(Vaccine)</span></h4>
+    <div class="evo-chain">
+      <span class="evo-name evo-active">Koromon</span>
+      <span class="arrow">&rarr;</span>
+      <span class="evo-name">Agumon</span>
+      <span class="arrow">&rarr;</span>
+      <span class="evo-name">Greymon</span>
+      <span class="arrow">&rarr;</span>
+      <span class="evo-name">MetalGreymon</span>
+      <span class="arrow">&rarr;</span>
+      <span class="evo-name" style="color:var(--text-gold)">WarGreymon</span>
+    </div>
+    <p>Burn AoE at every stage &mdash; the best wave-clearing line in the game. WarGreymon + MetalGarurumon DNA fuses into <strong>Omegamon</strong>, the most versatile Ultra.</p>
+  </div>
+</div>
+
+<!-- ===================================================================== -->
+<h2 id="effects">Effect Tier List</h2>
+<!-- ===================================================================== -->
+
+<table>
+  <thead>
+    <tr><th>Tier</th><th>Effect</th><th>Why</th><th>Best Towers</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><span class="tag tag-s">S</span></td>
+      <td class="effect">Pierce AoE</td>
+      <td>Ignores armor <em>and</em> splashes 50% to nearby. Multiplies DPS by 2&ndash;4&times; on grouped enemies.</td>
+      <td><span class="name">Alphamon</span>, <span class="name">Imperialdramon FM</span>, <span class="name">DoruGremon</span></td>
+    </tr>
+    <tr>
+      <td><span class="tag tag-s">S</span></td>
+      <td class="effect">Burn AoE</td>
+      <td>AoE splash + DoT (5% tower damage every 0.5s for 3s = +30% bonus). Unmatched wave clear.</td>
+      <td><span class="name">Greymon</span>, <span class="name">WarGrowlmon</span>, <span class="name">WarGreymon</span>, <span class="name">Apollomon</span></td>
+    </tr>
+    <tr>
+      <td><span class="tag tag-s">S</span></td>
+      <td class="effect">Freeze</td>
+      <td>Full stop for 1.5s. Enemies take more hits from every tower on the board. Force multiplier.</td>
+      <td><span class="name">MetalGarurumon</span>, <span class="name">Crescemon</span>, <span class="name">AncientGarurumon</span></td>
+    </tr>
+    <tr>
+      <td><span class="tag tag-a">A</span></td>
+      <td class="effect">Armor Break</td>
+      <td>Reduces armor by 50% for 3s. Turns tanks from 40% armor to 20%. Essential for phases 3&ndash;5.</td>
+      <td><span class="name">Guilmon</span>, <span class="name">Ouryumon</span>, <span class="name">Apollomon</span></td>
+    </tr>
+    <tr>
+      <td><span class="tag tag-a">A</span></td>
+      <td class="effect">Execute</td>
+      <td>Instant-kills low HP enemies. Bypasses effective-HP entirely. Great for cleaning up after AoE.</td>
+      <td><span class="name">Alphamon</span> (50%), <span class="name">HolyAngemon</span> (8%), <span class="name">Beelzemon BM</span> (50%)</td>
+    </tr>
+    <tr>
+      <td><span class="tag tag-a">A</span></td>
+      <td class="effect">Slow</td>
+      <td>40% speed reduction for 2s. Enemies spend ~67% longer in tower range = 67% more DPS from all towers.</td>
+      <td><span class="name">Gabumon</span>, <span class="name">Lunamon</span>, <span class="name">MetalGarurumon</span></td>
+    </tr>
+    <tr>
+      <td><span class="tag tag-s">S</span></td>
+      <td class="effect">Heal</td>
+      <td>Restores player lives on proc. Only way to recover lives. With bosses costing 2–5 lives each, healing is essential from phase 2 onward.</td>
+      <td><span class="name">Hououmon</span>, <span class="name">Plesiomon</span>, <span class="name">Rafflesimon</span></td>
+    </tr>
+    <tr>
+      <td><span class="tag tag-b">B</span></td>
+      <td class="effect">Multihit</td>
+      <td>3 projectiles per attack (same total damage). Doesn't increase DPS, but triggers effects 1&times; reliably.</td>
+      <td><span class="name">Togemon</span>, <span class="name">Paildramon</span>, <span class="name">Terriermon</span></td>
+    </tr>
+    <tr>
+      <td><span class="tag tag-b">B</span></td>
+      <td class="effect">Poison</td>
+      <td>3% damage/s for 4s, stacks &times;3. Modest DoT but counters regen enemies (blocks healing).</td>
+      <td><span class="name">Lalamon</span>, <span class="name">VenomMyotismon</span>, <span class="name">Lotusmon</span></td>
+    </tr>
+    <tr>
+      <td><span class="tag tag-c">C</span></td>
+      <td class="effect">Knockback / Fear</td>
+      <td>Niche. Resets enemy progress on the path. Useful in tight spots, but unreliable proc rates.</td>
+      <td><span class="name">Patamon</span>, <span class="name">BlackGarurumon</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ===================================================================== -->
+<h2 id="towers">Best Towers by Stage</h2>
+<!-- ===================================================================== -->
+
+<h3>Rookie <span class="tier-label tier-r">ROOKIE</span></h3>
+<table>
+  <thead><tr><th>Tower</th><th>Attr</th><th>Base DPS</th><th>Effect</th><th>Why pick</th></tr></thead>
+  <tbody>
+    <tr><td class="name">Hackmon</td><td class="attr-vaccine">Vaccine</td><td><span class="dps-val">8.8</span></td><td>100% pierce</td><td>Highest Rookie DPS, ignores all armor</td></tr>
+    <tr><td class="name">Guilmon</td><td class="attr-virus">Virus</td><td><span class="dps-val">8.1</span></td><td>10% armor break</td><td>Early armor shredder &mdash; essential vs tanks from wave 15+</td></tr>
+    <tr><td class="name">Agumon</td><td class="attr-vaccine">Vaccine</td><td><span class="dps-val">8.0</span></td><td>15% burn</td><td>Solid all-rounder, evolves into AoE king Greymon</td></tr>
+    <tr><td class="name">Dorumon</td><td class="attr-data">Data</td><td><span class="dps-val">8.0</span></td><td>100% pierce</td><td>Armor ignore + best late-game evolution path (Alphamon)</td></tr>
+    <tr><td class="name">Terriermon</td><td class="attr-vaccine">Vaccine</td><td><span class="dps-val">8.4</span></td><td>100% multihit</td><td>Fastest attacker (1.2 spd), consistent damage output</td></tr>
+  </tbody>
+</table>
+
+<h3>Champion <span class="tier-label tier-c">CHAMPION</span></h3>
+<table>
+  <thead><tr><th>Tower</th><th>Attr</th><th>Base DPS</th><th>Effect</th><th>Why pick</th></tr></thead>
+  <tbody>
+    <tr><td class="name">Greymon</td><td class="attr-vaccine">Vaccine</td><td><span class="dps-val">14.4</span></td><td>25% burn AoE</td><td><strong>#1 priority.</strong> AoE splash + DoT clears entire wave groups. 3.0 range.</td></tr>
+    <tr><td class="name">Tailmon</td><td class="attr-vaccine">Vaccine</td><td><span class="dps-val">19.8</span></td><td>25% crit</td><td>Highest raw Champion DPS. Single-target boss killer.</td></tr>
+    <tr><td class="name">Growlmon</td><td class="attr-virus">Virus</td><td><span class="dps-val">15.2</span></td><td>30% burn</td><td>High single-target burn. Best Virus option for counter-picks.</td></tr>
+    <tr><td class="name">ExVeemon</td><td class="attr-free">Free</td><td><span class="dps-val">16.2</span></td><td>100% pierce</td><td>Attribute-neutral, ignores armor. Works against everything.</td></tr>
+    <tr><td class="name">Dorugamon</td><td class="attr-data">Data</td><td><span class="dps-val">15.3</span></td><td>20% pierce + crit</td><td>Armor pierce + burst crits. Evolves toward Alphamon.</td></tr>
+  </tbody>
+</table>
+
+<h3>Ultimate <span class="tier-label tier-u">ULTIMATE</span></h3>
+<table>
+  <thead><tr><th>Tower</th><th>Attr</th><th>Base DPS</th><th>Effect</th><th>Why pick</th></tr></thead>
+  <tbody>
+    <tr><td class="name">Paildramon</td><td class="attr-free">Free</td><td><span class="dps-val">28.8</span></td><td>100% multihit</td><td>Highest Ultimate DPS, 4.0 range, attribute-neutral. Carry tower.</td></tr>
+    <tr><td class="name">DoruGremon</td><td class="attr-data">Data</td><td><span class="dps-val">24.5</span></td><td>30% pierce AoE</td><td>Pierce + AoE = melts armored groups. Alphamon's precursor.</td></tr>
+    <tr><td class="name">Angewomon</td><td class="attr-vaccine">Vaccine</td><td><span class="dps-val">23.8</span></td><td>35% holy AoE</td><td>+25% bonus holy damage on top of AoE splash. Great value.</td></tr>
+    <tr><td class="name">WarGrowlmon</td><td class="attr-virus">Virus</td><td><span class="dps-val">22.8</span></td><td>35% burn AoE</td><td>Burn + AoE wave clear. Best Virus Ultimate.</td></tr>
+    <tr><td class="name">MetalGreymon</td><td class="attr-vaccine">Vaccine</td><td><span class="dps-val">21.0</span></td><td>40% burn multi</td><td>Higher burn proc than Greymon. Evolves into WarGreymon.</td></tr>
+  </tbody>
+</table>
+
+<h3>Mega <span class="tier-label tier-m">MEGA</span></h3>
+<table>
+  <thead><tr><th>Tower</th><th>Attr</th><th>Base DPS</th><th>Effect</th><th>Why pick</th></tr></thead>
+  <tbody>
+    <tr><td class="name">Alphamon</td><td class="attr-vaccine">Vaccine</td><td><span class="dps-val">45.0</span></td><td>50% pierce AoE execute</td><td><strong>#1 tower in game.</strong> Ignores armor, splashes AoE, executes low-HP. Does everything.</td></tr>
+    <tr><td class="name">ChaosGallantmon</td><td class="attr-virus">Virus</td><td><span class="dps-val">43.2</span></td><td>25% pierce lifesteal</td><td>#2 DPS. Pierce + DB recovery from lifesteal. Boss specialist.</td></tr>
+    <tr><td class="name">Jesmon</td><td class="attr-vaccine">Vaccine</td><td><span class="dps-val">42.0</span></td><td>50% pierce AoE crit</td><td>Crits can spike to insane damage. Pierce AoE package.</td></tr>
+    <tr><td class="name">Ouryumon</td><td class="attr-vaccine">Vaccine</td><td><span class="dps-val">40.8</span></td><td>50% pierce AoE armor break</td><td>Shreds armor for the whole team. DNA partner for Alphamon Ouryuken.</td></tr>
+    <tr><td class="name">WarGreymon</td><td class="attr-vaccine">Vaccine</td><td><span class="dps-val">35.0</span></td><td>60% burn AoE KB</td><td>60% proc rate! Burn + AoE + knockback. DNA partner for Omegamon.</td></tr>
+    <tr><td class="name">Imperialdramon FM</td><td class="attr-free">Free</td><td><span class="dps-val">40.0</span></td><td>100% pierce AoE</td><td>Never weak to any attribute. 100% proc, 5.0 range. Safe pick.</td></tr>
+  </tbody>
+</table>
+
+<h3>Ultra <span class="tier-label tier-ultra">ULTRA</span> (DNA Digivolution only)</h3>
+<table>
+  <thead><tr><th>Tower</th><th>Attr</th><th>Base DPS</th><th>Effect</th><th>DNA from</th></tr></thead>
+  <tbody>
+    <tr><td class="name">Omegamon</td><td class="attr-vaccine">Vaccine</td><td><span class="dps-val">160.0</span></td><td>30% all effects</td><td>WarGreymon + MetalGarurumon (3 DP)</td></tr>
+    <tr><td class="name">Susanoomon</td><td class="attr-free">Free</td><td><span class="dps-val">159.5</span></td><td>40% holy celestial</td><td>Ophanimon + Cherubimon (5 DP)</td></tr>
+    <tr><td class="name">Beelzemon BM</td><td class="attr-virus">Virus</td><td><span class="dps-val">148.5</span></td><td>50% execute rapid</td><td>Beelzemon + VenomMyotismon (6 DP)</td></tr>
+    <tr><td class="name">Rafflesimon</td><td class="attr-data">Data</td><td><span class="dps-val">144.0</span></td><td>55% poison AoE + heal all</td><td>Rosemon + Lotusmon (4 DP)</td></tr>
+    <tr><td class="name">Alphamon Ouryuken</td><td class="attr-vaccine">Vaccine</td><td><span class="dps-val">139.5</span></td><td>45% execute AoE</td><td>Alphamon + Ouryumon (5 DP)</td></tr>
+    <tr><td class="name">Gallantmon CM</td><td class="attr-virus">Virus</td><td><span class="dps-val">136.0</span></td><td>50% purge pierce</td><td>Gallantmon + ChaosGallantmon (5 DP)</td></tr>
+  </tbody>
+</table>
+
+<!-- ===================================================================== -->
+<h2 id="phase1">Phase 1: Waves 1–20</h2>
+<!-- ===================================================================== -->
+
+<div class="phase-header">
+  <h3 style="margin:0">The Cheap Army</h3>
+  <span class="phase-meta">Income: <span class="cost">750</span> start &rarr; <span class="cost">5,070</span> cumulative &nbsp;|&nbsp; Enemies: In-Training &amp; Rookie</span>
+</div>
+
+<div class="card card-highlight">
+  <h4>Build Order</h4>
+  <ol class="build-order">
+    <li><strong>Pre-wave 1:</strong> Place your free starter on a tile covering the upper serpentine (kill zone A). Spawn <strong>2 random In-Training</strong> (<span class="cost">150 DB</span>) on adjacent tiles. Keep <span class="cost">600 DB</span> for leveling.</li>
+    <li><strong>Waves 1–5:</strong> Level all 3 towers to level 5–7. Total cost ~<span class="cost">120 DB</span>. This gives ~12 DPS total &mdash; plenty for 72–258 HP waves.</li>
+    <li><strong>Waves 5–9:</strong> Spawn 2 more random In-Training (<span class="cost">150 DB</span>). Level to 5. You now have 5 towers, ~20 DPS.</li>
+    <li><strong>Wave 9 (pre-boss):</strong> Merge same-attribute pairs. You should get 1–2 merges for <strong>+1 DP each</strong>. The merge fodder is consumed, the survivor keeps the higher level.</li>
+    <li><strong>Wave 10 boss</strong> — Greymon (<span class="hp">508 HP</span>, slow): Your 3–4 surviving towers handle this easily. Boss walks slowly (91s path time).</li>
+    <li><strong>Waves 11–15:</strong> Keep spawning In-Training for merge fodder. Target: <strong>2 towers with 3+ DP each</strong>. Cost per DP: <span class="cost">75 DB</span> (one random spawn sacrificed).</li>
+    <li><strong>Waves 15–18:</strong> Evolve your 2 best DP-stacked towers to <strong>Rookie</strong> (<span class="cost">80 DB</span> each). At 3 DP, Rookie max level = 20 + 3&times;2 = 26.</li>
+    <li><strong>Wave 18–19:</strong> Level Rookies to 10–15. Evolve to <strong>Champion</strong> (<span class="cost">120 DB</span>). Champions at level 1 already outperform maxed In-Training.</li>
+    <li><strong>Wave 20 boss</strong> — Greymon Evolved (<span class="hp">1,884 HP</span>): 1–2 low-level Champions + Rookies handle this. Path time is 100+ seconds.</li>
+  </ol>
+</div>
+
+<div class="card card-danger">
+  <h4>Boss Lives Penalty</h4>
+  <p>Bosses that reach your base cost <strong>more than 1 life</strong>. Mid-phase bosses (waves 10, 30, 50, 70, 90) cost <strong class="hp">2 lives</strong>. Phase bosses (waves 20, 40, 60, 80, 100) cost <strong class="hp">5 lives</strong>. Letting a phase boss through is catastrophic &mdash; with 20 starting lives, that's 25% gone in one enemy. Prioritize boss kills above all else.</p>
+</div>
+
+<div class="card card-warning">
+  <h4>DP Farming Trick</h4>
+  <p>Merge fodder does <strong>not</strong> need to be leveled. Spawn a level 1 In-Training (<span class="cost">75 DB</span>), immediately merge it into your main tower. Cost: <span class="cost">75 DB per DP</span>. This is the cheapest DP gain in the game. Bank 3–5 DP before evolving.</p>
+</div>
+
+<h4>Board State at Wave 20</h4>
+<table>
+  <thead><tr><th>Tower</th><th>Stage</th><th>Level</th><th>DP</th><th>DPS</th></tr></thead>
+  <tbody>
+    <tr><td>Main carry #1</td><td>Champion</td><td>1–5</td><td>3–4</td><td>~15–20</td></tr>
+    <tr><td>Main carry #2</td><td>Champion</td><td>1–5</td><td>2–3</td><td>~15–20</td></tr>
+    <tr><td>Support #1–3</td><td>In-Training / Rookie</td><td>8–10</td><td>0–1</td><td>~3–8 each</td></tr>
+    <tr><td colspan="4" style="text-align:right;color:var(--text-dim)"><strong>Total</strong></td><td class="dps-val">~55–80</td></tr>
+  </tbody>
+</table>
+
+<!-- ===================================================================== -->
+<h2 id="phase2">Phase 2: Waves 21–40</h2>
+<!-- ===================================================================== -->
+
+<div class="phase-header">
+  <h3 style="margin:0">The Champion Wall</h3>
+  <span class="phase-meta">Income: <span class="cost">5,070</span> &rarr; <span class="cost">14,340</span> &nbsp;|&nbsp; Enemies: Champion tier (100–320 HP), Tanks 30–45% armor</span>
+</div>
+
+<div class="card card-highlight">
+  <h4>Build Order</h4>
+  <ol class="build-order">
+    <li><strong>Waves 21–25:</strong> Level your 2 Champions to 15–20. At level 20, Greymon does ~38 DPS with 25% AoE burn &mdash; this clears grouped Champion enemies. Total cost ~<span class="cost">1,500 DB</span>.</li>
+    <li><strong>Wave 25:</strong> Spawn <strong>2 Rookie-origin</strong> towers (<span class="cost">225 DB</span> each, random). These will reach Ultimate and serve as your mid-game backbone. Pick Vaccine or Data for attribute coverage.</li>
+    <li><strong>Waves 25–30:</strong> Level Rookies to max (20), evolve to Champion (<span class="cost">120 DB</span>). You now have <strong>4 Champions</strong>.</li>
+    <li><strong>Wave 30 boss</strong> — Devimon (<span class="hp">4,675 HP</span>, 25% armor, <strong class="hp">2 lives</strong>): 4 Champions at level 15+ = ~120 DPS. Boss has 146s path time. Easy: 120 &times; 146 = 17,520 damage output vs 6,233 effective HP. But don't get careless &mdash; leaking a mid-phase boss costs 2 lives.</li>
+    <li><strong>Waves 31–35:</strong> <strong>KEY MOMENT</strong> — Spawn your first <strong>Champion-origin</strong> tower (<span class="cost">750 DB</span> random). This is your future Mega. Pick it carefully &mdash; Vaccine or Data attribute for the best Mega options (Alphamon, WarGreymon).</li>
+    <li><strong>Waves 35–39:</strong> Level everything. Sell your weakest In-Training towers (recover 50% investment). Push your best Champions to level 30+.</li>
+    <li><strong>Wave 40 boss</strong> — Myotismon (<span class="hp">13,020 HP</span>, 30% armor, Virus): <strong>FIRST REAL TEST.</strong> Stack Vaccine towers near the path. A Vaccine Champion at level 25 deals ~45 &times; 1.5 = 67 effective DPS against him. Need 3–4 focused Vaccine Champions.</li>
+  </ol>
+</div>
+
+<div class="card card-danger">
+  <h4>Wave 40 — Myotismon (the skill check)</h4>
+  <p>13,020 HP with 30% armor = <span class="hp">18,600</span> effective damage needed. He's <span class="attr-virus">Virus</span> &mdash; <span class="attr-vaccine">Vaccine</span> towers deal 1.5&times;. As a phase boss, Myotismon costs <strong class="hp">5 lives</strong> if he reaches the base &mdash; that's 25% of your starting lives from one enemy. This is the wave where under-investing in Champions loses the game. You <em>must</em> have 3+ leveled Vaccine Champions.</p>
+</div>
+
+<h4>Board State at Wave 40</h4>
+<table>
+  <thead><tr><th>Tower</th><th>Stage</th><th>Level</th><th>Origin</th><th>DPS</th></tr></thead>
+  <tbody>
+    <tr><td>Greymon (AoE carry)</td><td>Champion</td><td>25–30</td><td>In-Training</td><td>~40–48</td></tr>
+    <tr><td>Tailmon / Dorugamon</td><td>Champion</td><td>20–25</td><td>In-Training</td><td>~35–45</td></tr>
+    <tr><td>Rookie-origin #1</td><td>Champion</td><td>10–15</td><td>Rookie</td><td>~20–28</td></tr>
+    <tr><td>Rookie-origin #2</td><td>Champion</td><td>10–15</td><td>Rookie</td><td>~20–28</td></tr>
+    <tr><td>Champion-origin #1 (future Mega)</td><td>Champion</td><td>5–10</td><td>Champion</td><td>~16–22</td></tr>
+    <tr><td>Supports (2–3)</td><td>Rookie</td><td>10–15</td><td>In-Training</td><td>~6–10 each</td></tr>
+    <tr><td colspan="4" style="text-align:right;color:var(--text-dim)"><strong>Total</strong></td><td class="dps-val">~170–230</td></tr>
+  </tbody>
+</table>
+
+<!-- ===================================================================== -->
+<h2 id="phase3">Phase 3: Waves 41–60</h2>
+<!-- ===================================================================== -->
+
+<div class="phase-header">
+  <h3 style="margin:0">The Ultimate Transition</h3>
+  <span class="phase-meta">Income: <span class="cost">14,340</span> &rarr; <span class="cost">28,910</span> &nbsp;|&nbsp; Enemies: Ultimate (300–700 HP, 30–60% armor), Splitters</span>
+</div>
+
+<div class="card card-highlight">
+  <h4>Build Order</h4>
+  <ol class="build-order">
+    <li><strong>Waves 41–43:</strong> Evolve Rookie-origin Champions to <strong>Ultimate</strong> (<span class="cost">160 DB</span> each, resets to level 1). Level them to 10–15 immediately. Even a level 10 Ultimate outperforms a level 30 Champion.</li>
+    <li><strong>Waves 43–48:</strong> Level Ultimates to 25–30. Focus on <strong>Paildramon</strong> (Free, 28.8 base DPS) or <strong>DoruGremon</strong> (pierce AoE) if available.</li>
+    <li><strong>Wave 46 &mdash; SPLITTER WARNING:</strong> Mamemon wave. 10 enemies split into 20+ copies. <strong>Have AoE towers ready</strong> (Greymon, WarGrowlmon). Kill them before they split if possible.</li>
+    <li><strong>Wave 50 boss</strong> — SkullGreymon (<span class="hp">12,350 HP</span>, 30% armor, <strong class="hp">2 lives</strong>): Ability: destroys ALL projectiles at 50% HP. Burst him down fast. 2 Ultimates + AoE Champions handle it.</li>
+    <li><strong>Waves 50–55:</strong> Spawn a <strong>second Champion-origin</strong> tower (<span class="cost">750 DB</span>). Start leveling your first Champion-origin through Ultimate. DP-merge Champions if you can afford it (<span class="cost">750 DB</span> per merge at Champion stage).</li>
+    <li><strong>Waves 55–58:</strong> <strong>Sell obsolete In-Training-origin towers.</strong> Their Champion cap can't keep up with Ultimate enemies. Recoup 50% and funnel into your Mega pipeline.</li>
+    <li><strong>Wave 60 boss</strong> — VenomMyotismon (<span class="hp">22,160 HP</span>, 35% armor, Virus, <strong class="hp">5 lives</strong>): Ability: spawns 3 minions every 15s. As a phase boss, leaking him is devastating. Stack Vaccine Ultimates and bring armor break.</li>
+  </ol>
+</div>
+
+<div class="card card-warning">
+  <h4>The Sell-and-Reinvest Loop</h4>
+  <p>Your In-Training-origin towers cap at Champion. By wave 50, they're falling behind. <strong>Sell them</strong> (50% refund) and use the DigiBytes for Mega-path towers. A level 30 Champion you sell for ~350 DB can fund half a Champion-origin spawn. This loop is <em>mandatory</em> &mdash; hoarding old towers loses the game.</p>
+</div>
+
+<h4>Specific Tower Targets</h4>
+<div class="grid-2">
+  <div class="card">
+    <h4>Must have by wave 50</h4>
+    <ul>
+      <li><span class="name">Paildramon</span> or <span class="name">DoruGremon</span> at level 25+ (main DPS)</li>
+      <li>1 <strong>armor break</strong> tower: <span class="name">Growlmon</span> or <span class="name">Guilmon</span> line</li>
+      <li>1 <strong>slow/freeze</strong> tower: <span class="name">Garurumon</span> line</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>Pipeline for later</h4>
+    <ul>
+      <li>2 Champion-origin towers leveling through Champion (future Megas)</li>
+      <li>Ideally one is on the <strong>Alphamon</strong> or <strong>WarGreymon</strong> path</li>
+      <li>Start thinking about <strong>DNA partners</strong></li>
+    </ul>
+  </div>
+</div>
+
+<!-- ===================================================================== -->
+<h2 id="phase4">Phase 4: Waves 61–80</h2>
+<!-- ===================================================================== -->
+
+<div class="phase-header">
+  <h3 style="margin:0">The Mega Race</h3>
+  <span class="phase-meta">Income: <span class="cost">28,910</span> &rarr; <span class="cost">48,580</span> &nbsp;|&nbsp; Enemies: Mega (900–5,000 HP), 20–45% armor</span>
+</div>
+
+<div class="card card-highlight">
+  <h4>Build Order</h4>
+  <ol class="build-order">
+    <li><strong>Wave 61:</strong> Your Champion-origin tower should be at Ultimate, level 30–40 by now. Push to <strong>max Ultimate</strong> (level 55 with origin bonus) and evolve to <strong>Mega</strong> (<span class="cost">200 DB</span>, resets to level 1).</li>
+    <li><strong>Waves 61–65:</strong> Rush first Mega to level 20–25. Even a low-level Alphamon (75 base damage) outperforms a maxed Ultimate. Level-up cost: ~<span class="cost">3,000 DB</span> for level 1&rarr;25 at &times;3 multiplier.</li>
+    <li><strong>Wave 66 &mdash; DANGER: Diaboromon splitters (&times;4).</strong> 7 enemies &rarr; 28 copies. If not killed before splitting, effective HP is <span class="hp">~170,000</span>. <strong>Set all towers to "First" targeting and focus fire.</strong> AoE is your best friend here.</li>
+    <li><strong>Waves 66–69:</strong> Get second Mega online. Level first Mega to 35–40. Sell any remaining Rookie-origin Ultimates that are falling off.</li>
+    <li><strong>Wave 70 boss</strong> — Machinedramon (<span class="hp">46,050 HP</span>, 40% armor, <strong class="hp">2 lives</strong>): <strong>Passive aura: reduces all tower ranges by 20%.</strong> Place towers close to path. 2 Megas at level 35 = ~350 DPS. With armor break active: 46,050 / 0.8 armor / 0.5 break = ~57,563 effective HP. 350 DPS &times; 100s path = 35,000 &mdash; this is tight. Level your Megas more or bring armor break.</li>
+    <li><strong>Waves 71–78:</strong> Push Megas to level 50–60. Spawn a <strong>third Champion-origin</strong> if budget allows (<span class="cost">750 DB</span>). This third Mega or DNA partner is your endgame insurance.</li>
+    <li><strong>Wave 80 boss</strong> — Omegamon (<span class="hp">84,250 HP</span>, 40% armor, <strong class="hp">5 lives</strong>): Ability: 50% damage shield every 20s for 4s. A phase boss leak here costs 5 lives &mdash; potentially fatal. Need 3 Megas at level 40+ to brute force through the shield windows.</li>
+  </ol>
+</div>
+
+<div class="card card-danger">
+  <h4>Wave 66 — The Diaboromon Trap</h4>
+  <p>7 Diaboromon that each split into <strong>4 copies</strong> on death. Total effective HP: <span class="hp">~170,000</span>. If they reach the base, that's up to 28 lives lost. <strong>Counter:</strong> Focus-fire each Diaboromon before it dies near your base &mdash; kill them early on the path so the 4 split copies still have far to walk. AoE burn clears the splits.</p>
+</div>
+
+<h4>Ideal Mega Roster (pick 2–3)</h4>
+<table>
+  <thead><tr><th>Slot</th><th>Best Choice</th><th>Role</th><th>DPS at Lv40</th><th>DPS at Lv60</th></tr></thead>
+  <tbody>
+    <tr><td>Primary DPS</td><td class="name">Alphamon <span class="attr-vaccine">(V)</span></td><td>Pierce AoE Execute</td><td class="dps-val">~139</td><td class="dps-val">~213</td></tr>
+    <tr><td>AoE Carry</td><td class="name">WarGreymon <span class="attr-vaccine">(V)</span></td><td>Burn AoE KB (60%!)</td><td class="dps-val">~108</td><td class="dps-val">~166</td></tr>
+    <tr><td>Flex / Attribute</td><td class="name">Imperialdramon FM <span class="attr-free">(F)</span></td><td>Pierce AoE (100%)</td><td class="dps-val">~124</td><td class="dps-val">~190</td></tr>
+    <tr><td>Anti-Armor</td><td class="name">Ouryumon <span class="attr-vaccine">(V)</span></td><td>Pierce AoE Armor Break</td><td class="dps-val">~126</td><td class="dps-val">~193</td></tr>
+  </tbody>
+</table>
+<p style="font-size:0.82rem;color:var(--text-dim)">DPS formula at level L: baseDmg &times; (1 + L&times;0.03) &times; baseSpd &times; (1 + L&times;0.01). Doesn't include AoE multiplier which effectively 2–4&times; these values.</p>
+
+<!-- ===================================================================== -->
+<h2 id="phase5">Phase 5: Waves 81–100</h2>
+<!-- ===================================================================== -->
+
+<div class="phase-header">
+  <h3 style="margin:0">The Endurance Check</h3>
+  <span class="phase-meta">Income: <span class="cost">48,580</span> &rarr; <span class="cost">74,050</span> &nbsp;|&nbsp; Enemies: Ultra tier (3,000–5,000 HP &times; 3.5–4.0&times; scaling)</span>
+</div>
+
+<div class="card card-highlight">
+  <h4>Build Order</h4>
+  <ol class="build-order">
+    <li><strong>Wave 81–85:</strong> Push Megas to max level (70 base + origin bonus + DP bonus). Sell ALL remaining non-Mega towers. You need every DB for Ultra leveling.</li>
+    <li><strong>Wave 82–85:</strong> <strong>DNA Digivolve #1.</strong> Fuse <span class="name">WarGreymon</span> + <span class="name">MetalGarurumon</span> &rarr; <span class="name">Omegamon</span> (requires both at max level, 3+ DP). Omegamon starts at level 1 but with 160 base DPS &mdash; even level 1 Ultra beats a level 50 Mega.</li>
+    <li><strong>Waves 85–89:</strong> Level Omegamon to 20–30. DPS at level 25: ~450. Each level costs <span class="cost">ceil(2 &times; level &times; 3.5)</span>. Level 1&rarr;30 costs ~<span class="cost">3,150 DB</span>.</li>
+    <li><strong>Wave 90 boss</strong> — Omegamon Zwart (<span class="hp">128,450 HP</span>, <strong class="hp">2 lives</strong>): Ability: stuns top 3 DPS towers for 3s every 15s. Spread your Megas so they're not all stunned at once. Your Ultra carries through the stun windows.</li>
+    <li><strong>Waves 90–94:</strong> <strong>DNA Digivolve #2</strong> if possible (Alphamon + Ouryumon &rarr; Alphamon Ouryuken). Level all Ultras as high as budget allows. Every level matters.</li>
+    <li><strong>Wave 95 &mdash; THE REAL FINAL BOSS:</strong> 45 enemies totaling <span class="hp">~598,000 HP</span> with 35–45% armor. Harder than wave 100. Your AoE splash + slow/freeze uptime is what wins here. If you survive this, you win the game.</li>
+    <li><strong>Wave 100 boss</strong> — Apocalymon (<span class="hp">238,200 HP</span>, 30% armor, <strong class="hp">5 lives</strong>): Ability: stuns ALL towers for 2s at 25% HP. Single target with fewer effective HP than wave 95's horde &mdash; but leaking the final boss costs 5 lives, so don't get complacent. Your 2+ Ultras obliterate him. <strong>Victory.</strong></li>
+  </ol>
+</div>
+
+<div class="card card-success">
+  <h4>Wave 95 &gt; Wave 100</h4>
+  <p><strong>Wave 95 is the actual hardest wave.</strong> It has 2.5&times; the effective HP of the final boss. The Apocalymon fight has fewer raw HP &mdash; but leaking the final boss costs <strong class="hp">5 lives</strong>, so don't write it off entirely. Still, if you survive wave 95 with 6+ lives, you've effectively won. Budget accordingly.</p>
+</div>
+
+<!-- ===================================================================== -->
+<h2 id="dna">DNA Digivolution Priority</h2>
+<!-- ===================================================================== -->
+
+<p>DNA requires both partners at <strong>max level Mega</strong> on the board + minimum DP. One partner is consumed. Plan ahead &mdash; you need two specific Megas leveled.</p>
+
+<table>
+  <thead><tr><th>#</th><th>Result</th><th>Partners</th><th>Min DP</th><th>Why this priority</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>1st</strong></td>
+      <td><span class="name">Omegamon</span> <span class="attr-vaccine">(V)</span></td>
+      <td>WarGreymon + MetalGarurumon</td>
+      <td>3</td>
+      <td>Lowest DP requirement. 160 base DPS. 5.0 range (longest in game). "All effects" proc.</td>
+    </tr>
+    <tr>
+      <td>3rd</td>
+      <td><span class="name">Alphamon Ouryuken</span> <span class="attr-vaccine">(V)</span></td>
+      <td>Alphamon + Ouryumon</td>
+      <td>5</td>
+      <td>Execute AoE at 45% &mdash; instantly kills wounded enemies across an area. Top-tier clean-up, but Rafflesimon's life recovery edges it out for priority.</td>
+    </tr>
+    <tr>
+      <td><strong>2nd</strong></td>
+      <td><span class="name">Rafflesimon</span> <span class="attr-data">(D)</span></td>
+      <td>Rosemon + Lotusmon</td>
+      <td>4</td>
+      <td>Team-wide healing (restores player lives). With bosses costing 2–5 lives each, Rafflesimon's heal is critical survival insurance from phase 4 onward.</td>
+    </tr>
+    <tr>
+      <td>4th</td>
+      <td><span class="name">Beelzemon BM</span> <span class="attr-virus">(Vi)</span></td>
+      <td>Beelzemon + VenomMyotismon</td>
+      <td>6</td>
+      <td>Highest Ultra DPS (148.5) + 50% execute. But 6 DP is expensive.</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ===================================================================== -->
+<h2 id="economy">Economy Cheat Sheet</h2>
+<!-- ===================================================================== -->
+
+<h3>Income Curve</h3>
+<table>
+  <thead><tr><th>Wave</th><th>Reward</th><th>Boss Bonus</th><th>Cumulative DB</th><th>What you can afford</th></tr></thead>
+  <tbody>
+    <tr><td>Start</td><td>&mdash;</td><td>&mdash;</td><td class="cost">750</td><td>3–4 In-Training towers</td></tr>
+    <tr><td>10</td><td>195</td><td>+100</td><td class="cost">2,260</td><td>Evolve 2 towers to Rookie</td></tr>
+    <tr><td>20</td><td>315</td><td>+200</td><td class="cost">5,070</td><td>2 Champions + Rookie-origin spawns</td></tr>
+    <tr><td>30</td><td>435</td><td>+150</td><td class="cost">9,030</td><td>4 leveled Champions</td></tr>
+    <tr><td>40</td><td>555</td><td>+300</td><td class="cost">14,340</td><td>First Champion-origin spawn + Ultimates</td></tr>
+    <tr><td>50</td><td>675</td><td>+350</td><td class="cost">20,900</td><td>2 Ultimates + second Champion-origin</td></tr>
+    <tr><td>60</td><td>795</td><td>+600</td><td class="cost">28,910</td><td>First Mega evolve</td></tr>
+    <tr><td>70</td><td>915</td><td>+500</td><td class="cost">38,020</td><td>2 Megas at level 40</td></tr>
+    <tr><td>80</td><td>1,035</td><td>+750</td><td class="cost">48,580</td><td>3 Megas + prep for DNA</td></tr>
+    <tr><td>90</td><td>1,155</td><td>+750</td><td class="cost">60,340</td><td>1st DNA Ultra + leveling</td></tr>
+    <tr><td>100</td><td>1,275</td><td>+1,500</td><td class="cost">74,050</td><td>2 Ultras + maxed Megas</td></tr>
+  </tbody>
+</table>
+
+<h3>Cost Reference</h3>
+<div class="grid-2">
+  <div class="card">
+    <h4>Spawning</h4>
+    <table>
+      <tr><td>In-Training random</td><td class="cost">75 DB</td></tr>
+      <tr><td>In-Training specific attr</td><td class="cost">120 DB</td></tr>
+      <tr><td>Rookie random</td><td class="cost">225 DB</td></tr>
+      <tr><td>Rookie specific attr</td><td class="cost">350 DB</td></tr>
+      <tr><td>Champion random</td><td class="cost">750 DB</td></tr>
+      <tr><td>Champion specific attr</td><td class="cost">1,100 DB</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h4>Evolving (resets level to 1)</h4>
+    <table>
+      <tr><td>In-Training &rarr; Rookie</td><td class="cost">80 DB</td></tr>
+      <tr><td>Rookie &rarr; Champion</td><td class="cost">120 DB</td></tr>
+      <tr><td>Champion &rarr; Ultimate</td><td class="cost">160 DB</td></tr>
+      <tr><td>Ultimate &rarr; Mega</td><td class="cost">200 DB</td></tr>
+    </table>
+  </div>
+</div>
+
+<h3>Level-Up Cost Totals (1 &rarr; max level, 0 DP)</h3>
+<table>
+  <thead><tr><th>Stage</th><th>Base Max Lv</th><th>Total Cost</th><th>Cost per DPS point</th></tr></thead>
+  <tbody>
+    <tr><td>In-Training (lv 1&rarr;10)</td><td>10</td><td class="cost">90 DB</td><td>Low &mdash; cheap filler</td></tr>
+    <tr><td>Rookie (lv 1&rarr;20)</td><td>20</td><td class="cost">570 DB</td><td>Medium &mdash; solid investment</td></tr>
+    <tr><td>Champion (lv 1&rarr;35)</td><td>35</td><td class="cost">2,380 DB</td><td>Your mid-game budget sink</td></tr>
+    <tr><td>Ultimate (lv 1&rarr;55)*</td><td>50+5</td><td class="cost">7,425 DB</td><td>Expensive but worth it</td></tr>
+    <tr><td>Mega (lv 1&rarr;80)*</td><td>70+10</td><td class="cost">18,960 DB</td><td>Only level what you need</td></tr>
+    <tr><td>Ultra (lv 1&rarr;30)</td><td>100+</td><td class="cost">3,150 DB</td><td>Best value &mdash; base stats are insane</td></tr>
+  </tbody>
+</table>
+<p style="font-size:0.8rem;color:var(--text-dim)">* Max level includes origin bonus (Champion origin at Ultimate = +5, at Mega = +10). Don't max Megas fully &mdash; level 40–60 is the sweet spot before DNA fusion.</p>
+
+<div class="card card-warning">
+  <h4>Golden Rule: Don't over-level towers you'll evolve soon</h4>
+  <p>Evolution resets level to 1. If your Ultimate is 5 levels from max, evolve it to Mega rather than maxing it. Those last 5 levels are wasted DB. Only max a tower when it's at its <strong>final stage</strong> (or when you need the digivolve button to appear).</p>
+</div>
+
+<!-- ===================================================================== -->
+<h2 id="verdict">Balance Verdict</h2>
+<!-- ===================================================================== -->
+
+<div class="verdict-grid">
+  <div class="verdict-item"><div class="label">Phase 1 (1–20)</div><div class="value easy">Easy</div></div>
+  <div class="verdict-item"><div class="label">Phase 2 (21–40)</div><div class="value moderate">Moderate</div></div>
+  <div class="verdict-item"><div class="label">Phase 3 (41–60)</div><div class="value hard">Challenging</div></div>
+  <div class="verdict-item"><div class="label">Phase 4 (61–80)</div><div class="value hard">Hard</div></div>
+  <div class="verdict-item"><div class="label">Phase 5 (81–100)</div><div class="value very-hard">Very Hard</div></div>
+  <div class="verdict-item"><div class="label">Overall Economy</div><div class="value hard">Razor-thin</div></div>
+</div>
+
+<div class="summary-box">
+  <h3>Overall Assessment</h3>
+  <ul>
+    <li><strong>The game is beatable</strong> with optimal play, but there's almost no margin for error. Total budget (~74,050 DB) vs total investment needed (~73,500 DB) leaves only ~550 DB slack before sell-recycling.</li>
+    <li><strong>Selling old towers is mandatory</strong>, not optional. The 50% recoup from selling 10+ obsolete In-Training/Rookie towers is what funds your endgame Megas.</li>
+    <li><strong>DP farming is unintuitive but essential.</strong> A new player who doesn't merge early will hit level-cap walls around wave 50–60. The "spawn cheap fodder just to merge it" loop isn't obvious without this guide.</li>
+    <li><strong>Wave 95 is harder than wave 100.</strong> The final boss Apocalymon (~238k HP single target) is easier than the wave 95 horde (~598k HP across 45 enemies). This rewards sustained board strength over single-target builds.</li>
+    <li><strong>AoE + Slow/Freeze is the real meta.</strong> Raw DPS numbers are misleading. AoE effectively multiplies DPS by 2–4&times; on grouped enemies, and slow/freeze gives all towers 50–67% more shooting time. A team of AoE + CC towers with mediocre stats outperforms a team of high-DPS single-target towers.</li>
+  </ul>
+</div>
+
+<h3>Potential Balance Concerns</h3>
+<div class="grid-2">
+  <div class="card card-danger">
+    <h4>Wave 40 Myotismon</h4>
+    <p>First serious boss. New players who spread across too many attribute types will lack focused Vaccine DPS. Consider adding a wave preview hint about attribute weakness.</p>
+  </div>
+  <div class="card card-danger">
+    <h4>Wave 66 Diaboromon</h4>
+    <p>7 &times;4 splitters = 28 enemies. Could feel unfair without warning. The wave preview shows "Splitter" tag but the &times;4 multiplier (vs normal &times;2) isn't obvious.</p>
+  </div>
+  <div class="card card-warning">
+    <h4>Champion-Origin Timing</h4>
+    <p>Spawning at Champion costs 750 DB. Too early (wave 20) = economy crash. Too late (wave 55) = Megas come online too late for phase 4. The "right time" (wave 30–40) isn't signposted.</p>
+  </div>
+  <div class="card card-warning">
+    <h4>DP Farming Discovery</h4>
+    <p>Optimal play requires merging level-1 fodder into your main tower. This non-obvious tactic is a 75 DB/DP bargain vs the alternative (leveling both towers to max first). Tutorial doesn't cover this.</p>
+  </div>
+</div>
+
+<h3>What's Well-Balanced</h3>
+<div class="grid-2">
+  <div class="card card-success">
+    <h4>Attribute Triangle</h4>
+    <p>1.5&times; vs 0.75&times; is a meaningful 2&times; swing. Waves with mixed attributes reward diverse rosters. Boss attributes create clear "bring the right counter" moments.</p>
+  </div>
+  <div class="card card-success">
+    <h4>AoE vs Single-Target</h4>
+    <p>Both have clear roles. AoE clears waves, single-target kills bosses. The Diaboromon and horde waves (85–99) demand AoE, while boss-only waves demand focused damage.</p>
+  </div>
+  <div class="card card-success">
+    <h4>DNA Digivolution Timing</h4>
+    <p>Ultra power spike arrives exactly when you need it (wave 80+). The DP requirement gates ensure you've engaged with the merge system. Omegamon at 3 DP is accessible; Beelzemon BM at 6 DP rewards deep investment.</p>
+  </div>
+  <div class="card card-success">
+    <h4>Difficulty Curve</h4>
+    <p>Smooth early ramp (waves 1–30), clear skill checks (wave 40, 66, 80), and a demanding but fair endgame. Wave 95 as the true peak is good TD design &mdash; it tests your whole board, not just one tower.</p>
+  </div>
+</div>
+
+<p style="text-align:center; color:var(--text-dim); margin-top:48px; font-size:0.82rem;">
+  DigiMerge TD Strategy Guide &mdash; Generated from game data analysis of DigimonDatabase.ts, WaveData.ts, Constants.ts, and all system files.
+</p>
+
+</body>
+</html>
