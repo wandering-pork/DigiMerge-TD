@@ -571,7 +571,7 @@ cost = Math.ceil(3 * currentLevel * stageMultiplier);
 - **Sprint 23/24 (merged)**: Screen centering (940px), player name high scores, 257 Digimon descriptions (✅)
 
 ### Remaining Work
-- **Sprint 25 (balance)**: Boss-only waves, boss lives penalty, stealth/healer enemies, armor-as-shield
+- **Sprint 25 (balance)**: Boss lives penalty, stealth/healer enemies, armor-as-shield, balance new tower entries
 - **Sprint 26**: DNA Digivolution system (Ultra tier, combine two Megas)
 - **Sprint 27 partial**: High-contrast mode, colorblind-friendly palette
 - Manual playtest of all proc rates and bonus effect inheritance
