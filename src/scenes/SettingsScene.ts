@@ -34,7 +34,7 @@ export class SettingsScene extends Phaser.Scene {
     // Panel
     const panelWidth = 310;
     const showGameButtons = this.callerScene !== 'MainMenuScene';
-    const panelHeight = showGameButtons ? 572 : 472;
+    const panelHeight = showGameButtons ? 598 : 498;
     const panelX = (width - panelWidth) / 2;
     const panelY = (height - panelHeight) / 2;
 
@@ -525,9 +525,59 @@ export class SettingsScene extends Phaser.Scene {
       this.registry.set('colorblindMode', newValue);
       cbText.setText(newValue ? 'ON' : 'OFF');
       drawButton(cbBtnBg, cbBtnW, cbBtnH, newValue ? COLORS.CYAN_DIM : COLORS.BG_PANEL_LIGHT);
+      // Persist setting
+      try {
+        localStorage.setItem('digimerge_colorblind', newValue ? 'true' : 'false');
+      } catch { /* ignore */ }
     });
 
     cbRow.add(cbBtnContainer);
+    controlY += 26;
+
+    // High Contrast Mode Toggle
+    const isHighContrast = this.registry.get('highContrastMode') === true;
+
+    const hcRow = this.add.container(0, controlY);
+    hcRow.add(this.add.text(controlX, 0, 'High Contrast', {
+      fontFamily: FONTS.BODY,
+      fontSize: '13px',
+      color: '#aabbcc',
+      resolution: 2,
+    }));
+
+    const hcBtnW = 50;
+    const hcBtnH = 22;
+    const hcBtnContainer = this.add.container(panelX + panelWidth - 44, 0);
+    const hcBtnBg = this.add.graphics();
+    drawButton(hcBtnBg, hcBtnW, hcBtnH, isHighContrast ? COLORS.CYAN_DIM : COLORS.BG_PANEL_LIGHT);
+    hcBtnContainer.add(hcBtnBg);
+
+    const hcText = this.add.text(0, 0, isHighContrast ? 'ON' : 'OFF', {
+      fontFamily: FONTS.BODY,
+      fontSize: '11px',
+      color: '#ffffff',
+      fontStyle: 'bold',
+      resolution: 2,
+    }).setOrigin(0.5);
+    hcBtnContainer.add(hcText);
+
+    const hcHitArea = new Phaser.Geom.Rectangle(-hcBtnW / 2, -hcBtnH / 2, hcBtnW, hcBtnH);
+    hcBtnContainer.setInteractive(hcHitArea, Phaser.Geom.Rectangle.Contains);
+    hcBtnContainer.input!.cursor = 'pointer';
+
+    hcBtnContainer.on('pointerdown', () => {
+      const current = this.registry.get('highContrastMode') === true;
+      const newValue = !current;
+      this.registry.set('highContrastMode', newValue);
+      hcText.setText(newValue ? 'ON' : 'OFF');
+      drawButton(hcBtnBg, hcBtnW, hcBtnH, newValue ? COLORS.CYAN_DIM : COLORS.BG_PANEL_LIGHT);
+      // Persist setting
+      try {
+        localStorage.setItem('digimerge_high_contrast', newValue ? 'true' : 'false');
+      } catch { /* ignore */ }
+    });
+
+    hcRow.add(hcBtnContainer);
     controlY += 26;
 
     // FPS Counter Toggle

@@ -61,6 +61,13 @@ export interface EvolutionPath {
   isDefault: boolean;
 }
 
+export interface DNADigivolutionPair {
+  partnerAId: string;  // First Mega Digimon ID
+  partnerBId: string;  // Second Mega Digimon ID
+  resultId: string;    // Ultra Digimon result ID
+  minDPRequired: number; // Minimum DP on either partner
+}
+
 export interface SaveData {
   version: string;
   timestamp: string;

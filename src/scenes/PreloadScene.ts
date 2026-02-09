@@ -246,6 +246,12 @@ export class PreloadScene extends Phaser.Scene {
       Examon: 'Examon.png',
       AncientGarurumon: 'AncientGarurumon.png',
 
+      // DNA Digivolution Results
+      Dukemon_X: 'Dukemon_X.png',
+      Alphamon_Ouryuken: 'Alphamon_Ouryuken.png',
+      Rafflesimon: 'Rafflesimon.png',
+      Beelzebumon_Blast: 'Beelzebumon_Blast.png',
+
       // Enemy-only sprites
       goblimon: 'Goblimon.png',
       gazimon: 'Gazimon.png',
@@ -383,6 +389,12 @@ export class PreloadScene extends Phaser.Scene {
         texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
       }
     }, this);
+
+    // Initialize display settings from localStorage
+    try {
+      this.registry.set('colorblindMode', localStorage.getItem('digimerge_colorblind') === 'true');
+      this.registry.set('highContrastMode', localStorage.getItem('digimerge_high_contrast') === 'true');
+    } catch { /* Ignore localStorage errors */ }
 
     this.scene.start('MainMenuScene');
   }

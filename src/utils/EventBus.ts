@@ -42,6 +42,7 @@ export const GameEvents = {
   STARTER_SELECTED: 'ui:starterSelected',
   MERGE_INITIATED: 'ui:mergeInitiated',
   DIGIVOLVE_INITIATED: 'ui:digivolveInitiated',
+  DNA_FUSE_INITIATED: 'ui:dnaFuseInitiated',
 
   // Boss ability events
   BOSS_ABILITY_ACTIVATED: 'boss:abilityActivated',

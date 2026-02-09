@@ -77,6 +77,7 @@ digimerge-td/
 │   │   ├── SpawnMenu.ts           # Spawn configuration + starter placement
 │   │   ├── EvolutionModal.ts      # Evolution selection
 │   │   ├── MergeModal.ts          # Merge confirmation
+│   │   ├── DNAModal.ts            # DNA Digivolution fusion UI
 │   │   └── TutorialOverlay.ts     # 8-step new player tutorial
 │   ├── systems/
 │   │   ├── AttributeSystem.ts     # Damage multipliers
@@ -555,6 +556,9 @@ cost = Math.ceil(3 * currentLevel * stageMultiplier);
 | Particle pool | ✅ | Graphics object pooling for merge/hit/death particles |
 | FPS counter | ✅ | Toggleable overlay (bottom-right), color-coded, Settings toggle |
 | Boss ability visuals | ✅ | 9 distinct effects (impact circles, flame ring, shockwave, portal, shield flash) |
+| Tower balance | ✅ | Overpowered Megas nerfed, weak supports buffed for tier separation |
+| DNA Digivolution | ✅ | 6 fusion pairs, DNAModal UI, board-based partner selection |
+| High-contrast mode | ✅ | Brighter UI colors, pure white text, Settings toggle |
 
 ### Completed Sprints (Post-MVP)
 - **Sprint 20**: Boss sprite fix, statistics tracking, sell formula (✅)
@@ -564,16 +568,15 @@ cost = Math.ceil(3 * currentLevel * stageMultiplier);
 - **Sprint 23A**: Object pooling for projectiles, enemies, and particles + FPS counter (✅)
 - **Sprint 24**: Boss death effects, tower attack animation, enhanced boss ability visuals (✅)
 - **Sprint 25**: Roster expansion to ~171 towers + Ultra tier (✅)
-- **Sprint 27**: Colorblind mode (V/D/X/F symbols), game speed indicator (✅)
+- **Sprint 25 (balance)**: Mega stat rebalance (KaiserGreymon/MagnaGarurumon/Megidramon/Titamon nerfed, Rosemon/Plesiomon buffed) (✅)
+- **Sprint 26**: DNA Digivolution system — 6 fusion pairs, DNAModal UI, GameScene integration, 20 tests (✅)
+- **Sprint 27**: Colorblind mode (V/D/X/F symbols), game speed indicator, high-contrast mode (✅)
 - **Sprint 23B**: Texture atlases + sprite idle animations (✅)
 - **Sprint 28**: Background tab support (Web Worker), main menu + starter select UI polish (✅)
 - **Sprint 29**: Effect audit fixes, armor_pierce/holy/heal, armor bar, DoT numbers, in-game Encyclopedia, TowerInfoPanel cleanup (✅)
 - **Sprint 23/24 (merged)**: Screen centering (940px), player name high scores, 257 Digimon descriptions (✅)
 
 ### Remaining Work
-- **Sprint 25 (balance)**: Boss lives penalty, stealth/healer enemies, armor-as-shield, balance new tower entries
-- **Sprint 26**: DNA Digivolution system (Ultra tier, combine two Megas)
-- **Sprint 27 partial**: High-contrast mode, colorblind-friendly palette
 - Manual playtest of all proc rates and bonus effect inheritance
 
 ---

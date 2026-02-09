@@ -101,6 +101,43 @@ export const COLORS = {
   BUTTON_HIGHLIGHT: 0xffffff,
 };
 
+// HIGH-CONTRAST COLOR OVERRIDES
+// When high-contrast mode is enabled, these replace the standard colors
+export const HIGH_CONTRAST_COLORS = {
+  // Backgrounds — slightly lighter for better text contrast
+  BG_DEEPEST: 0x0a0a0a,
+  BG_DARK: 0x111111,
+  BG_PANEL: 0x1a1a1a,
+  BG_PANEL_LIGHT: 0x2a2a2a,
+  BG_HOVER: 0x3a3a3a,
+  BG_CARD: 0x1e1e1e,
+
+  // Text — pure white and brighter grays
+  TEXT_WHITE: '#ffffff',
+  TEXT_DIM: '#cccccc',
+  TEXT_LABEL: '#dddddd',
+  TEXT_VALUE: '#ffffff',
+  TEXT_GOLD: '#ffdd00',
+  TEXT_LIVES: '#ff4444',
+  TEXT_CURRENCY: '#ffee00',
+
+  // Borders — more visible
+  BORDER_PANEL: 0xffffff,
+  BORDER_BUTTON: 0xaaaaaa,
+  SEPARATOR: 0xffffff,
+
+  // Attribute colors — more saturated for clarity
+  VACCINE: 0x00ff66,
+  DATA: 0x00aaff,
+  VIRUS: 0xff00aa,
+  FREE: 0xffdd00,
+
+  VACCINE_STR: '#00ff66',
+  DATA_STR: '#00aaff',
+  VIRUS_STR: '#ff00aa',
+  FREE_STR: '#ffdd00',
+};
+
 // ATTRIBUTE_COLORS map (replaces duplicated definitions)
 export const ATTRIBUTE_COLORS_NUM: Record<number, number> = {
   0: COLORS.VACCINE,
@@ -221,3 +258,16 @@ export const ANIM = {
   STAGGER_MS: 60,
   ENTRANCE_OFFSET: 40,
 };
+
+/**
+ * Get a color value, respecting high-contrast mode.
+ * Checks the Phaser registry for 'highContrastMode' flag.
+ * Falls back to standard COLORS if key not found in HIGH_CONTRAST_COLORS.
+ */
+export function getColor(key: keyof typeof COLORS, registry?: { get: (key: string) => unknown }): number | string {
+  if (registry?.get('highContrastMode') === true) {
+    const hcValue = (HIGH_CONTRAST_COLORS as Record<string, number | string>)[key];
+    if (hcValue !== undefined) return hcValue;
+  }
+  return COLORS[key];
+}

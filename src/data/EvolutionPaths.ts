@@ -1,4 +1,4 @@
-import { EvolutionPath } from '@/types';
+import { EvolutionPath, DNADigivolutionPair } from '@/types';
 
 /**
  * Evolution paths for all MVP Digimon.
@@ -676,4 +676,43 @@ export const EVOLUTION_PATHS: Record<string, EvolutionPath[]> = {
 export function getEvolutions(digimonId: string, currentDP: number): EvolutionPath[] {
   const paths = EVOLUTION_PATHS[digimonId] ?? [];
   return paths.filter(path => currentDP >= path.minDP && currentDP <= path.maxDP);
+}
+
+/**
+ * DNA Digivolution pairs — combine two specific Mega Digimon to create an Ultra.
+ * Both partners must be at max level and meet the DP requirement.
+ */
+export const DNA_PAIRS: DNADigivolutionPair[] = [
+  // WarGreymon + MetalGarurumon = Omegamon (the iconic fusion)
+  { partnerAId: 'wargreymon', partnerBId: 'metalgarurumon', resultId: 'omegamon', minDPRequired: 3 },
+  // Gallantmon + ChaosGallantmon = Gallantmon Crimson Mode
+  { partnerAId: 'gallantmon', partnerBId: 'chaosgallantmon', resultId: 'gallantmon_cm', minDPRequired: 5 },
+  // Alphamon + Ouryumon = Alphamon Ouryuken
+  { partnerAId: 'alphamon', partnerBId: 'ouryumon', resultId: 'alphamon_ouryuken', minDPRequired: 5 },
+  // Ophanimon + Cherubimon (Virtue) = Susanoomon (angels fuse)
+  { partnerAId: 'ophanimon', partnerBId: 'cherubimon_virtue', resultId: 'susanoomon_dna', minDPRequired: 5 },
+  // Rosemon + Lotusmon = Rafflesimon
+  { partnerAId: 'rosemon', partnerBId: 'lotusmon', resultId: 'rafflesimon', minDPRequired: 4 },
+  // Beelzemon → Beelzemon Blast Mode (DP-only upgrade, partner with self attribute)
+  { partnerAId: 'beelzemon', partnerBId: 'venommyotismon', resultId: 'beelzemon_bm', minDPRequired: 6 },
+];
+
+/**
+ * Find a DNA pair that matches two given Digimon IDs (order doesn't matter).
+ */
+export function findDNAPair(digimonAId: string, digimonBId: string): DNADigivolutionPair | undefined {
+  return DNA_PAIRS.find(
+    pair =>
+      (pair.partnerAId === digimonAId && pair.partnerBId === digimonBId) ||
+      (pair.partnerAId === digimonBId && pair.partnerBId === digimonAId)
+  );
+}
+
+/**
+ * Get all DNA pairs where a given Digimon is one of the partners.
+ */
+export function getDNAPairsFor(digimonId: string): DNADigivolutionPair[] {
+  return DNA_PAIRS.filter(
+    pair => pair.partnerAId === digimonId || pair.partnerBId === digimonId
+  );
 }

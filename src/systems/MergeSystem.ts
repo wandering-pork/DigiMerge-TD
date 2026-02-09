@@ -1,5 +1,6 @@
 import { Attribute, Stage, BonusEffect } from '@/types';
 import { canMerge as dpCanMerge, getDPFromMerge } from '@/systems/DPSystem';
+import { findDNAPair } from '@/data/EvolutionPaths';
 
 /**
  * Represents the minimum data needed to evaluate a merge between two Digimon.
@@ -101,4 +102,30 @@ export function calculateMergeEffects(
   }
 
   return result;
+}
+
+/**
+ * Check whether two towers can perform a DNA Digivolution.
+ * Requirements:
+ * - Both must be at Stage.MEGA
+ * - Both must be at their max level (caller must verify this)
+ * - A valid DNA pair must exist for their IDs
+ * - At least one partner meets the pair's min DP requirement
+ */
+export function canDNADigivolve(
+  a: { digimonId: string; stage: Stage; dp: number; isMaxLevel: boolean },
+  b: { digimonId: string; stage: Stage; dp: number; isMaxLevel: boolean },
+): boolean {
+  if (a.stage !== Stage.MEGA || b.stage !== Stage.MEGA) return false;
+  if (!a.isMaxLevel || !b.isMaxLevel) return false;
+  const pair = findDNAPair(a.digimonId, b.digimonId);
+  if (!pair) return false;
+  return Math.max(a.dp, b.dp) >= pair.minDPRequired;
+}
+
+/**
+ * Get the DNA Digivolution result ID for two Digimon, or undefined if invalid.
+ */
+export function getDNAResult(digimonAId: string, digimonBId: string): string | undefined {
+  return findDNAPair(digimonAId, digimonBId)?.resultId;
 }

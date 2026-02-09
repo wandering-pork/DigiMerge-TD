@@ -153,6 +153,18 @@ export class TowerManager {
     return sellPrice;
   }
 
+  /**
+   * Remove a tower from the board without selling (no refund, no TOWER_SOLD event).
+   * Used for DNA Digivolution where the partner tower is consumed.
+   */
+  public removeTower(tower: Tower): void {
+    if (this.selectedTower === tower) {
+      this.selectedTower = null;
+    }
+    this.towerContainer.remove(tower);
+    tower.destroy();
+  }
+
   // ---------------------------------------------------------------------------
   // Utility
   // ---------------------------------------------------------------------------

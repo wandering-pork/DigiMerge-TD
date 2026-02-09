@@ -2,7 +2,7 @@
 
 ## Current Status
 
-**All 11 sprints complete + Sprint 12A-D + Sprint 13-16 + Sprint 18-24B (full) + Sprint 23B + Sprint 27-29 + Sprint 23/24 (merged) done** | 528 tests passing | 20 test files | 51 source files | TypeScript clean | Vite build succeeds
+**All 11 sprints complete + Sprint 12A-D + Sprint 13-16 + Sprint 18-24B (full) + Sprint 23B + Sprint 25 (balance) + Sprint 26 (DNA) + Sprint 27 (full) + Sprint 28-29 + Sprint 23/24 (merged) done** | 548 tests passing | 21 test files | 53 source files | TypeScript clean | Vite build succeeds
 
 Live at: https://wandering-pork.github.io/DigiMerge-TD/
 
@@ -57,6 +57,12 @@ Live at: https://wandering-pork.github.io/DigiMerge-TD/
 - Digimon descriptions: 257 entries with lore-based 1-2 sentence descriptions
 - Encyclopedia detail view shows description below name/attribute
 - TowerInfoPanel shows description subtitle under Digimon name
+- Sprint 25 balance: Reduced overpowered Megas (KaiserGreymon, MagnaGarurumon, Megidramon, Titamon), buffed weak supports (Rosemon, Plesiomon)
+- DNA Digivolution system: Combine two specific max-level Mega Digimon to create Ultra-tier results (6 fusion pairs)
+- DNA pairs: WarGreymon+MetalGarurumon→Omegamon, Gallantmon+ChaosGallantmon→Gallantmon CM, Alphamon+Ouryumon→Alphamon Ouryuken, Ophanimon+Cherubimon→Susanoomon, Rosemon+Lotusmon→Rafflesimon, Beelzemon+VenomMyotismon→Beelzemon BM
+- DNAModal UI: Gold-themed modal showing compatible board partners, result previews, stat display
+- TowerInfoPanel DNA Fuse button for eligible Mega towers at max level
+- High-contrast mode: Brighter UI colors, improved text readability, toggle in Settings
 
 ---
 
@@ -137,7 +143,7 @@ Live at: https://wandering-pork.github.io/DigiMerge-TD/
 
 ---
 
-## Test Summary (528 tests, 20 files)
+## Test Summary (548 tests, 21 files)
 
 | Test File | Tests |
 |-----------|-------|
@@ -161,10 +167,11 @@ Live at: https://wandering-pork.github.io/DigiMerge-TD/
 | EncyclopediaScene | 6 |
 | HighScoreManager | 18 |
 | SpriteAnimHelper | 20 |
+| DNADigivolution | 20 |
 
 ---
 
-## File Inventory (51 source files)
+## File Inventory (53 source files)
 
 - **config/**: Constants.ts, GameConfig.ts
 - **data/**: DigimonDatabase.ts, DigimonDescriptions.ts, EvolutionPaths.ts, StatusEffects.ts, WaveData.ts, SpriteAtlasData.ts (auto-generated)
@@ -172,7 +179,7 @@ Live at: https://wandering-pork.github.io/DigiMerge-TD/
 - **managers/**: AudioManager.ts, CombatManager.ts, GameStateManager.ts, HighScoreManager.ts, SaveManager.ts, TowerManager.ts, WaveManager.ts
 - **scenes/**: BootScene.ts, PreloadScene.ts, MainMenuScene.ts, StarterSelectScene.ts, GameScene.ts, PauseScene.ts, SettingsScene.ts, GameOverScene.ts, HighScoresScene.ts, EncyclopediaScene.ts, CreditsScene.ts
 - **systems/**: AttributeSystem.ts, BossAbilitySystem.ts, DPSystem.ts, LevelSystem.ts, MergeSystem.ts, OriginSystem.ts, TargetingSystem.ts
-- **ui/**: SpawnMenu.ts, TowerInfoPanel.ts, EvolutionModal.ts, MergeModal.ts, TutorialOverlay.ts, UITheme.ts, UIHelpers.ts
+- **ui/**: SpawnMenu.ts, TowerInfoPanel.ts, EvolutionModal.ts, MergeModal.ts, DNAModal.ts, TutorialOverlay.ts, UITheme.ts, UIHelpers.ts
 - **utils/**: EventBus.ts, GridUtils.ts, SpriteAnimHelper.ts, ParticlePool.ts
 - **types/**: DigimonTypes.ts, GameTypes.ts, index.ts
 - main.ts
@@ -305,7 +312,7 @@ Live at: https://wandering-pork.github.io/DigiMerge-TD/
 
 ---
 
-### Sprint 25 — Roster Expansion ✓
+### Sprint 25 — Roster Expansion & Balance ✓
 
 - [x] Audited roster: 153 towers across 21 lines, identified attribute imbalance (FREE underrepresented)
 - [x] Added 18 new tower Digimon using available sprites (842 total, ~181 now loaded)
@@ -316,35 +323,39 @@ Live at: https://wandering-pork.github.io/DigiMerge-TD/
 - [x] New Data towers: UlforceVdramon, Craniummon, MagnaGarurumon, Examon, AncientGarurumon (DemiVeemon/Caprimon/Tsunomon/Dorimon branches)
 - [x] Connected all new entries to existing starter evolution paths
 - [x] Loaded 18 new sprites in PreloadScene
-- [ ] Add new enemy variants for underrepresented types
-- [ ] Balance new entries against existing towers at each stage
+- [x] Balance pass: Reduced overpowered Megas (KaiserGreymon 100→82, MagnaGarurumon 95→78, Megidramon 95→80, Titamon 95→80)
+- [x] Buffed weak support Megas (Rosemon 50→55, Plesiomon 52→56) for clearer tier separation
 
 ---
 
-### Sprint 26 — DNA Digivolution (Ultra Tier)
+### Sprint 26 — DNA Digivolution (Ultra Tier) ✓
 
-- [ ] Design DNA Digivolution system:
-  - Combine two specific Mega Digimon to create an Ultra
-  - Requires both at max level + DP threshold
-  - DNA pairs defined in evolution paths (e.g. WarGreymon + MetalGarurumon = Omnimon)
-- [ ] Add DNA fusion UI (select two compatible Megas, confirm fusion)
-- [ ] Add Ultra-tier tower stats and abilities
-- [ ] Define 8+ DNA fusion pairs (see `ROSTER_EXPANSION_PLAN.md`)
-- [ ] Update EvolutionPaths with DNA routes
-- [ ] Update Encyclopedia to display DNA requirements
-- [ ] Add tests for DNA merge validation, stat calculations
+- [x] DNADigivolutionPair type in GameTypes.ts
+- [x] DNA_PAIRS data in EvolutionPaths.ts (6 pairs with minDP requirements)
+- [x] findDNAPair() and getDNAPairsFor() helpers in EvolutionPaths.ts
+- [x] canDNADigivolve() and getDNAResult() in MergeSystem.ts
+- [x] 6 Ultra-tier DNA result Digimon in DigimonDatabase.ts (omegamon, gallantmon_cm, alphamon_ouryuken, susanoomon_dna, rafflesimon, beelzemon_bm)
+- [x] DNAModal.ts — gold-themed UI showing compatible board partners, result stats, Fuse button
+- [x] TowerInfoPanel DNA Fuse button (visible for max-level Megas with DNA pairs)
+- [x] GameScene DNA integration: onDNAFuseInitiated, executeDNAFusion (removes partner, evolves source)
+- [x] TowerManager.removeTower() for partner consumption (no refund/event)
+- [x] DNA result sprites loaded in PreloadScene (Dukemon_X, Alphamon_Ouryuken, Rafflesimon, Beelzebumon_Blast)
+- [x] Lore descriptions for all 6 DNA results in DigimonDescriptions.ts
+- [x] 20 new tests for DNA validation, pair lookup, stage/level/DP checks (DNADigivolution.test.ts)
 
 ---
 
-### Sprint 27 — Accessibility ✓ (partial)
+### Sprint 27 — Accessibility ✓
 
 - [x] Colorblind mode: attribute symbols (V/D/X/F) displayed on tower and enemy sprites
 - [x] Attribute symbol badges on tower sprites (top-right, 9px monospace) and enemy sprites (top-right, 8px)
 - [x] Symbols respond to real-time toggle via registry change listener
 - [x] Current game speed indicator (persistent badge over grid, amber at 2x, red at 3x, hidden at 1x)
 - [x] Settings toggle for colorblind mode (ON/OFF button in Display section)
-- [ ] High-contrast mode option for UI panels and text
-- [ ] Settings toggle for colorblind-friendly palette (alternative color scheme)
+- [x] High-contrast mode: HIGH_CONTRAST_COLORS in UITheme.ts with brighter backgrounds, pure white text, saturated attribute colors
+- [x] getColor() helper in UITheme.ts for registry-aware color retrieval
+- [x] Settings toggle for high-contrast mode (ON/OFF button, persists to localStorage)
+- [x] PreloadScene initializes high-contrast registry from localStorage on boot
 
 ---
 

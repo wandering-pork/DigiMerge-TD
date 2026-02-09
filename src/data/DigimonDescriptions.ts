@@ -313,6 +313,16 @@ export const DIGIMON_DESCRIPTIONS: Record<string, string> = {
   examon: 'A transcendent Dragon Digimon and the largest Royal Knight. Its Pendragon\'s Glory rains destruction from above.',
   ancientgarurumon: 'A transcendent Ancient Beast Digimon whose primordial ice predates the Digital World. Its absolute zero attacks freeze all existence.',
 
+  // --------------------------------------------------------------------------
+  // DNA Digivolution Results (Ultra Tier)
+  // --------------------------------------------------------------------------
+  omegamon: 'Born from the fusion of WarGreymon and MetalGarurumon, Omegamon wields the Grey Sword and Garuru Cannon to annihilate any threat to the Digital World.',
+  gallantmon_cm: 'Gallantmon Crimson Mode, ascended through the bond of light and chaos. Its Invincible Sword and Gungnir lance channel the power of two royal knights.',
+  alphamon_ouryuken: 'Alphamon wielding the legendary Ouryuken blade, forged from the spirit of Ouryumon. Its Alpha inForce transcends time itself.',
+  susanoomon_dna: 'Susanoomon reborn through the fusion of angelic power. The combined might of Ophanimon and Cherubimon creates an unstoppable force of divine judgment.',
+  rafflesimon: 'A mythical plant Digimon born from the fusion of Rosemon and Lotusmon. Its intoxicating bloom drains the life force of all who approach.',
+  beelzemon_bm: 'Beelzemon Blast Mode, awakened to its full destructive power through unholy fusion. Its Corona Destroyer obliterates entire armies.',
+
   // ==========================================================================
   // ENEMY DIGIMON
   // ==========================================================================

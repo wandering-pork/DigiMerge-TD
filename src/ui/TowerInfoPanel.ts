@@ -1,9 +1,9 @@
 import Phaser from 'phaser';
 import { Tower } from '@/entities/Tower';
 import { EventBus, GameEvents } from '@/utils/EventBus';
-import { STAGE_NAMES, ATTRIBUTE_NAMES, TargetPriority } from '@/types';
+import { STAGE_NAMES, ATTRIBUTE_NAMES, TargetPriority, Stage } from '@/types';
 import { getLevelUpCost, getTotalLevelUpCost, canLevelUp, calculateMaxLevel, getMaxAffordableLevel } from '@/systems/LevelSystem';
-import { getEvolutions } from '@/data/EvolutionPaths';
+import { getEvolutions, getDNAPairsFor } from '@/data/EvolutionPaths';
 import { DIGIMON_DATABASE } from '@/data/DigimonDatabase';
 import { canMerge, MergeCandidate } from '@/systems/MergeSystem';
 import { GRID, GRID_OFFSET_X, getSellPrice as calculateSellPrice } from '@/config/Constants';
@@ -210,6 +210,11 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
   private mergeBtn!: Phaser.GameObjects.Container;
   private mergeBtnBg!: Phaser.GameObjects.Graphics;
   private mergeBtnText!: Phaser.GameObjects.Text;
+
+  // DNA Fuse section
+  private dnaFuseBtn!: Phaser.GameObjects.Container;
+  private dnaFuseBtnBg!: Phaser.GameObjects.Graphics;
+  private dnaFuseBtnText!: Phaser.GameObjects.Text;
 
   // Separator before action buttons (repositioned dynamically)
   private actionSeparator!: Phaser.GameObjects.Graphics;
@@ -541,6 +546,35 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
     });
     this.mergeBtn.setVisible(false);
     this.add(this.mergeBtn);
+
+    statsY += 44;
+
+    // --- DNA Fuse Button (hidden by default, shown for Mega towers with DNA pairs) ---
+    this.dnaFuseBtn = this.scene.add.container(w / 2, statsY);
+    this.dnaFuseBtnBg = this.scene.add.graphics();
+    drawButton(this.dnaFuseBtnBg, 200, 36, COLORS.GOLD_DIM);
+    this.dnaFuseBtn.add(this.dnaFuseBtnBg);
+
+    this.dnaFuseBtnText = this.scene.add.text(0, 0, 'DNA Fuse...', {
+      ...TEXT_STYLES.BUTTON_SM,
+      color: '#ffdd44',
+    }).setOrigin(0.5);
+    this.dnaFuseBtn.add(this.dnaFuseBtnText);
+
+    const dnaHitArea = new Phaser.Geom.Rectangle(-100, -18, 200, 36);
+    this.dnaFuseBtn.setInteractive(dnaHitArea, Phaser.Geom.Rectangle.Contains);
+    this.dnaFuseBtn.input!.cursor = 'pointer';
+    this.dnaFuseBtn.on('pointerdown', () => this.onDNAFuse());
+    this.dnaFuseBtn.on('pointerover', () => {
+      drawButton(this.dnaFuseBtnBg, 200, 36, COLORS.GOLD, { glowRing: true });
+      animateButtonHover(this.scene, this.dnaFuseBtn, true);
+    });
+    this.dnaFuseBtn.on('pointerout', () => {
+      drawButton(this.dnaFuseBtnBg, 200, 36, COLORS.GOLD_DIM);
+      animateButtonHover(this.scene, this.dnaFuseBtn, false);
+    });
+    this.dnaFuseBtn.setVisible(false);
+    this.add(this.dnaFuseBtn);
   }
 
   // ---------------------------------------------------------------------------
@@ -726,6 +760,16 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
     this.mergeBtn.y = actionY;
     this.mergeBtn.setVisible(true);
     this.mergeBtnText.setText('Merge...');
+    actionY += 44;
+
+    // DNA Fuse button — show for Mega towers at max level that have DNA pairs
+    const hasDNAPairs = tower.stage === Stage.MEGA && getDNAPairsFor(tower.digimonId).length > 0;
+    if (isMaxed && hasDNAPairs) {
+      this.dnaFuseBtn.setVisible(true);
+      this.dnaFuseBtn.y = actionY;
+    } else {
+      this.dnaFuseBtn.setVisible(false);
+    }
   }
 
   // ---------------------------------------------------------------------------
@@ -1000,6 +1044,17 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
     if (!tower) return;
 
     EventBus.emit(GameEvents.MERGE_INITIATED, tower);
+  }
+
+  // ---------------------------------------------------------------------------
+  // DNA Fuse
+  // ---------------------------------------------------------------------------
+
+  private onDNAFuse(): void {
+    const tower = this.currentTower;
+    if (!tower) return;
+
+    EventBus.emit(GameEvents.DNA_FUSE_INITIATED, tower);
   }
 
   // ---------------------------------------------------------------------------

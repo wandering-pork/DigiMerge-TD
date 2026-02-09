@@ -21,6 +21,7 @@ import { SpawnMenu } from '@/ui/SpawnMenu';
 import { EvolutionModal } from '@/ui/EvolutionModal';
 import { TowerInfoPanel } from '@/ui/TowerInfoPanel';
 import { MergeModal } from '@/ui/MergeModal';
+import { DNAModal } from '@/ui/DNAModal';
 import { TowerManager } from '@/managers/TowerManager';
 import { AudioManager } from '@/managers/AudioManager';
 import { Tower } from '@/entities/Tower';
@@ -59,6 +60,7 @@ export class GameScene extends Phaser.Scene {
   private evolutionModal!: EvolutionModal;
   private towerInfoPanel!: TowerInfoPanel;
   private mergeModal!: MergeModal;
+  private dnaModal!: DNAModal;
 
   // HUD text
   private waveText!: Phaser.GameObjects.Text;
@@ -280,6 +282,7 @@ export class GameScene extends Phaser.Scene {
 
     // Create merge modal
     this.mergeModal = new MergeModal(this);
+    this.dnaModal = new DNAModal(this);
 
     // Listen for game events
     EventBus.on(GameEvents.ENEMY_DIED, this.onEnemyDied, this);
@@ -291,6 +294,7 @@ export class GameScene extends Phaser.Scene {
     EventBus.on(GameEvents.TOWER_SELECTED, this.onTowerSelected, this);
     EventBus.on(GameEvents.MERGE_INITIATED, this.onMergeInitiated, this);
     EventBus.on(GameEvents.DIGIVOLVE_INITIATED, this.onDigivolveInitiated, this);
+    EventBus.on(GameEvents.DNA_FUSE_INITIATED, this.onDNAFuseInitiated, this);
     EventBus.on(GameEvents.BOSS_SPAWNED, this.onBossSpawned, this);
     EventBus.on(GameEvents.TOWER_PLACED, this.onTowerPlaced, this);
     EventBus.on(GameEvents.TOWER_MERGED, this.onMergeCompleted, this);
@@ -389,6 +393,7 @@ export class GameScene extends Phaser.Scene {
     EventBus.off(GameEvents.TOWER_SELECTED, this.onTowerSelected, this);
     EventBus.off(GameEvents.MERGE_INITIATED, this.onMergeInitiated, this);
     EventBus.off(GameEvents.DIGIVOLVE_INITIATED, this.onDigivolveInitiated, this);
+    EventBus.off(GameEvents.DNA_FUSE_INITIATED, this.onDNAFuseInitiated, this);
     EventBus.off(GameEvents.BOSS_SPAWNED, this.onBossSpawned, this);
     EventBus.off(GameEvents.TOWER_PLACED, this.onTowerPlaced, this);
     EventBus.off(GameEvents.TOWER_MERGED, this.onMergeCompleted, this);
@@ -890,6 +895,50 @@ export class GameScene extends Phaser.Scene {
   private onDigivolveInitiated(tower: Tower): void {
     this.towerInfoPanel.hide();
     this.evolutionModal.show(tower);
+  }
+
+  // ============================================================
+  // DNA Fuse
+  // ============================================================
+
+  private onDNAFuseInitiated(tower: Tower): void {
+    this.towerInfoPanel.hide();
+
+    // Gather all placed towers from the tower container
+    const allTowers: Tower[] = [];
+    for (const child of this.towerContainer.list) {
+      if (child instanceof Tower) {
+        allTowers.push(child as Tower);
+      }
+    }
+
+    this.dnaModal.show(tower, allTowers, (source: Tower, partner: Tower, resultId: string) => {
+      this.executeDNAFusion(source, partner, resultId);
+    });
+  }
+
+  private executeDNAFusion(source: Tower, partner: Tower, resultId: string): void {
+    const previousDigimonId = source.digimonId;
+
+    // Remove partner tower from the board
+    this.towerManager.removeTower(partner);
+
+    // Evolve source tower to the DNA result (Ultra tier)
+    source.setDigimon(resultId);
+    source.setLevel(1);
+
+    // AudioManager auto-plays tower_evolve SFX via TOWER_EVOLVED event binding
+    EventBus.emit(GameEvents.TOWER_EVOLVED, {
+      towerID: source.towerID,
+      previousDigimonId,
+      newDigimonId: resultId,
+      newStage: source.stage,
+    });
+
+    // Update statistics
+    if (this.statistics) {
+      this.statistics.digivolutionsPerformed++;
+    }
   }
 
   // ============================================================
