@@ -358,7 +358,7 @@ export class PreloadScene extends Phaser.Scene {
 
     // -- Load Music --
     this.load.audio('music_menu', 'assets/music/menu_theme.mp3');
-    this.load.audio('music_battle', 'assets/music/butterfly-no-back-vocals.mp3');
+    this.load.audio('music_battle', 'assets/music/battle_theme.mp3');
 
     // -- Load Tileset sprites --
     this.load.spritesheet('tiles_grass', 'assets/tiles/grass.png', {

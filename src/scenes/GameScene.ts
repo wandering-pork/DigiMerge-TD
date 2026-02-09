@@ -1733,7 +1733,10 @@ export class GameScene extends Phaser.Scene {
     for (const entry of waveConfig.enemies) totalEnemies += entry.count;
     if (waveConfig.boss) totalEnemies++;
 
-    const header = `Wave ${this.currentWave} (${totalEnemies} enemies)`;
+    const enemyLabel = totalEnemies === 1 ? 'enemy' : 'enemies';
+    const header = waveConfig.boss && totalEnemies === 1
+      ? `Wave ${this.currentWave} — BOSS`
+      : `Wave ${this.currentWave} (${totalEnemies} ${enemyLabel})`;
     this.wavePreviewText.setText(header);
     this.wavePreviewText.setColor(waveConfig.boss ? '#ff8844' : COLORS.TEXT_DIM);
 

@@ -74,7 +74,7 @@ export class SettingsScene extends Phaser.Scene {
     controlY += 18;
 
     const currentVolume = audioManager ? audioManager.getVolume() : persistedSettings.sfxVolume;
-    const isMuted = audioManager ? !audioManager.isEnabled() : !persistedSettings.enabled;
+    const isSfxMuted = audioManager ? audioManager.isSfxMuted() : persistedSettings.sfxMuted;
 
     // Slider track
     const sliderWidth = contentWidth - 80; // room for percentage + mute
@@ -94,7 +94,7 @@ export class SettingsScene extends Phaser.Scene {
       const fillW = Math.max(3, sliderWidth * vol);
       sliderFill.fillRoundedRect(controlX, volumeSliderY, fillW, sliderHeight, 3);
     };
-    drawSliderFill(isMuted ? 0 : currentVolume);
+    drawSliderFill(isSfxMuted ? 0 : currentVolume);
 
     // Slider handle
     const handleSize = 14;
@@ -112,10 +112,10 @@ export class SettingsScene extends Phaser.Scene {
       handle.lineStyle(1.5, COLORS.CYAN, 0.6);
       handle.strokeRoundedRect(hx, hy, handleSize, handleSize, 4);
     };
-    drawHandle(isMuted ? 0 : volume);
+    drawHandle(isSfxMuted ? 0 : volume);
 
     // Volume percentage text (inline right of slider)
-    const volPercText = this.add.text(controlX + sliderWidth + 8, volumeSliderY - 3, `${Math.round((isMuted ? 0 : volume) * 100)}%`, {
+    const volPercText = this.add.text(controlX + sliderWidth + 8, volumeSliderY - 3, `${Math.round((isSfxMuted ? 0 : volume) * 100)}%`, {
       fontFamily: FONTS.MONO,
       fontSize: '12px',
       color: COLORS.TEXT_WHITE,
@@ -136,18 +136,18 @@ export class SettingsScene extends Phaser.Scene {
       volPercText.setText(`${Math.round(volume * 100)}%`);
       if (audioManager) {
         audioManager.setVolume(volume);
-        if (volume > 0) audioManager.setEnabled(true);
+        if (volume > 0) audioManager.setSfxMuted(false);
       } else {
         // Persist directly when no AudioManager instance exists (e.g., MainMenu)
         try {
           const s = AudioManager.loadSettings();
           s.sfxVolume = volume;
-          if (volume > 0) s.enabled = true;
+          if (volume > 0) s.sfxMuted = false;
           localStorage.setItem('digimerge_audio_settings', JSON.stringify(s));
         } catch { /* ignore */ }
       }
       // Update mute button state
-      updateMuteVisual();
+      updateSfxMuteVisual();
     };
 
     sliderZone.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
@@ -161,38 +161,38 @@ export class SettingsScene extends Phaser.Scene {
 
     this.input.on('pointerup', () => { isDragging = false; });
 
-    // Mute toggle (small icon button inline, far right)
+    // SFX Mute toggle (small icon button inline, far right)
     const muteBtnW = 26;
     const muteBtnH = 22;
     const muteBtnX = panelX + panelWidth - 34;
-    const muteContainer = this.add.container(muteBtnX, volumeSliderY + 1);
-    const muteBtnBg = this.add.graphics();
-    const muteIcon = this.add.text(0, 0, '', {
+    const sfxMuteContainer = this.add.container(muteBtnX, volumeSliderY + 1);
+    const sfxMuteBg = this.add.graphics();
+    const sfxMuteIcon = this.add.text(0, 0, '', {
       fontFamily: FONTS.BODY,
       fontSize: '14px',
       color: '#ffffff',
       resolution: 2,
     }).setOrigin(0.5);
 
-    const updateMuteVisual = () => {
-      const muted = audioManager ? !audioManager.isEnabled() : !AudioManager.loadSettings().enabled;
-      drawButton(muteBtnBg, muteBtnW, muteBtnH, muted ? COLORS.DANGER : COLORS.BG_PANEL_LIGHT);
-      muteIcon.setText(muted ? '\u2716' : '\u266A');
+    const updateSfxMuteVisual = () => {
+      const muted = audioManager ? audioManager.isSfxMuted() : AudioManager.loadSettings().sfxMuted;
+      drawButton(sfxMuteBg, muteBtnW, muteBtnH, muted ? COLORS.DANGER : COLORS.BG_PANEL_LIGHT);
+      sfxMuteIcon.setText(muted ? '\u2716' : '\u266A');
     };
 
-    muteContainer.add(muteBtnBg);
-    muteContainer.add(muteIcon);
-    updateMuteVisual();
+    sfxMuteContainer.add(sfxMuteBg);
+    sfxMuteContainer.add(sfxMuteIcon);
+    updateSfxMuteVisual();
 
-    const muteHitArea = new Phaser.Geom.Rectangle(-muteBtnW / 2, -muteBtnH / 2, muteBtnW, muteBtnH);
-    muteContainer.setInteractive(muteHitArea, Phaser.Geom.Rectangle.Contains);
-    muteContainer.input!.cursor = 'pointer';
+    const sfxMuteHitArea = new Phaser.Geom.Rectangle(-muteBtnW / 2, -muteBtnH / 2, muteBtnW, muteBtnH);
+    sfxMuteContainer.setInteractive(sfxMuteHitArea, Phaser.Geom.Rectangle.Contains);
+    sfxMuteContainer.input!.cursor = 'pointer';
 
-    muteContainer.on('pointerdown', () => {
+    sfxMuteContainer.on('pointerdown', () => {
       if (audioManager) {
-        const nowEnabled = audioManager.isEnabled();
-        audioManager.setEnabled(!nowEnabled);
-        if (nowEnabled) {
+        const wasMuted = audioManager.isSfxMuted();
+        audioManager.setSfxMuted(!wasMuted);
+        if (!wasMuted) {
           drawSliderFill(0);
           drawHandle(0);
           volPercText.setText('0%');
@@ -201,25 +201,22 @@ export class SettingsScene extends Phaser.Scene {
           drawHandle(volume);
           volPercText.setText(`${Math.round(volume * 100)}%`);
         }
-        updateMuteVisual();
+        updateSfxMuteVisual();
       } else {
-        // Persist mute toggle directly when no AudioManager instance
         try {
           const s = AudioManager.loadSettings();
-          s.enabled = !s.enabled;
+          s.sfxMuted = !s.sfxMuted;
           localStorage.setItem('digimerge_audio_settings', JSON.stringify(s));
-          if (!s.enabled) {
+          if (s.sfxMuted) {
             drawSliderFill(0);
             drawHandle(0);
             volPercText.setText('0%');
-            // Stop menu music
-            this.sound.stopAll();
           } else {
             drawSliderFill(volume);
             drawHandle(volume);
             volPercText.setText(`${Math.round(volume * 100)}%`);
           }
-          updateMuteVisual();
+          updateSfxMuteVisual();
         } catch { /* ignore */ }
       }
     });
@@ -238,6 +235,7 @@ export class SettingsScene extends Phaser.Scene {
 
     // Get current music volume from AudioManager or persisted settings
     let musicVol = audioManager?.getMusicVolume() ?? persistedSettings.musicVolume;
+    const isMusicMuted = audioManager ? audioManager.isMusicMuted() : persistedSettings.musicMuted;
     const musicSliderY = controlY; // Capture Y for closures
 
     const musicSliderTrack = this.add.graphics();
@@ -253,7 +251,7 @@ export class SettingsScene extends Phaser.Scene {
       const fillW = Math.max(3, sliderWidth * vol);
       musicSliderFill.fillRoundedRect(controlX, musicSliderY, fillW, sliderHeight, 3);
     };
-    drawMusicFill(musicVol);
+    drawMusicFill(isMusicMuted ? 0 : musicVol);
 
     const musicHandle = this.add.graphics();
     const drawMusicHandle = (vol: number) => {
@@ -267,9 +265,9 @@ export class SettingsScene extends Phaser.Scene {
       musicHandle.lineStyle(1.5, COLORS.GOLD, 0.6);
       musicHandle.strokeRoundedRect(hx, hy, handleSize, handleSize, 4);
     };
-    drawMusicHandle(musicVol);
+    drawMusicHandle(isMusicMuted ? 0 : musicVol);
 
-    const musicPercText = this.add.text(controlX + sliderWidth + 8, musicSliderY - 3, `${Math.round(musicVol * 100)}%`, {
+    const musicPercText = this.add.text(controlX + sliderWidth + 8, musicSliderY - 3, `${Math.round((isMusicMuted ? 0 : musicVol) * 100)}%`, {
       fontFamily: FONTS.MONO,
       fontSize: '12px',
       color: COLORS.TEXT_WHITE,
@@ -289,11 +287,13 @@ export class SettingsScene extends Phaser.Scene {
       musicPercText.setText(`${Math.round(musicVol * 100)}%`);
       if (audioManager) {
         audioManager.setMusicVolume(musicVol);
+        if (musicVol > 0) audioManager.setMusicMuted(false);
       } else {
         // Persist directly when no AudioManager instance exists (e.g., MainMenu)
         try {
           const s = AudioManager.loadSettings();
           s.musicVolume = musicVol;
+          if (musicVol > 0) s.musicMuted = false;
           localStorage.setItem('digimerge_audio_settings', JSON.stringify(s));
         } catch { /* ignore */ }
       }
@@ -304,6 +304,7 @@ export class SettingsScene extends Phaser.Scene {
           (s as any).volume = musicVol;
         }
       }
+      updateMusicMuteVisual();
     };
 
     musicSliderZone.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
@@ -316,6 +317,73 @@ export class SettingsScene extends Phaser.Scene {
     });
 
     this.input.on('pointerup', () => { isMusicDragging = false; });
+
+    // Music Mute toggle (small icon button inline, far right)
+    const musicMuteContainer = this.add.container(muteBtnX, musicSliderY + 1);
+    const musicMuteBg = this.add.graphics();
+    const musicMuteIcon = this.add.text(0, 0, '', {
+      fontFamily: FONTS.BODY,
+      fontSize: '14px',
+      color: '#ffffff',
+      resolution: 2,
+    }).setOrigin(0.5);
+
+    const updateMusicMuteVisual = () => {
+      const muted = audioManager ? audioManager.isMusicMuted() : AudioManager.loadSettings().musicMuted;
+      drawButton(musicMuteBg, muteBtnW, muteBtnH, muted ? COLORS.DANGER : COLORS.BG_PANEL_LIGHT);
+      musicMuteIcon.setText(muted ? '\u2716' : '\u266A');
+    };
+
+    musicMuteContainer.add(musicMuteBg);
+    musicMuteContainer.add(musicMuteIcon);
+    updateMusicMuteVisual();
+
+    const musicMuteHitArea = new Phaser.Geom.Rectangle(-muteBtnW / 2, -muteBtnH / 2, muteBtnW, muteBtnH);
+    musicMuteContainer.setInteractive(musicMuteHitArea, Phaser.Geom.Rectangle.Contains);
+    musicMuteContainer.input!.cursor = 'pointer';
+
+    musicMuteContainer.on('pointerdown', () => {
+      if (audioManager) {
+        const wasMuted = audioManager.isMusicMuted();
+        audioManager.setMusicMuted(!wasMuted);
+        if (!wasMuted) {
+          drawMusicFill(0);
+          drawMusicHandle(0);
+          musicPercText.setText('0%');
+        } else {
+          drawMusicFill(musicVol);
+          drawMusicHandle(musicVol);
+          musicPercText.setText(`${Math.round(musicVol * 100)}%`);
+          // Restart music if unmuting
+          audioManager.playBattleMusic();
+        }
+        updateMusicMuteVisual();
+      } else {
+        try {
+          const s = AudioManager.loadSettings();
+          s.musicMuted = !s.musicMuted;
+          localStorage.setItem('digimerge_audio_settings', JSON.stringify(s));
+          if (s.musicMuted) {
+            drawMusicFill(0);
+            drawMusicHandle(0);
+            musicPercText.setText('0%');
+            // Stop menu music
+            for (const key of ['music_menu', 'music_battle']) {
+              this.sound.getAll(key).forEach(snd => snd.stop());
+            }
+          } else {
+            drawMusicFill(musicVol);
+            drawMusicHandle(musicVol);
+            musicPercText.setText(`${Math.round(musicVol * 100)}%`);
+            // Restart menu music
+            if (this.cache.audio.exists('music_menu')) {
+              this.sound.play('music_menu', { loop: true, volume: musicVol });
+            }
+          }
+          updateMusicMuteVisual();
+        } catch { /* ignore */ }
+      }
+    });
 
     controlY += 28;
 

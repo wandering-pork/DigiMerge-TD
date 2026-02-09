@@ -38,8 +38,9 @@ export class AudioManager {
 
   private scene: Phaser.Scene;
   private sfxVolume: number;
-  private enabled: boolean;
+  private sfxMuted: boolean;
   private musicVolume: number;
+  private musicMuted: boolean;
   private currentMusic: Phaser.Sound.BaseSound | null = null;
   private currentMusicKey: string = '';
 
@@ -48,7 +49,8 @@ export class AudioManager {
     const settings = AudioManager.loadSettings();
     this.sfxVolume = settings.sfxVolume;
     this.musicVolume = settings.musicVolume;
-    this.enabled = settings.enabled;
+    this.sfxMuted = settings.sfxMuted;
+    this.musicMuted = settings.musicMuted;
     this.bindEvents();
   }
 
@@ -56,12 +58,24 @@ export class AudioManager {
   // Persistence
   // ---------------------------------------------------------------------------
 
-  public static loadSettings(): { sfxVolume: number; musicVolume: number; enabled: boolean } {
+  public static loadSettings(): { sfxVolume: number; musicVolume: number; sfxMuted: boolean; musicMuted: boolean } {
     try {
       const saved = localStorage.getItem(AudioManager.STORAGE_KEY);
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        // Backward compat: old format had single `enabled` boolean
+        if ('enabled' in parsed && !('sfxMuted' in parsed)) {
+          return {
+            sfxVolume: parsed.sfxVolume ?? 0.5,
+            musicVolume: parsed.musicVolume ?? 0.3,
+            sfxMuted: !parsed.enabled,
+            musicMuted: !parsed.enabled,
+          };
+        }
+        return parsed;
+      }
     } catch { /* ignore */ }
-    return { sfxVolume: 0.5, musicVolume: 0.3, enabled: true };
+    return { sfxVolume: 0.5, musicVolume: 0.3, sfxMuted: false, musicMuted: false };
   }
 
   private saveSettings(): void {
@@ -69,7 +83,8 @@ export class AudioManager {
       localStorage.setItem(AudioManager.STORAGE_KEY, JSON.stringify({
         sfxVolume: this.sfxVolume,
         musicVolume: this.musicVolume,
-        enabled: this.enabled,
+        sfxMuted: this.sfxMuted,
+        musicMuted: this.musicMuted,
       }));
     } catch { /* ignore */ }
   }
@@ -111,7 +126,7 @@ export class AudioManager {
    * or audio is disabled.
    */
   public play(key: string): void {
-    if (!this.enabled) return;
+    if (this.sfxMuted) return;
 
     try {
       this.scene.sound.play(key, { volume: this.sfxVolume });
@@ -147,16 +162,25 @@ export class AudioManager {
     return this.sfxVolume;
   }
 
-  public setEnabled(enabled: boolean): void {
-    this.enabled = enabled;
+  public setSfxMuted(muted: boolean): void {
+    this.sfxMuted = muted;
     this.saveSettings();
-    if (!enabled) {
+  }
+
+  public isSfxMuted(): boolean {
+    return this.sfxMuted;
+  }
+
+  public setMusicMuted(muted: boolean): void {
+    this.musicMuted = muted;
+    this.saveSettings();
+    if (muted) {
       this.stopMusic();
     }
   }
 
-  public isEnabled(): boolean {
-    return this.enabled;
+  public isMusicMuted(): boolean {
+    return this.musicMuted;
   }
 
   // ---------------------------------------------------------------------------
@@ -164,6 +188,7 @@ export class AudioManager {
   // ---------------------------------------------------------------------------
 
   public playMusic(key: string): void {
+    if (this.musicMuted) return;
     if (this.currentMusicKey === key && this.currentMusic?.isPlaying) return;
 
     this.stopMusic();

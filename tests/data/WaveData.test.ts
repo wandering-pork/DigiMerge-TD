@@ -9,10 +9,19 @@ describe('WaveData', () => {
     }
   });
 
-  it('every wave should have enemies array with at least one entry', () => {
+  it('non-boss waves should have enemies array with at least one entry', () => {
+    const bossWaves = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
     for (let i = 1; i <= 100; i++) {
+      if (bossWaves.includes(i)) continue;
       const wave = WAVE_DATA[i];
       expect(wave.enemies.length, `Wave ${i} has no enemies`).toBeGreaterThan(0);
+    }
+  });
+
+  it('boss waves should be boss-only (no regular enemies)', () => {
+    const bossWaves = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
+    for (const wave of bossWaves) {
+      expect(WAVE_DATA[wave].enemies.length, `Wave ${wave} should have no regular enemies`).toBe(0);
     }
   });
 
@@ -55,12 +64,12 @@ describe('WaveData', () => {
     }
   });
 
-  it('enemy counts should increase over waves', () => {
+  it('enemy counts should increase over waves (non-boss)', () => {
     const totalEnemies = (wave: number) =>
       WAVE_DATA[wave].enemies.reduce((sum, e) => sum + e.count, 0);
 
-    expect(totalEnemies(1)).toBeLessThan(totalEnemies(20));
-    expect(totalEnemies(20)).toBeLessThan(totalEnemies(80));
+    expect(totalEnemies(1)).toBeLessThan(totalEnemies(19));
+    expect(totalEnemies(19)).toBeLessThan(totalEnemies(79));
   });
 
   it('each enemy entry should have positive count', () => {
@@ -71,8 +80,10 @@ describe('WaveData', () => {
     }
   });
 
-  it('each wave should have at most 5 unique Digimon types', () => {
+  it('non-boss waves should have at most 5 unique Digimon types', () => {
+    const bossWaves = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
     for (let i = 1; i <= 100; i++) {
+      if (bossWaves.includes(i)) continue;
       expect(WAVE_DATA[i].enemies.length, `Wave ${i} has more than 5 unique Digimon`).toBeLessThanOrEqual(5);
     }
   });

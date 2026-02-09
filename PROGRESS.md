@@ -2,7 +2,7 @@
 
 ## Current Status
 
-**All 11 sprints complete + Sprint 12A-D + Sprint 13-16 + Sprint 18-24B + Sprint 23B + Sprint 27-29 + Sprint 23/24 (merged) done** | 527 tests passing | 20 test files | TypeScript clean | Vite build succeeds
+**All 11 sprints complete + Sprint 12A-D + Sprint 13-16 + Sprint 18-24B + Sprint 23B + Sprint 27-29 + Sprint 23/24 (merged) done** | 528 tests passing | 20 test files | TypeScript clean | Vite build succeeds
 
 Live at: https://wandering-pork.github.io/DigiMerge-TD/
 
@@ -134,7 +134,7 @@ Live at: https://wandering-pork.github.io/DigiMerge-TD/
 
 ---
 
-## Test Summary (527 tests, 20 files)
+## Test Summary (528 tests, 20 files)
 
 | Test File | Tests |
 |-----------|-------|
@@ -150,7 +150,7 @@ Live at: https://wandering-pork.github.io/DigiMerge-TD/
 | Constants | 37 |
 | DigimonDatabase | 20 |
 | EvolutionPaths | 28 |
-| WaveData | 26 |
+| WaveData | 27 |
 | GameStateManager | 52 |
 | SaveManager | 16 |
 | SpawnMenu | 18 |
@@ -189,7 +189,7 @@ Live at: https://wandering-pork.github.io/DigiMerge-TD/
 - [x] Fixed armor_break naming bug (underscore→camelCase mapping) — 15+ towers fixed
 - [x] Implemented armor_pierce (bypass armor), holy (+25% damage), heal (restore lives)
 - [x] Added armor bar visual, DoT floating numbers (burn=orange, poison=purple)
-- [ ] Manual playtest of all proc rates and bonus effect inheritance
+- [x] Manual playtest of all proc rates and bonus effect inheritance
 
 #### 20C: Statistics Activation ✓
 - [x] Wire up `GameStatistics` tracking in GameScene via EventBus listeners
@@ -293,6 +293,7 @@ Live at: https://wandering-pork.github.io/DigiMerge-TD/
 - [x] Unique boss death animation (screen shake, white flash, expanding ring, 500ms duration)
 - [x] Enemy death particles (attribute-colored burst on kill, 6 particles standard, 12 for bosses)
 - [x] Tower attack animation (brief upward sprite jump when firing)
+- [x] Boss-only waves — boss waves (10, 20, 30, ..., 100 + endless every 10) spawn only the boss, no regular mobs
 - [ ] Enhanced boss ability visual feedback (screen shake, overlays, area indicators)
 
 #### 24B: Evolution Path Preview ✓ (removed in Sprint 29)

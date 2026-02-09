@@ -20,7 +20,7 @@ export class MainMenuScene extends Phaser.Scene {
     this.sound.stopAll();
     try {
       const audioSettings = AudioManager.loadSettings();
-      if (this.cache.audio.exists('music_menu') && audioSettings.enabled) {
+      if (this.cache.audio.exists('music_menu') && !audioSettings.musicMuted) {
         this.sound.play('music_menu', { loop: true, volume: audioSettings.musicVolume });
       }
     } catch { /* Audio not available */ }

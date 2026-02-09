@@ -116,10 +116,7 @@ export const WAVE_DATA: Record<number, WaveConfig> = {
   },
 
   10: {
-    enemies: [
-      { id: 'enemy_agumon', count: 6 },
-      { id: 'enemy_gabumon', count: 6 },
-    ],
+    enemies: [],
     spawnInterval: 1800,
     boss: 'boss_greymon',
     reward: 100,
@@ -219,11 +216,7 @@ export const WAVE_DATA: Record<number, WaveConfig> = {
   },
 
   20: {
-    enemies: [
-      { id: 'enemy_greymon', count: 6 },
-      { id: 'enemy_ogremon', count: 5 },
-      { id: 'enemy_gabumon', count: 5 },
-    ],
+    enemies: [],
     spawnInterval: 1800,
     boss: 'boss_greymon_evolved',
     reward: 200,
@@ -318,11 +311,7 @@ export const WAVE_DATA: Record<number, WaveConfig> = {
   },
 
   30: {
-    enemies: [
-      { id: 'enemy_greymon', count: 5 },
-      { id: 'enemy_garurumon', count: 5 },
-      { id: 'enemy_ogremon', count: 5 },
-    ],
+    enemies: [],
     spawnInterval: 1500,
     boss: 'boss_devimon',
     reward: 150,
@@ -422,12 +411,7 @@ export const WAVE_DATA: Record<number, WaveConfig> = {
   },
 
   40: {
-    enemies: [
-      { id: 'enemy_metalgreymon', count: 6 },
-      { id: 'enemy_weregarurumon', count: 6 },
-      { id: 'enemy_andromon', count: 5 },
-      { id: 'enemy_mamemon', count: 5 },
-    ],
+    enemies: [],
     spawnInterval: 1500,
     boss: 'boss_myotismon',
     reward: 300,
@@ -527,13 +511,7 @@ export const WAVE_DATA: Record<number, WaveConfig> = {
   },
 
   50: {
-    enemies: [
-      { id: 'enemy_metalgreymon', count: 5 },
-      { id: 'enemy_myotismon', count: 4 },
-      { id: 'enemy_skullgreymon', count: 4 },
-      { id: 'enemy_megakabuterimon', count: 4 },
-      { id: 'enemy_andromon', count: 4 },
-    ],
+    enemies: [],
     spawnInterval: 1400,
     boss: 'boss_skullgreymon',
     reward: 350,
@@ -637,13 +615,7 @@ export const WAVE_DATA: Record<number, WaveConfig> = {
   },
 
   60: {
-    enemies: [
-      { id: 'enemy_skullgreymon', count: 5 },
-      { id: 'enemy_andromon', count: 5 },
-      { id: 'enemy_mamemon', count: 4 },
-      { id: 'enemy_metalmamemon', count: 4 },
-      { id: 'enemy_megadramon', count: 5 },
-    ],
+    enemies: [],
     spawnInterval: 1400,
     boss: 'boss_venommyotismon',
     reward: 600,
@@ -749,13 +721,7 @@ export const WAVE_DATA: Record<number, WaveConfig> = {
   },
 
   70: {
-    enemies: [
-      { id: 'enemy_wargreymon', count: 6 },
-      { id: 'enemy_metalgarurumon', count: 6 },
-      { id: 'enemy_machinedramon', count: 5 },
-      { id: 'enemy_saberleomon', count: 5 },
-      { id: 'enemy_phoenixmon', count: 5 },
-    ],
+    enemies: [],
     spawnInterval: 1200,
     boss: 'boss_machinedramon',
     reward: 500,
@@ -863,13 +829,7 @@ export const WAVE_DATA: Record<number, WaveConfig> = {
   },
 
   80: {
-    enemies: [
-      { id: 'enemy_omegamon', count: 6 },
-      { id: 'enemy_omegamon_zwart', count: 6 },
-      { id: 'enemy_imperialdramon_dm', count: 6 },
-      { id: 'enemy_armageddemon', count: 6 },
-      { id: 'enemy_machinedramon', count: 6 },
-    ],
+    enemies: [],
     spawnInterval: 1200,
     boss: 'boss_omegamon',
     reward: 750,
@@ -981,13 +941,7 @@ export const WAVE_DATA: Record<number, WaveConfig> = {
   },
 
   90: {
-    enemies: [
-      { id: 'enemy_omegamon', count: 7 },
-      { id: 'enemy_omegamon_zwart', count: 7 },
-      { id: 'enemy_imperialdramon_dm', count: 7 },
-      { id: 'enemy_armageddemon', count: 7 },
-      { id: 'enemy_millenniummon', count: 7 },
-    ],
+    enemies: [],
     spawnInterval: 1000,
     boss: 'boss_omegamon_zwart',
     reward: 750,
@@ -1095,13 +1049,7 @@ export const WAVE_DATA: Record<number, WaveConfig> = {
   },
 
   100: {
-    enemies: [
-      { id: 'enemy_omegamon', count: 8 },
-      { id: 'enemy_omegamon_zwart', count: 8 },
-      { id: 'enemy_imperialdramon_dm', count: 8 },
-      { id: 'enemy_armageddemon', count: 8 },
-      { id: 'enemy_millenniummon', count: 8 },
-    ],
+    enemies: [],
     spawnInterval: 1000,
     boss: 'boss_apocalymon',
     reward: 1500,
