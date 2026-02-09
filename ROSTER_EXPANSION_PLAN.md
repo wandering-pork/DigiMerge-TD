@@ -332,22 +332,24 @@
 
 ## Phase 4: DNA Digivolution Targets
 
-*DNA Digivolution: Combine two specific Mega Digimon to create an Ultra*
+*DNA Digivolution: Combine two specific max-level Mega Digimon with sufficient DP to create an Ultra.*
 
-| Fusion Partner A | Fusion Partner B | Result | Sprite |
-|-----------------|-----------------|--------|--------|
-| WarGreymon | MetalGarurumon | Omegamon | Omegamon.png |
-| Imperialdramon FM | — (with enough DP) | Imperialdramon PM | Imperialdramon_Paladin.png |
-| Gallantmon | ChaosGallantmon | Gallantmon CM (use Dukemon_X) | Dukemon_X.png |
-| Ophanimon | LadyDevimon (enemy→tower?) | Mastemon | Mastemon.png |
-| Alphamon | Ouryumon | Alphamon Ouryuken | Alphamon_Ouryuken.png |
-| Seraphimon | Ophanimon | Susanoomon | Susanoomon.png |
-| Rosemon | Lotusmon | Rafflesimon | Rafflesimon.png |
-| Beelzemon | — (with enough DP) | Beelzemon BM | Beelzebumon_Blast.png |
-| WarGreymon | — (variant) | BlitzGreymon | BlitzGreymon.png |
-| MetalGarurumon | — (variant) | CresGarurumon | CresGarurumon.png |
-| Omegamon | (dark fusion) | Omegamon Alter-S | Omegamon_Alter-S.png |
-| Jesmon | (with enough DP) | Jesmon GX | Jesmon_GX.png |
+**Status: PARTIALLY IMPLEMENTED (Sprint 26)** — 6 of 12 fusion pairs are live. System includes DNAModal with board partner scanning, DNA Fuse button on TowerInfoPanel, and 20 unit tests in `DNADigivolution.test.ts`.
+
+| Fusion Partner A | Fusion Partner B | Result | Sprite | Min DP | Status |
+|-----------------|-----------------|--------|--------|--------|--------|
+| WarGreymon | MetalGarurumon | Omegamon | Omegamon.png | 3 | **IMPLEMENTED** |
+| Gallantmon | ChaosGallantmon | Gallantmon CM (Dukemon_X) | Dukemon_X.png | 5 | **IMPLEMENTED** |
+| Alphamon | Ouryumon | Alphamon Ouryuken | Alphamon_Ouryuken.png | 5 | **IMPLEMENTED** |
+| Ophanimon | Cherubimon Virtue | Susanoomon | Susanoomon.png | 5 | **IMPLEMENTED** |
+| Rosemon | Lotusmon | Rafflesimon | Rafflesimon.png | 4 | **IMPLEMENTED** |
+| Beelzemon | VenomMyotismon | Beelzemon BM | Beelzebumon_Blast.png | 6 | **IMPLEMENTED** |
+| Imperialdramon FM | — (with enough DP) | Imperialdramon PM | Imperialdramon_Paladin.png | — | Planned |
+| Ophanimon | LadyDevimon (enemy→tower?) | Mastemon | Mastemon.png | — | Planned |
+| WarGreymon | — (variant) | BlitzGreymon | BlitzGreymon.png | — | Planned |
+| MetalGarurumon | — (variant) | CresGarurumon | CresGarurumon.png | — | Planned |
+| Omegamon | (dark fusion) | Omegamon Alter-S | Omegamon_Alter-S.png | — | Planned |
+| Jesmon | (with enough DP) | Jesmon GX | Jesmon_GX.png | — | Planned |
 
 ---
 
@@ -540,10 +542,13 @@
 - **Any phase**: Add 2-4 new enemies per wave tier from available sprites
 - **Priority**: Champion + Ultimate enemies (most wave variety needed)
 
-### DNA Digivolution
-- Implement after Tier 1 tower lines are in
-- Start with Omegamon (WarGreymon + MetalGarurumon)
-- Then Imperialdramon PM, Alphamon Ouryuken, Mastemon
+### DNA Digivolution — IMPLEMENTED (Sprint 26)
+- Core DNA Digivolution system is live with 6 fusion pairs
+- Both partners must be max-level Mega with sufficient DP (minDP varies per pair)
+- UI: DNAModal with board partner scanning, DNA Fuse button on TowerInfoPanel
+- 20 tests in `DNADigivolution.test.ts`
+- **Implemented pairs**: Omegamon, Gallantmon CM, Alphamon Ouryuken, Susanoomon, Rafflesimon, Beelzemon BM
+- **Remaining pairs** (can be added incrementally): Imperialdramon PM, Mastemon, BlitzGreymon, CresGarurumon, Omegamon Alter-S, Jesmon GX
 
 ---
 

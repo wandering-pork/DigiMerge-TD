@@ -908,7 +908,7 @@ export class GameScene extends Phaser.Scene {
     const allTowers: Tower[] = [];
     for (const child of this.towerContainer.list) {
       if (child instanceof Tower) {
-        allTowers.push(child as Tower);
+        allTowers.push(child);
       }
     }
 

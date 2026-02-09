@@ -61,7 +61,8 @@
 │  DATA LAYER (Static JSON/TS)                                     │
 │  ┌────────────────┐ ┌────────────────┐ ┌────────────────┐       │
 │  │DigimonDatabase │ │   WaveData     │ │ EvolutionPaths │       │
-│  └────────────────┘ └────────────────┘ └────────────────┘       │
+│  └────────────────┘ └────────────────┘ │  + DNA_PAIRS   │       │
+│                                         └────────────────┘       │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -316,6 +317,10 @@ export class PreloadScene extends Phaser.Scene {
     this.registry.set('digimonData', DIGIMON_DATABASE);
     this.registry.set('waveData', WAVE_DATA);
     this.registry.set('evolutionData', EVOLUTION_PATHS);
+
+    // Initialize accessibility flags from localStorage (Sprint 27)
+    const hcStored = localStorage.getItem('digimerge_high_contrast');
+    this.registry.set('high_contrast', hcStored === 'true');
 
     this.scene.start('MainMenuScene');
   }
@@ -1536,6 +1541,33 @@ export function findMergeTargets(tower: Tower, allTowers: Tower[]): Tower[] {
  * - Total investment transferred to survivor
  */
 
+/**
+ * DNA Digivolution validation — checks if two max-level Mega towers
+ * can perform a DNA fusion to produce an Ultra-tier result.
+ */
+export function canDNADigivolve(towerA: Tower, towerB: Tower): boolean {
+  // Both must be Mega (tier 4) and at max level
+  if (towerA.towerData.stageTier !== 4 || towerB.towerData.stageTier !== 4) return false;
+  if (towerA.level < towerA.getMaxLevel() || towerB.level < towerB.getMaxLevel()) return false;
+
+  // Must have a matching DNA pair defined in EvolutionPaths
+  return findDNAPair(towerA.digimonId, towerB.digimonId) !== undefined;
+}
+
+/**
+ * Returns the DNA result Digimon ID for a valid pair, or null.
+ */
+export function getDNAResult(towerA: Tower, towerB: Tower): string | null {
+  const pair = findDNAPair(towerA.digimonId, towerB.digimonId);
+  if (!pair) return null;
+
+  // Check minimum DP requirement
+  const combinedDP = Math.max(towerA.dp, towerB.dp);
+  if (combinedDP < pair.minDPRequired) return null;
+
+  return pair.resultId;
+}
+
 // Helper functions
 function getStageName(tier: number): string {
   const stages = ['In-Training', 'Rookie', 'Champion', 'Ultimate', 'Mega', 'Ultra'];
@@ -1547,6 +1579,72 @@ function getAttributeName(attr: Attribute): string {
   return names[attr] ?? 'Unknown';
 }
 ```
+
+### DNA Digivolution System
+```typescript
+// DNA Digivolution — Ultra tier fusion system
+// Defined in src/data/EvolutionPaths.ts alongside normal evolution paths
+// Validation helpers in src/systems/MergeSystem.ts (canDNADigivolve, getDNAResult)
+
+import type { DNADigivolutionPair } from '@/types/GameTypes';
+
+/**
+ * DNA_PAIRS defines which two Mega Digimon can fuse into an Ultra.
+ * Each pair is order-independent (partnerA and partnerB are interchangeable).
+ * 6 pairs ship with Sprint 26.
+ */
+export const DNA_PAIRS: DNADigivolutionPair[] = [
+  // Example pairs — actual data lives in EvolutionPaths.ts
+  { partnerAId: 'wargreymon',      partnerBId: 'metalgarurumon', resultId: 'omegamon',         minDPRequired: 5 },
+  { partnerAId: 'wargreymon_blk',  partnerBId: 'metalgarurumon_blk', resultId: 'omegamon_zwart', minDPRequired: 5 },
+  // ... (6 total)
+];
+
+/**
+ * Finds a matching DNA pair for two Digimon IDs (order-independent).
+ */
+export function findDNAPair(
+  idA: string,
+  idB: string
+): DNADigivolutionPair | undefined {
+  return DNA_PAIRS.find(
+    p =>
+      (p.partnerAId === idA && p.partnerBId === idB) ||
+      (p.partnerAId === idB && p.partnerBId === idA)
+  );
+}
+
+/**
+ * Returns all DNA pairs that include the given Digimon ID.
+ */
+export function getDNAPairsFor(digimonId: string): DNADigivolutionPair[] {
+  return DNA_PAIRS.filter(
+    p => p.partnerAId === digimonId || p.partnerBId === digimonId
+  );
+}
+```
+
+#### DNA Fusion Flow (GameScene Integration)
+
+```
+TowerInfoPanel                GameScene                    TowerManager
+     │                            │                            │
+     │  "DNA Fuse" button click   │                            │
+     │──DNA_FUSE_INITIATED────────▶                            │
+     │                            │  onDNAFuseInitiated()      │
+     │                            │  → highlight valid partners │
+     │                            │                            │
+     │                    partner selected                     │
+     │                            │  executeDNAFusion()        │
+     │                            │──removeTower(partner)──────▶  (no refund, no event)
+     │                            │  evolve survivor → Ultra   │
+     │                            │                            │
+```
+
+- **`TowerInfoPanel`**: Displays a "DNA Fuse" button when the selected tower is a max-level Mega with at least one valid DNA partner on the board.
+- **`GameScene.onDNAFuseInitiated(tower)`**: Highlights valid DNA partners; player clicks one to confirm.
+- **`GameScene.executeDNAFusion(initiator, partner)`**: Calls `TowerManager.removeTower(partner)` (silent removal, no sell refund, no `TOWER_SOLD` event), then evolves the initiator into the Ultra result via `TowerManager.evolveTower()`.
+- **`TowerManager.removeTower(tower)`**: New method that removes a tower from `towerMap` and destroys it without emitting events or granting DigiBytes.
 
 ### Targeting System
 ```typescript
@@ -3047,6 +3145,17 @@ export class TowerManager {
     return sellValue;
   }
 
+  /**
+   * Silent tower removal for DNA Digivolution partner consumption (Sprint 26).
+   * Removes the tower from the grid and destroys it without granting
+   * a sell refund or emitting TOWER_SOLD.
+   */
+  removeTower(tower: Tower): void {
+    const position = `${tower.gridPosition.col},${tower.gridPosition.row}`;
+    this.towerMap.delete(position);
+    tower.destroy();
+  }
+
   private onTowerAttack(data: {
     tower: Tower;
     target: any;
@@ -3827,6 +3936,14 @@ export interface DNADigivolution {
   result: string;
 }
 
+// src/types/GameTypes.ts — DNADigivolutionPair (Sprint 26)
+export interface DNADigivolutionPair {
+  partnerAId: string;     // Mega Digimon A's database ID
+  partnerBId: string;     // Mega Digimon B's database ID
+  resultId: string;       // Ultra Digimon result ID
+  minDPRequired: number;  // Minimum DP on the higher-DP partner
+}
+
 // src/types/GameTypes.ts
 export interface GridPosition {
   col: number;
@@ -3879,6 +3996,76 @@ See the main GAME_DESIGN_DOCUMENT.md for detailed UI mockups. Implementation use
 - `Phaser.GameObjects.Zone` for interactive areas
 - Custom button class extending `Container`
 
+### UI File Listing
+
+| File | Description |
+|------|-------------|
+| `src/ui/UITheme.ts` | Design tokens (colors, fonts, styles), `HIGH_CONTRAST_COLORS`, `getColor()` helper |
+| `src/ui/UIHelpers.ts` | `drawPanel`, `drawButton`, shared animations |
+| `src/ui/TowerInfoPanel.ts` | Selected tower details, Level Up / Evolve / Sell / **DNA Fuse** buttons |
+| `src/ui/SpawnMenu.ts` | Spawn configuration + starter placement |
+| `src/ui/EvolutionModal.ts` | Normal evolution selection |
+| `src/ui/MergeModal.ts` | Merge confirmation |
+| `src/ui/DNAModal.ts` | Gold-themed DNA Digivolution confirmation (Sprint 26) |
+| `src/ui/TutorialOverlay.ts` | 8-step new player tutorial |
+
+### DNAModal.ts (Sprint 26)
+
+```typescript
+// src/ui/DNAModal.ts
+// Gold-themed DNA Digivolution confirmation modal.
+// Extends Phaser.GameObjects.Container.
+//
+// Shows:
+//   - Initiator sprite + name (left)
+//   - Partner sprite + name (right)
+//   - "+" symbol between them, arrow pointing down to result
+//   - Result Ultra sprite + name + stats preview
+//   - "Fuse" and "Cancel" buttons
+//
+// Theming: Gold accent border (0xFFD700), dark background panel.
+// Emits no events directly — calls a callback on confirm/cancel.
+```
+
+### High-Contrast Mode (Sprint 27)
+
+```typescript
+// In src/ui/UITheme.ts
+
+/** High-contrast color palette for accessibility */
+export const HIGH_CONTRAST_COLORS = {
+  panelBg:       0x000000,   // Pure black background
+  panelBorder:   0xFFFFFF,   // White border
+  textPrimary:   '#FFFFFF',  // White text
+  textSecondary: '#FFFF00',  // Yellow secondary text
+  buttonBg:      0x000080,   // Navy button fill
+  buttonHover:   0x0000FF,   // Blue hover
+  hpBarFull:     0x00FF00,   // Bright green
+  hpBarLow:      0xFF0000,   // Bright red
+  vaccine:       0xFFFF00,   // Yellow (Vaccine)
+  data:          0x00FFFF,   // Cyan (Data)
+  virus:         0xFF00FF,   // Magenta (Virus)
+  free:          0xFFFFFF,   // White (Free)
+};
+
+/**
+ * Registry-aware color retrieval. Returns high-contrast color when
+ * the `high_contrast` registry flag is true, otherwise the default color.
+ *
+ * @param key   Color key name (e.g. 'panelBg', 'vaccine')
+ * @param registry  Phaser registry (scene.registry or game.registry)
+ */
+export function getColor(
+  key: keyof typeof HIGH_CONTRAST_COLORS,
+  registry: Phaser.Data.DataManager
+): number | string {
+  const hc = registry.get('high_contrast') === true;
+  return hc ? HIGH_CONTRAST_COLORS[key] : DEFAULT_COLORS[key];
+}
+```
+
+**Persistence**: The high-contrast toggle is stored in `localStorage` under the key `digimerge_high_contrast` (`'true'` / `'false'`). `PreloadScene.create()` reads it and sets `this.registry.set('high_contrast', stored === 'true')` so the flag is available to all scenes immediately. `SettingsScene` writes both the registry flag and `localStorage` on toggle.
+
 ---
 
 ## 9. Event System
@@ -3907,6 +4094,9 @@ export const GameEvents = {
   // Boss events
   BOSS_SPAWNED: 'boss:spawned',
   BOSS_ABILITY: 'boss:ability',
+
+  // DNA Digivolution events (Sprint 26)
+  DNA_FUSE_INITIATED: 'dna:fuseInitiated',  // Payload: { tower: Tower }
 
   // Wave events
   WAVE_STARTED: 'wave:started',
@@ -4114,18 +4304,36 @@ Use **Electron** or **Tauri** to wrap the web build for desktop distribution.
 ### Data Files Needed
 - [ ] `src/data/DigimonDatabase.ts` - All Digimon stats
 - [ ] `src/data/WaveData.ts` - Wave compositions for waves 1-20
-- [ ] `src/data/EvolutionPaths.ts` - Evolution trees and DP requirements
+- [ ] `src/data/EvolutionPaths.ts` - Evolution trees, DP requirements, and `DNA_PAIRS`
+
+### Sprint 26 — DNA Digivolution
+- [x] `DNADigivolutionPair` type in `GameTypes.ts`
+- [x] `DNA_PAIRS` data (6 pairs) in `EvolutionPaths.ts`
+- [x] `findDNAPair()` / `getDNAPairsFor()` helpers in `EvolutionPaths.ts`
+- [x] `canDNADigivolve()` / `getDNAResult()` in `MergeSystem.ts`
+- [x] `DNAModal.ts` — gold-themed UI component (extends Container)
+- [x] `TowerInfoPanel` — DNA Fuse button for max-level Megas with DNA pairs
+- [x] `GameScene` integration: `onDNAFuseInitiated`, `executeDNAFusion`
+- [x] `TowerManager.removeTower()` — silent partner consumption (no refund/event)
+- [x] `DNA_FUSE_INITIATED` event in `EventBus`
+
+### Sprint 27 — High-Contrast Mode (Accessibility)
+- [x] `HIGH_CONTRAST_COLORS` in `UITheme.ts`
+- [x] `getColor(key, registry)` helper for registry-aware color retrieval
+- [x] Settings toggle persists to `localStorage` key `digimerge_high_contrast`
+- [x] `PreloadScene` initializes registry from `localStorage` on startup
 
 ### Testing
 - [ ] Unit tests for damage calculations
 - [ ] Unit tests for DP/level formulas
 - [ ] Unit tests for merge validation
 - [ ] Unit tests for attribute multipliers
+- [ ] Unit tests for DNA Digivolution validation (`canDNADigivolve`, `getDNAResult`)
 - [ ] Integration tests for wave progression
 
 ---
 
-*Document Version: 2.0*
-*Last Updated: 2025-02-06*
+*Document Version: 3.0*
+*Last Updated: 2026-02-09*
 *Target: Phaser 3.80+ with TypeScript 5.x*
-*Changes: Fixed tilemap→code path, added missing managers, fixed texture keys, added all scenes*
+*Changes: Added DNA Digivolution system (Sprint 26), high-contrast mode (Sprint 27), DNAModal.ts, updated event bus and type definitions*

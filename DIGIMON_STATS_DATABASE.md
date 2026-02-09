@@ -9,8 +9,9 @@
 6. [Ultimate Tier](#6-ultimate-tier)
 7. [Mega Tier](#7-mega-tier)
 8. [Ultra Tier](#8-ultra-tier)
-9. [Evolution Chains](#9-evolution-chains)
-10. [Status Effect Reference](#10-status-effect-reference)
+9. [DNA Digivolution (Ultra Tier)](#9-dna-digivolution-ultra-tier)
+10. [Evolution Chains](#10-evolution-chains)
+11. [Status Effect Reference](#11-status-effect-reference)
 
 ---
 
@@ -20,7 +21,7 @@
 
 | Stat | Description | Range |
 |------|-------------|-------|
-| **DMG** | Base damage per attack | 2-150 |
+| **DMG** | Base damage per attack | 2-170 |
 | **SPD** | Attacks per second | 0.4-1.5 |
 | **RNG** | Attack range in tiles | 1-6 |
 | **Effect** | Status effect applied | See Section 10 |
@@ -81,7 +82,7 @@ Sunflowmon, Angewomon, Magnadramon, Lotosmon, Sakuyamon, Kentaurosmon, Mastemon
 | Champion | 12-25 | 0.5-1.3 | 2.0-4.0 |
 | Ultimate | 25-50 | 0.4-1.3 | 2.5-5.0 |
 | Mega | 50-100 | 0.4-1.0 | 3.0-5.5 |
-| Ultra | 80-150 | 0.4-0.7 | 4.0-6.0 |
+| Ultra | 80-170 | 0.4-1.2 | 4.0-6.0 |
 
 ### Attack Types
 
@@ -420,6 +421,7 @@ Example: Greymon Lv 30
 | Justimon | Metal Empire | 72 | 0.7 | 3.0 | Stun | 35% | First | 2s | 0-5 |
 | Dynasmon | Virus Busters | 70 | 0.6 | 4.0 | Pierce | 100% | First | Pierce all, +30% vs Virus | 0-5 |
 | Valkyrimon | Wind Guardians | 65 | 0.8 | 4.0 | Crit, Flying | 40% | Flying | 2.5x on crit, aerial | 6-8 |
+| KaiserGreymon | Dragon's Roar | 82 | 0.9 | 3.0 | Burn (Inferno) | 30% | Strongest | Inferno burn, heavy fire | 9+ |
 
 ### Data Attribute
 
@@ -428,18 +430,19 @@ Example: Greymon Lv 30
 | MetalGarurumon | Nature Spirits | 60 | 0.6 | 4.0 | Freeze, AoE | 50% | Fastest | 4x4 AoE, 2.5s freeze | 0-5 |
 | CresGarurumon | Nature Spirits | 70 | 0.7 | 3.5 | Bleed | 40% | Weakest | Cross slash, 5s 4% HP/tick | 9+ |
 | SaberLeomon | Nature Spirits | 72 | 0.8 | 3.0 | Bleed | 35% | Weakest | Double hit, 4s 3% HP/tick | 6-8 |
-| Rosemon | Jungle Troopers | 50 | 0.8 | 4.0 | Root, Multi-shot (5) | 40% | Fastest | 5 projectiles, 3s root | 0-5 |
+| Rosemon | Jungle Troopers | 55 | 0.8 | 4.0 | Root, Multi-shot (5) | 40% | Fastest | 5 projectiles, 3s root | 0-5 |
 | Lotosmon | Jungle Troopers | 45 | 0.7 | 5.0 | Heal, Debuff | 30% | Support | +0.1 lives/s, 30% debuffs | 6-8 |
 | Sakuyamon | Nature Spirits | 58 | 0.8 | 4.5 | Aura (All), Holy | 100% | Support | Team +20% all stats, +80% vs Dark | 0-5 |
 | Ravemon | Wind Guardians | 70 | 0.9 | 3.5 | Pierce, Bleed, Flying | 35% | Flying | Pierce all, 4s 3% HP/tick, aerial | 9+ |
 | MetalSeadramon | Deep Savers | 65 | 0.6 | 5.0 | Pierce | 100% | First | Pierce all enemies | 0-5 |
-| Plesiomon | Deep Savers | 55 | 0.7 | 4.5 | Heal, Slow | 100% | Support | +0.05 lives/s, 40% slow | 6-8 |
+| Plesiomon | Deep Savers | 56 | 0.7 | 4.5 | Heal, Slow | 100% | Support | +0.05 lives/s, 40% slow | 6-8 |
 | Boltmon | Metal Empire | 75 | 0.5 | 3.5 | Stun, AoE | 40% | Strongest | 4x4 AoE, 2s stun | 0-5 |
 | Jesmon | Metal Empire | 65 | 0.9 | 3.0 | Multi-hit (6), Debuff | 25% | First | 6 hits, 25% all debuffs | 9+ |
 | Alphamon | Virus Busters | 75 | 0.6 | 4.0 | Reset | 100% | Weakest | Resets own cooldowns on kill | 9+ |
 | HiAndromon | Metal Empire | 68 | 0.6 | 4.0 | Pierce, Slow | 40% | Fastest | Pierce all, 5s 50% slow | 6-8 |
 | Minervamon | Virus Busters | 70 | 0.9 | 3.0 | Crit | 45% | Weakest | 2.5x on crit | 6-8 |
 | Ebemon | Metal Empire | 58 | 0.8 | 4.5 | Confuse, Chain (6) | 35% | Strongest | 80% chain, 3s confuse | 6-8 |
+| MagnaGarurumon | Nature Spirits | 78 | 1.0 | 4.0 | Freeze (Cannon) | 25% | Fastest | Freeze cannon, ranged | 9+ |
 
 ### Virus Attribute
 
@@ -460,8 +463,9 @@ Example: Greymon Lv 30
 | Diaboromon | Nightmare Soldiers | 70 | 0.7 | 4.0 | Split | 100% | First | Creates copy at 50% HP on death | 6-8 |
 | Darkdramon | Metal Empire | 78 | 0.6 | 4.0 | Pierce, Armor Break | 35% | Strongest | Pierce 5, 5s -45% armor | 6-8 |
 | GranDracmon | Nightmare Soldiers | 72 | 0.6 | 4.5 | Lifesteal, Fear | 35% | Weakest | 30% lifesteal, 4s fear | 9+ |
-| Megidramon | Dragon's Roar | 95 | 0.4 | 3.5 | Burn, Fear | 50% | Strongest | 5s burn, 4s fear, berserk | 12+ |
+| Megidramon | Dragon's Roar | 80 | 0.4 | 3.5 | Burn, Fear | 50% | Strongest | 5s burn, 4s fear, berserk | 12+ |
 | ChaosGallantmon | Dragon's Roar | 72 | 0.6 | 3.5 | Pierce, Lifesteal | 25% | Weakest | Pierce all, 20% lifesteal | 9+ |
+| Titamon | Dragon's Roar | 80 | 0.9 | 2.5 | AoE (Smash) | 25% | Strongest | AoE smash, melee brute | 12+ |
 
 ### Free Attribute
 
@@ -489,7 +493,22 @@ Example: Greymon Lv 30
 
 ---
 
-## 9. Evolution Chains
+## 9. DNA Digivolution (Ultra Tier)
+
+*Sprint 26 addition. DNA Digivolution combines two specific Mega-tier Digimon to produce an Ultra-tier result. Each pair requires a minimum DP threshold on both components.*
+
+| Digimon | Attribute | DMG | SPD | RNG | Effect | Priority | Sprite Key | DNA Pair | Min DP | Notes |
+|---------|-----------|-----|-----|-----|--------|----------|------------|----------|--------|-------|
+| Omegamon | Vaccine | 160 | 1.0 | 5.0 | All Effects | Strongest | Omegamon | WarGreymon + MetalGarurumon | 3 | Applies all debuffs |
+| Gallantmon CM | Virus | 170 | 0.8 | 4.5 | Purge, Pierce | Strongest | Dukemon_X | Gallantmon + ChaosGallantmon | 5 | Removes buffs, pierces all |
+| Alphamon Ouryuken | Vaccine | 155 | 0.9 | 5.0 | Execute, AoE | Weakest | Alphamon_Ouryuken | Alphamon + Ouryumon | 5 | Execute + area damage |
+| Susanoomon DNA | Free | 145 | 1.1 | 4.5 | Holy, Celestial | Strongest | Susanoomon | Ophanimon + Cherubimon Virtue | 5 | Holy celestial power |
+| Rafflesimon | Data | 120 | 1.2 | 5.0 | Poison, AoE, Heal | First | Rafflesimon | Rosemon + Lotusmon | 4 | Poison AoE + life recovery |
+| Beelzemon BM | Virus | 165 | 0.9 | 4.0 | Execute, Rapid | Weakest | Beelzebumon_Blast | Beelzemon + VenomMyotismon | 6 | Execute + rapid fire |
+
+---
+
+## 10. Evolution Chains
 
 ### Dragon's Roar Family
 
@@ -606,7 +625,7 @@ Kapurimon → Hagurumon → Guardromon (DP 0-2) → Andromon (DP 0-3) → HiAndr
 
 ---
 
-## 10. Status Effect Reference
+## 11. Status Effect Reference
 
 ### Damage Over Time
 
@@ -674,5 +693,5 @@ Kapurimon → Hagurumon → Guardromon (DP 0-2) → Andromon (DP 0-3) → HiAndr
 
 ---
 
-*Document Version: 2.0*
-*Last Updated: 2025-02-04*
+*Document Version: 3.0*
+*Last Updated: 2026-02-09*

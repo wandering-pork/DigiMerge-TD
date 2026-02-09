@@ -43,8 +43,9 @@ Web (HTML5) via Phaser 3 + TypeScript, with optional desktop builds via Electron
 │  2. LEVEL UP  → Pay to increase tower level                 │
 │  3. MERGE     → Same stage + same attribute = +1 DP         │
 │  4. DIGIVOLVE → At max level + pay fee = choose evolution   │
-│  5. DEFEND    → Towers attack waves, earn DigiBytes         │
-│  6. REPEAT    → Build army to reach Wave 100                │
+│  5. DNA FUSE  → Two max-level Megas = Ultra (optional)      │
+│  6. DEFEND    → Towers attack waves, earn DigiBytes         │
+│  7. REPEAT    → Build army to reach Wave 100                │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -789,17 +790,31 @@ Seraphimon         Ophanimon
 (DP 0-5)           (DP 0-5)
 ```
 
-### DNA Digivolution (Ultra Tier)
+### DNA Digivolution (Ultra Tier) [IMPLEMENTED]
 
-Combine two **specific different Mega** Digimon to create Ultra tier.
+Combine two **specific max-level Mega** Digimon to create an Ultra-tier result. This is the only way to obtain Ultra Digimon.
 
-| Digimon A | Digimon B | Result | Special |
-|-----------|-----------|--------|---------|
-| WarGreymon | MetalGarurumon | Omegamon | All effects 30% |
-| BlackWarGreymon | BlackMetalGarurumon | Omegamon Zwart | 50% all debuffs |
-| Angewomon | LadyDevimon | Mastemon | +100% vs Dark |
-| Imperialdramon FM | Omegamon | Imperialdramon PM | 50% Execute |
-| Gallantmon | Grani | Gallantmon CM | Purge all |
+**Requirements:**
+- Both partners must be **MEGA stage**
+- Both must be at **max level**
+- Valid DNA pair (see table below)
+- At least one partner must meet the **minDP** requirement
+
+**On fusion:**
+- The initiating tower transforms into the Ultra result
+- The partner tower is **consumed** (removed from board, no refund)
+- The result inherits the higher DP and better Origin from either parent
+
+| Digimon A | Digimon B | Result | Attr | MinDP | DMG | SPD | RNG |
+|-----------|-----------|--------|------|-------|-----|-----|-----|
+| WarGreymon | MetalGarurumon | Omegamon | Vaccine | 3 | 160 | 1.0 | 5.0 |
+| Gallantmon | ChaosGallantmon | Gallantmon CM | Virus | 5 | 170 | 0.8 | 4.5 |
+| Alphamon | Ouryumon | Alphamon Ouryuken | Vaccine | 5 | 155 | 0.9 | 5.0 |
+| Ophanimon | Cherubimon Virtue | Susanoomon | Free | 5 | 145 | 1.1 | 4.5 |
+| Rosemon | Lotusmon | Rafflesimon | Data | 4 | 120 | 1.2 | 5.0 |
+| Beelzemon | VenomMyotismon | Beelzemon BM | Virus | 6 | 165 | 0.9 | 4.0 |
+
+**Tier Separation:** Ultra DPS 120-170 vs Mega DPS 28-82 creates a clear power jump for DNA results.
 
 ---
 
@@ -1039,6 +1054,28 @@ Cumulative to reach level (at Mega ×4.0):
 | Rookie → Champion | 150 DB |
 | Champion → Ultimate | 200 DB |
 | Ultimate → Mega | 250 DB |
+
+### Mega/Ultra Tier Balance [Sprint 25 Balance]
+
+Mega towers were rebalanced to create clear tier separation from Ultra DNA results:
+
+**Nerfed Megas (overpowered DPS):**
+| Digimon | Old DMG | New DMG | Notes |
+|---------|---------|---------|-------|
+| KaiserGreymon | 100 | 82 | Was encroaching on Ultra DPS range |
+| MagnaGarurumon | 95 | 78 | Was encroaching on Ultra DPS range |
+| Megidramon | 95 | 80 | Was encroaching on Ultra DPS range |
+| Titamon | 95 | 80 | Was encroaching on Ultra DPS range |
+
+**Buffed Megas (weak support):**
+| Digimon | Old DMG | New DMG | Notes |
+|---------|---------|---------|-------|
+| Rosemon | 50 | 55 | Support Mega, slight DPS bump |
+| Plesiomon | 52 | 56 | Support Mega, slight DPS bump |
+
+**Resulting Tier Ranges:**
+- Ultra DPS: 120-170 (DNA fusion results only)
+- Mega DPS: 28-82 (clear gap below Ultra)
 
 ### Lives System
 
@@ -1424,16 +1461,16 @@ See the full database for complete trees. Key starter lines:
 | Viximon | Renamon | Nature Spirits | Magic Multi-hit |
 | DemiVeemon | Veemon | Dragon's Roar | Free/Versatile |
 
-### DNA Digivolution Quick Reference
+### DNA Digivolution Quick Reference [IMPLEMENTED]
 
-| Digimon A | Digimon B | Ultra Result |
-|-----------|-----------|--------------|
-| WarGreymon | MetalGarurumon | Omegamon |
-| BlackWarGreymon | BlackMetalGarurumon | Omegamon Zwart |
-| Angewomon | LadyDevimon | Mastemon |
-| Imperialdramon FM | Omegamon | Imperialdramon PM |
-| Gallantmon | Grani | Gallantmon CM |
-| Seraphimon | Ophanimon | Susanoomon |
+| Digimon A | Digimon B | Ultra Result | MinDP | Attribute |
+|-----------|-----------|--------------|-------|-----------|
+| WarGreymon | MetalGarurumon | Omegamon | 3 | Vaccine |
+| Gallantmon | ChaosGallantmon | Gallantmon CM | 5 | Virus |
+| Alphamon | Ouryumon | Alphamon Ouryuken | 5 | Vaccine |
+| Ophanimon | Cherubimon Virtue | Susanoomon | 5 | Free |
+| Rosemon | Lotusmon | Rafflesimon | 4 | Data |
+| Beelzemon | VenomMyotismon | Beelzemon BM | 6 | Virus |
 
 ---
 
@@ -1461,9 +1498,9 @@ interface DigimonData {
   // Evolution paths
   evolutions: EvolutionPath[];
 
-  // DNA Digivolution
-  dnaPartner?: string;
-  dnaResult?: string;
+  // DNA Digivolution (Sprint 26)
+  // DNA pairs are defined externally in DNADigivolutionData
+  // Each pair specifies: partnerA, partnerB, result, minDP, result stats
 }
 
 enum Attribute {
@@ -1976,10 +2013,13 @@ PAUSE MENU (In-Game)
 | Setting | Type | Default | Options | Description |
 |---------|------|---------|---------|-------------|
 | Colorblind Mode | Toggle | OFF | ON/OFF | Shows attribute symbols (V/D/X/F) on tower and enemy sprites |
+| High-Contrast Mode | Toggle | OFF | ON/OFF | Brighter backgrounds, pure white text, saturated attribute colors for improved readability |
 | Text Size | Dropdown | Medium | Small, Medium, Large | UI text scaling |
 | Reduced Motion | Toggle | OFF | ON/OFF | Minimize animations |
 
 > **Implementation note**: Colorblind mode is implemented as a simple ON/OFF toggle (not per-deficiency dropdown). When ON, single-letter attribute symbols (V=Vaccine, D=Data, X=Virus, F=Free) appear on all tower and enemy sprites, providing a non-color way to identify attributes.
+
+> **Implementation note**: High-contrast mode uses `HIGH_CONTRAST_COLORS` defined in `UITheme.ts` with brighter panel backgrounds, pure white text, and saturated attribute colors. Toggle in Settings scene, persists to localStorage. A `getColor()` helper provides registry-aware color retrieval throughout the UI.
 
 ### Default Configuration
 ```typescript
@@ -2010,6 +2050,7 @@ interface GameSettings {
   };
   accessibility: {
     colorblindMode: 'off' | 'protanopia' | 'deuteranopia' | 'tritanopia';
+    highContrastMode: boolean;
     textSize: 'small' | 'medium' | 'large';
     reducedMotion: boolean;
   };
@@ -2041,6 +2082,7 @@ export const DEFAULT_SETTINGS: GameSettings = {
   },
   accessibility: {
     colorblindMode: 'off',
+    highContrastMode: false,
     textSize: 'medium',
     reducedMotion: false,
   },
@@ -2115,7 +2157,44 @@ Shows when a tower is selected:
 │  │   Merge   │ │   Sell    │        │
 │  │  (Drag)   │ │   50 DB   │        │
 │  └───────────┘ └───────────┘        │
+│  ┌───────────────────────────┐      │
+│  │  DNA Fuse (Mega max lv)   │      │
+│  └───────────────────────────┘      │
 └─────────────────────────────────────┘
+
+> The **DNA Fuse** button appears only for eligible max-level Mega towers that
+> have a valid DNA partner on the board. Clicking opens the DNAModal showing
+> compatible partners and a result preview with stats.
+```
+
+#### DNA Fusion Modal
+```
+┌───────────────────────────────────────────────────────────────┐
+│                       DNA DIGIVOLUTION                        │
+├───────────────────────────────────────────────────────────────┤
+│  Select a partner to fuse with WarGreymon:                    │
+│                                                               │
+│  ┌─────────────────────┐                                      │
+│  │ ┌───────┐           │                                      │
+│  │ │       │ MetalGar- │                                      │
+│  │ │ sprite│ urumon    │                                      │
+│  │ └───────┘ Lv 70 DP:4│                                      │
+│  │     [SELECT]        │                                      │
+│  └─────────────────────┘                                      │
+│                                                               │
+│  RESULT PREVIEW:                                              │
+│  ┌─────────────────────────────────────────────────────────┐  │
+│  │  Omegamon (Ultra) — Vaccine                              │  │
+│  │  DMG: 160  SPD: 1.0  RNG: 5.0                           │  │
+│  └─────────────────────────────────────────────────────────┘  │
+│                                                               │
+│  ⚠ The partner tower will be consumed (no refund)!           │
+│                                                               │
+│  ┌─────────────────┐    ┌─────────────────┐                   │
+│  │   CONFIRM FUSE  │    │     Cancel      │                   │
+│  └─────────────────┘    └─────────────────┘                   │
+│                                                               │
+└───────────────────────────────────────────────────────────────┘
 ```
 
 #### Bottom Panel - Spawn Menu (Right)
@@ -2950,34 +3029,35 @@ ENCYCLOPEDIA
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
-### DNA Digivolution Section
+### DNA Digivolution Section [IMPLEMENTED]
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
 │  ◄ Back                    DNA DIGIVOLUTIONS                        │
 ├─────────────────────────────────────────────────────────────────────┤
 │                                                                      │
-│  DNA Digivolution combines two specific Mega Digimon into Ultra!    │
+│  DNA Digivolution combines two specific max-level Mega Digimon      │
+│  into an Ultra result! The partner is consumed (no refund).         │
 │                                                                      │
 │  ┌─────────────────────────────────────────────────────────────┐    │
 │  │                                                              │    │
 │  │  [WarGreymon]  +  [MetalGarurumon]  =  [Omegamon]           │    │
 │  │     Mega            Mega                 Ultra               │    │
+│  │     (max lv)        (max lv)             MinDP: 3            │    │
 │  │                                                              │    │
-│  │  Both Digimon are consumed. Omegamon inherits the higher    │    │
-│  │  DP and better Origin from either parent.                   │    │
+│  │  Result inherits the higher DP and better Origin from        │    │
+│  │  either parent.                                              │    │
 │  │                                                              │    │
 │  └─────────────────────────────────────────────────────────────┘    │
 │                                                                      │
-│  ALL DNA COMBINATIONS:                                              │
-│  ─────────────────────                                              │
+│  ALL DNA COMBINATIONS (6 pairs):                                    │
+│  ───────────────────────────────                                    │
 │                                                                      │
-│  WarGreymon + MetalGarurumon ──────────────► Omegamon               │
-│  BlackWarGreymon + BlackMetalGarurumon ────► Omegamon Zwart         │
-│  Angewomon + LadyDevimon ──────────────────► Mastemon               │
-│  Imperialdramon FM + Omegamon ─────────────► Imperialdramon PM      │
-│  Gallantmon + Grani ───────────────────────► Gallantmon CM          │
-│  Seraphimon + Ophanimon ───────────────────► Susanoomon             │
-│  Alphamon + Ouryumon ──────────────────────► Alphamon Ouryuken      │
+│  WarGreymon + MetalGarurumon ──────────────► Omegamon (VCC, DP 3)   │
+│  Gallantmon + ChaosGallantmon ─────────────► Gallantmon CM (VIR, 5) │
+│  Alphamon + Ouryumon ──────────────────────► Alphamon Ouryuken (V,5)│
+│  Ophanimon + Cherubimon Virtue ────────────► Susanoomon (FREE, 5)   │
+│  Rosemon + Lotusmon ───────────────────────► Rafflesimon (DATA, 4)  │
+│  Beelzemon + VenomMyotismon ───────────────► Beelzemon BM (VIR, 6) │
 │                                                                      │
 └─────────────────────────────────────────────────────────────────────┘
 ```
@@ -3220,8 +3300,8 @@ Priority: MEDIUM - Full roster
 - [ ] All evolution paths
 - [ ] All In-Training starters
 - [ ] Starter selection screen
-- [ ] DNA Digivolution system
-- [ ] Ultra tier Digimon
+- [x] DNA Digivolution system (Sprint 26 — 6 DNA fusion pairs, DNAModal UI, partner consumption)
+- [x] Ultra tier Digimon (Sprint 25/26 — via DNA fusion only)
 
 **Milestone: All ~150 Digimon available**
 
@@ -3293,13 +3373,32 @@ Priority: LOW - Feel good
 Priority: LOW - Final tuning
 ```
 - [ ] Playtest waves 1-100
-- [ ] Adjust Digimon stats
+- [x] Adjust Digimon stats (Sprint 25 Balance — 4 Mega nerfs, 2 Mega buffs, clear Ultra/Mega tier separation)
 - [ ] Adjust wave difficulty
 - [ ] Adjust economy
 - [ ] Bug fixes
 - [ ] Performance optimization
 
 **Milestone: Game is balanced and stable**
+
+---
+
+### Sprint 25 (Balance) [IMPLEMENTED]
+- Nerfed 4 overpowered Megas: KaiserGreymon (100→82), MagnaGarurumon (95→78), Megidramon (95→80), Titamon (95→80)
+- Buffed 2 weak support Megas: Rosemon (50→55), Plesiomon (52→56)
+- Clear tier separation: Ultra DPS 120-170, Mega DPS 28-82
+
+### Sprint 26 (DNA Digivolution) [IMPLEMENTED]
+- DNA Digivolution system: combine two specific max-level Megas → Ultra result
+- 6 DNA fusion pairs: Omegamon, Gallantmon CM, Alphamon Ouryuken, Susanoomon, Rafflesimon, Beelzemon BM
+- Requirements: both MEGA stage, both max level, valid pair, minDP met
+- UI: "DNA Fuse" button on TowerInfoPanel, DNAModal with partner selection and result preview
+- Partner tower consumed on fusion (no refund)
+
+### Sprint 27 (High-Contrast Mode) [IMPLEMENTED]
+- `HIGH_CONTRAST_COLORS` in UITheme.ts with brighter backgrounds, pure white text, saturated attribute colors
+- Toggle in Settings scene (persists to localStorage)
+- `getColor()` helper for registry-aware color retrieval throughout UI
 
 ---
 
