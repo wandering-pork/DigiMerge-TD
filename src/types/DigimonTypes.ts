@@ -36,6 +36,7 @@ export interface DigimonStats {
   effectChance?: number;
   priority?: TargetPriority;
   spriteKey?: string;
+  description?: string;
 }
 
 export type BossAbilityTrigger = 'cooldown' | 'passive' | 'hp_threshold';
@@ -63,6 +64,7 @@ export interface EnemyStats {
   type: EnemyType;
   reward: number;
   bossAbility?: BossAbility;
+  description?: string;
 }
 
 export type EnemyType = 'swarm' | 'standard' | 'tank' | 'speedster' | 'flying' | 'regen' | 'shielded' | 'splitter';

@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { calculateScore, HighScoreManager, HighScoreEntry } from '@/managers/HighScoreManager';
+import { calculateScore, HighScoreManager, HighScoreEntry, getLastPlayerName, setLastPlayerName } from '@/managers/HighScoreManager';
 
 // Mock localStorage
 const store: Record<string, string> = {};
@@ -46,6 +46,7 @@ describe('HighScoreManager', () => {
         playtimeSeconds: 600,
         date: new Date().toISOString(),
         won: false,
+        playerName: 'TestPlayer',
       };
       const rank = HighScoreManager.addScore(entry);
       expect(rank).toBe(1);
@@ -53,8 +54,8 @@ describe('HighScoreManager', () => {
     });
 
     it('sorts scores descending', () => {
-      HighScoreManager.addScore({ wave: 10, score: 1000, enemiesKilled: 50, livesRemaining: 0, playtimeSeconds: 100, date: '', won: false });
-      HighScoreManager.addScore({ wave: 50, score: 5000, enemiesKilled: 200, livesRemaining: 5, playtimeSeconds: 500, date: '', won: false });
+      HighScoreManager.addScore({ wave: 10, score: 1000, enemiesKilled: 50, livesRemaining: 0, playtimeSeconds: 100, date: '', won: false, playerName: 'Player' });
+      HighScoreManager.addScore({ wave: 50, score: 5000, enemiesKilled: 200, livesRemaining: 5, playtimeSeconds: 500, date: '', won: false, playerName: 'Player' });
       const scores = HighScoreManager.getHighScores();
       expect(scores[0].score).toBe(5000);
       expect(scores[1].score).toBe(1000);
@@ -62,7 +63,7 @@ describe('HighScoreManager', () => {
 
     it('keeps only top 10', () => {
       for (let i = 0; i < 15; i++) {
-        HighScoreManager.addScore({ wave: i + 1, score: (i + 1) * 100, enemiesKilled: i * 10, livesRemaining: 0, playtimeSeconds: 60, date: '', won: false });
+        HighScoreManager.addScore({ wave: i + 1, score: (i + 1) * 100, enemiesKilled: i * 10, livesRemaining: 0, playtimeSeconds: 60, date: '', won: false, playerName: 'Player' });
       }
       expect(HighScoreManager.getHighScores()).toHaveLength(10);
     });
@@ -75,14 +76,14 @@ describe('HighScoreManager', () => {
 
     it('returns true when score beats lowest in top 10', () => {
       for (let i = 0; i < 10; i++) {
-        HighScoreManager.addScore({ wave: 1, score: 100, enemiesKilled: 0, livesRemaining: 0, playtimeSeconds: 0, date: '', won: false });
+        HighScoreManager.addScore({ wave: 1, score: 100, enemiesKilled: 0, livesRemaining: 0, playtimeSeconds: 0, date: '', won: false, playerName: 'Player' });
       }
       expect(HighScoreManager.isHighScore(200)).toBe(true);
     });
 
     it('returns false when score is too low', () => {
       for (let i = 0; i < 10; i++) {
-        HighScoreManager.addScore({ wave: 1, score: 1000, enemiesKilled: 0, livesRemaining: 0, playtimeSeconds: 0, date: '', won: false });
+        HighScoreManager.addScore({ wave: 1, score: 1000, enemiesKilled: 0, livesRemaining: 0, playtimeSeconds: 0, date: '', won: false, playerName: 'Player' });
       }
       expect(HighScoreManager.isHighScore(50)).toBe(false);
     });
@@ -90,7 +91,7 @@ describe('HighScoreManager', () => {
 
   describe('clearHighScores', () => {
     it('removes all scores', () => {
-      HighScoreManager.addScore({ wave: 1, score: 100, enemiesKilled: 0, livesRemaining: 0, playtimeSeconds: 0, date: '', won: false });
+      HighScoreManager.addScore({ wave: 1, score: 100, enemiesKilled: 0, livesRemaining: 0, playtimeSeconds: 0, date: '', won: false, playerName: 'Player' });
       HighScoreManager.clearHighScores();
       expect(HighScoreManager.getHighScores()).toEqual([]);
     });
@@ -102,8 +103,36 @@ describe('HighScoreManager', () => {
     });
 
     it('returns true when scores exist', () => {
-      HighScoreManager.addScore({ wave: 1, score: 100, enemiesKilled: 0, livesRemaining: 0, playtimeSeconds: 0, date: '', won: false });
+      HighScoreManager.addScore({ wave: 1, score: 100, enemiesKilled: 0, livesRemaining: 0, playtimeSeconds: 0, date: '', won: false, playerName: 'Player' });
       expect(HighScoreManager.hasHighScores()).toBe(true);
+    });
+  });
+
+  describe('getLastPlayerName', () => {
+    it('returns "Player" when no name stored', () => {
+      expect(getLastPlayerName()).toBe('Player');
+    });
+
+    it('returns stored name', () => {
+      setLastPlayerName('DigiTamer');
+      expect(getLastPlayerName()).toBe('DigiTamer');
+    });
+  });
+
+  describe('setLastPlayerName', () => {
+    it('trims whitespace', () => {
+      setLastPlayerName('  Hero  ');
+      expect(getLastPlayerName()).toBe('Hero');
+    });
+
+    it('defaults to "Player" for empty string', () => {
+      setLastPlayerName('');
+      expect(getLastPlayerName()).toBe('Player');
+    });
+
+    it('defaults to "Player" for whitespace-only string', () => {
+      setLastPlayerName('   ');
+      expect(getLastPlayerName()).toBe('Player');
     });
   });
 });

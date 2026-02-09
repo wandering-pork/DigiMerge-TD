@@ -7,6 +7,7 @@ import { COLORS, TEXT_STYLES, FONTS, ANIM } from '@/ui/UITheme';
 import { drawPanel, drawButton, drawDigitalGrid, drawSeparator, animateButtonHover, animateButtonPress, animateModalIn, animateModalOut, createDigitalParticles } from '@/ui/UIHelpers';
 import { ATTRIBUTE_COLORS_STR } from '@/ui/UITheme';
 import { canDisplaySprite, getStaticFrame } from '@/utils/SpriteAnimHelper';
+import { DIGIMON_DESCRIPTIONS } from '@/data/DigimonDescriptions';
 
 type FilterMode = 'all' | 'towers' | 'enemies';
 type StageFilter = 'all' | Stage;
@@ -345,7 +346,9 @@ export class EncyclopediaScene extends Phaser.Scene {
       evoChain = this.getEvolutionChain(entry.id);
     }
     const hasEvoData = evoChain && (evoChain.prevIds.length > 0 || evoChain.nextIds.length > 0);
-    const cardH = entry.isTower && hasEvoData ? 540 : 420;
+    const hasDesc = !!(DIGIMON_DESCRIPTIONS[entry.id] || entry.stats.description);
+    const descExtra = hasDesc ? 40 : 0;
+    const cardH = (entry.isTower && hasEvoData ? 540 : 420) + descExtra;
     const cardX = (GAME_WIDTH - cardW) / 2;
     const cardY = (GAME_HEIGHT - cardH) / 2;
 
@@ -443,8 +446,24 @@ export class EncyclopediaScene extends Phaser.Scene {
       panelCont.add(tab2);
     }
 
+    // Description text (from DIGIMON_DESCRIPTIONS)
+    const descText = DIGIMON_DESCRIPTIONS[entry.id] || entry.stats.description;
+    let descHeight = 0;
+    if (descText) {
+      const desc = this.add.text(cardX + 30, cardY + 115, descText, {
+        fontFamily: FONTS.BODY,
+        fontSize: '12px',
+        color: '#99aabb',
+        wordWrap: { width: cardW - 60 },
+        lineSpacing: 2,
+        resolution: 2,
+      });
+      panelCont.add(desc);
+      descHeight = desc.height + 8;
+    }
+
     // Stats separator
-    let statsY = cardY + 125;
+    let statsY = cardY + 125 + descHeight;
     const sepGfx = this.add.graphics();
     drawSeparator(sepGfx, cardX + 20, statsY - 5, cardX + cardW - 20);
     panelCont.add(sepGfx);

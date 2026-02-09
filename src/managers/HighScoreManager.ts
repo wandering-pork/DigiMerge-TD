@@ -9,6 +9,7 @@ export interface HighScoreEntry {
   playtimeSeconds: number;
   date: string; // ISO date string
   won: boolean;
+  playerName: string;
 }
 
 /**
@@ -77,5 +78,23 @@ export class HighScoreManager {
   public static hasHighScores(): boolean {
     const scores = this.getHighScores();
     return scores.length > 0;
+  }
+}
+
+const PLAYER_NAME_KEY = 'digimerge_td_player_name';
+
+export function getLastPlayerName(): string {
+  try {
+    return localStorage.getItem(PLAYER_NAME_KEY) || 'Player';
+  } catch {
+    return 'Player';
+  }
+}
+
+export function setLastPlayerName(name: string): void {
+  try {
+    localStorage.setItem(PLAYER_NAME_KEY, name.trim() || 'Player');
+  } catch {
+    // Ignore storage errors
   }
 }

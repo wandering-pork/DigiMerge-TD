@@ -65,6 +65,7 @@ digimerge-td/
 │   │   └── SaveManager.ts         # LocalStorage save/load
 │   ├── data/
 │   │   ├── DigimonDatabase.ts     # All Digimon stats
+│   │   ├── DigimonDescriptions.ts # Lore descriptions for all 257 Digimon
 │   │   ├── WaveData.ts            # Wave compositions
 │   │   ├── EvolutionPaths.ts      # Evolution trees
 │   │   ├── StatusEffects.ts       # Effect definitions

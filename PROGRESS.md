@@ -2,7 +2,7 @@
 
 ## Current Status
 
-**All 11 sprints complete + Sprint 12A-D + Sprint 13-16 + Sprint 18-24B + Sprint 23B + Sprint 27-29 done** | 522 tests passing | 20 test files | TypeScript clean | Vite build succeeds
+**All 11 sprints complete + Sprint 12A-D + Sprint 13-16 + Sprint 18-24B + Sprint 23B + Sprint 27-29 + Sprint 23/24 (merged) done** | 527 tests passing | 20 test files | TypeScript clean | Vite build succeeds
 
 Live at: https://wandering-pork.github.io/DigiMerge-TD/
 
@@ -49,6 +49,11 @@ Live at: https://wandering-pork.github.io/DigiMerge-TD/
 - DoT damage floating numbers (orange for burn, purple for poison)
 - armor_pierce (bypass armor entirely), holy (+25% bonus damage), heal (restore player lives) effects
 - Cleaner TowerInfoPanel (evolution preview removed, players use Encyclopedia instead)
+- Screen centering fix: GAME_WIDTH reduced from 1280 to 940, eliminates 362px dead space
+- Player name entry for high scores (HTML input on game over, persists across sessions)
+- Digimon descriptions: 257 entries with lore-based 1-2 sentence descriptions
+- Encyclopedia detail view shows description below name/attribute
+- TowerInfoPanel shows description subtitle under Digimon name
 
 ---
 
@@ -129,7 +134,7 @@ Live at: https://wandering-pork.github.io/DigiMerge-TD/
 
 ---
 
-## Test Summary (522 tests, 20 files)
+## Test Summary (527 tests, 20 files)
 
 | Test File | Tests |
 |-----------|-------|
@@ -151,15 +156,15 @@ Live at: https://wandering-pork.github.io/DigiMerge-TD/
 | SpawnMenu | 18 |
 | TutorialOverlay | 4 |
 | EncyclopediaScene | 6 |
-| HighScoreManager | 13 |
+| HighScoreManager | 18 |
 | SpriteAnimHelper | 20 |
 
 ---
 
-## File Inventory (49 source files)
+## File Inventory (50 source files)
 
 - **config/**: Constants.ts, GameConfig.ts
-- **data/**: DigimonDatabase.ts, EvolutionPaths.ts, StatusEffects.ts, WaveData.ts, SpriteAtlasData.ts (auto-generated)
+- **data/**: DigimonDatabase.ts, DigimonDescriptions.ts, EvolutionPaths.ts, StatusEffects.ts, WaveData.ts, SpriteAtlasData.ts (auto-generated)
 - **entities/**: Tower.ts, Enemy.ts, Projectile.ts
 - **managers/**: AudioManager.ts, CombatManager.ts, GameStateManager.ts, HighScoreManager.ts, SaveManager.ts, TowerManager.ts, WaveManager.ts
 - **scenes/**: BootScene.ts, PreloadScene.ts, MainMenuScene.ts, StarterSelectScene.ts, GameScene.ts, PauseScene.ts, SettingsScene.ts, GameOverScene.ts, HighScoresScene.ts, EncyclopediaScene.ts, CreditsScene.ts
@@ -361,6 +366,23 @@ Live at: https://wandering-pork.github.io/DigiMerge-TD/
 - [x] **EncyclopediaScene overlay**: callerScene tracking — Back/ESC resumes GameScene or returns to MainMenu
 - [x] **TowerInfoPanel cleanup**: Removed evolution preview section (cluttered, overflow-prone); players use Encyclopedia
 - [x] 4 new tests for effect type mappings (522 total)
+
+---
+
+### Merged Sprint 23/24 — Screen Centering, Player Names & Descriptions ✓
+
+- [x] **Screen centering fix**: GAME_WIDTH reduced from 1280 to 940, eliminates 362px dead space on right
+- [x] CreditsScene panel narrowed from 620 to 580px for better margins at new width
+- [x] All scenes auto-adjust (use `cameras.main.width` or `GAME_WIDTH/2` for centering)
+- [x] **Player name for high scores**: HTML `<input>` on GameOverScene, pre-filled with last name
+- [x] DOM enabled in Phaser config (`dom: { createContainer: true }`)
+- [x] `playerName` field added to `HighScoreEntry`, `getLastPlayerName`/`setLastPlayerName` helpers
+- [x] HighScoresScene shows Name column between Rank and Wave
+- [x] CSS styling for name input (dark theme, cyan/gold focus glow)
+- [x] **Digimon descriptions**: 257 lore-based descriptions in `DigimonDescriptions.ts`
+- [x] Encyclopedia detail view shows description below name/stage
+- [x] TowerInfoPanel shows description subtitle under Digimon name header
+- [x] 5 new tests for player name persistence (527 total)
 
 ---
 

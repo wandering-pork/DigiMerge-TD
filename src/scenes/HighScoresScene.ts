@@ -38,16 +38,18 @@ export class HighScoresScene extends Phaser.Scene {
     const headerY = panelY + 15;
     const cols = {
       rank: panelX + 20,
-      wave: panelX + 55,
-      score: panelX + 130,
-      kills: panelX + 230,
-      time: panelX + 330,
-      date: panelX + 430,
+      name: panelX + 50,
+      wave: panelX + 145,
+      score: panelX + 200,
+      kills: panelX + 290,
+      time: panelX + 370,
+      date: panelX + 460,
       result: panelX + panelW - 30,
     };
 
     const headers = [
       { text: '#', x: cols.rank },
+      { text: 'Name', x: cols.name },
       { text: 'Wave', x: cols.wave },
       { text: 'Score', x: cols.score },
       { text: 'Kills', x: cols.kills },
@@ -94,6 +96,14 @@ export class HighScoresScene extends Phaser.Scene {
           fontSize: '14px',
           color: rankColor,
           fontStyle: isTop3 ? 'bold' : 'normal',
+          resolution: 2,
+        });
+
+        // Player Name
+        this.add.text(cols.name, y, entry.playerName || 'Anonymous', {
+          fontFamily: FONTS.MONO,
+          fontSize: '12px',
+          color: '#ccddee',
           resolution: 2,
         });
 

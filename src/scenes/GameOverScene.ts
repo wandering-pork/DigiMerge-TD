@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { GameStatistics } from '@/types';
 import { COLORS, TEXT_STYLES, FONTS, ANIM } from '@/ui/UITheme';
 import { drawDigitalGrid, drawPanel, drawButton, drawSeparator, createDigitalParticles, animateButtonHover, animateButtonPress, animateStaggeredEntrance } from '@/ui/UIHelpers';
-import { HighScoreManager, calculateScore, HighScoreEntry } from '@/managers/HighScoreManager';
+import { HighScoreManager, calculateScore, HighScoreEntry, getLastPlayerName, setLastPlayerName } from '@/managers/HighScoreManager';
 
 export class GameOverScene extends Phaser.Scene {
   private gameData: {
@@ -31,21 +31,10 @@ export class GameOverScene extends Phaser.Scene {
     const isVictory: boolean = this.gameData.won;
     const waveReached: number = this.gameData.wave || 1;
 
-    // Save high score
+    // Calculate score (save deferred until player enters name)
     const gameStats = this.gameData.statistics;
     const livesRemaining = this.gameData.lives ?? (isVictory ? 20 : 0);
     const score = calculateScore(waveReached, gameStats?.enemiesKilled ?? 0, livesRemaining);
-    const hsEntry: HighScoreEntry = {
-      wave: waveReached,
-      score,
-      enemiesKilled: gameStats?.enemiesKilled ?? 0,
-      livesRemaining,
-      playtimeSeconds: gameStats?.playtimeSeconds ?? 0,
-      date: new Date().toISOString(),
-      won: isVictory,
-    };
-    const rank = HighScoreManager.addScore(hsEntry);
-    const isNewRecord = rank === 1 && HighScoreManager.getHighScores().length > 1;
 
     // Digital grid with tinted color
     const gridGfx = this.add.graphics();
@@ -59,7 +48,7 @@ export class GameOverScene extends Phaser.Scene {
     const hasStats = !!this.gameData.statistics;
     const hasMvp = !!this.gameData.mvpTower;
     const panelW = 420;
-    const panelH = hasStats ? (hasMvp ? 520 : 470) : 350;
+    const panelH = hasStats ? (hasMvp ? 620 : 570) : 450;
     const panelX = (width - panelW) / 2;
     const panelY = (height - panelH) / 2 - 10;
     const panelBg = this.add.graphics();
@@ -148,27 +137,6 @@ export class GameOverScene extends Phaser.Scene {
       duration: 400,
       delay: 500,
     });
-
-    // New Record indicator
-    if (isNewRecord) {
-      const recordText = this.add.text(width / 2, panelY + 185, 'New Record!', {
-        fontFamily: FONTS.MONO,
-        fontSize: '16px',
-        color: '#ffdd44',
-        fontStyle: 'bold',
-        resolution: 2,
-      }).setOrigin(0.5).setAlpha(0);
-
-      this.tweens.add({
-        targets: recordText,
-        alpha: 1,
-        scaleX: { from: 0.5, to: 1 },
-        scaleY: { from: 0.5, to: 1 },
-        duration: 400,
-        ease: 'Back.easeOut',
-        delay: 600,
-      });
-    }
 
     // Subtitle message
     const subtitle = isVictory
@@ -282,6 +250,81 @@ export class GameOverScene extends Phaser.Scene {
         statsEndY = mvpY + 48;
       }
     }
+
+    // --- Name Input & Save Section ---
+    const nameInputY = statsEndY + 15;
+
+    // "Enter your name:" label
+    const nameLabel = this.add.text(width / 2, nameInputY, 'Enter your name:', {
+      fontFamily: FONTS.MONO,
+      fontSize: '13px',
+      color: '#8899bb',
+      resolution: 2,
+    }).setOrigin(0.5).setAlpha(0);
+
+    this.tweens.add({
+      targets: nameLabel,
+      alpha: 1,
+      duration: 300,
+      delay: 900,
+    });
+
+    // HTML input element
+    const inputEl = document.createElement('input');
+    inputEl.type = 'text';
+    inputEl.maxLength = 16;
+    inputEl.className = 'digimerge-name-input';
+    inputEl.value = getLastPlayerName();
+    inputEl.placeholder = 'Player';
+
+    const domInput = this.add.dom(width / 2, nameInputY + 30, inputEl).setOrigin(0.5).setAlpha(0);
+
+    this.tweens.add({
+      targets: domInput,
+      alpha: 1,
+      duration: 300,
+      delay: 950,
+    });
+
+    // Save Score button
+    const saveBtn = this.createMenuButton(
+      width / 2, nameInputY + 70, 160, 38,
+      'Save Score',
+      COLORS.GOLD_DIM, COLORS.SUCCESS_HOVER,
+      () => {
+        const playerName = (inputEl.value || '').trim() || 'Player';
+        setLastPlayerName(playerName);
+
+        const hsEntry: HighScoreEntry = {
+          wave: waveReached,
+          score,
+          enemiesKilled: gameStats?.enemiesKilled ?? 0,
+          livesRemaining,
+          playtimeSeconds: gameStats?.playtimeSeconds ?? 0,
+          date: new Date().toISOString(),
+          won: isVictory,
+          playerName,
+        };
+        const rank = HighScoreManager.addScore(hsEntry);
+
+        // Replace input section with saved confirmation
+        nameLabel.setText(`Saved! Rank #${rank}`);
+        nameLabel.setColor('#ffdd44');
+        domInput.destroy();
+        saveBtn.destroy();
+      },
+    );
+    saveBtn.setAlpha(0);
+    saveBtn.y += 10;
+    this.tweens.add({
+      targets: saveBtn,
+      alpha: 1,
+      y: saveBtn.y - 10,
+      duration: 300,
+      delay: 1000,
+    });
+
+    statsEndY = nameInputY + 110;
 
     // Action buttons with staggered entrance
     const btnStartY = statsEndY + 20;

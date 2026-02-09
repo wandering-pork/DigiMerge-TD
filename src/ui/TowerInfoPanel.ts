@@ -11,6 +11,7 @@ import { STATUS_EFFECTS, STATUS_EFFECT_CONFIGS } from '@/data/StatusEffects';
 import { COLORS, ATTRIBUTE_COLORS_STR, TEXT_STYLES, FONTS, ANIM } from './UITheme';
 import { drawPanel, drawButton, drawSeparator, animateSlideIn, animateSlideOut, animateButtonHover, animateButtonPress } from './UIHelpers';
 import { canDisplaySprite, getStaticFrame } from '@/utils/SpriteAnimHelper';
+import { DIGIMON_DESCRIPTIONS } from '@/data/DigimonDescriptions';
 
 /**
  * Parse a compound effect type (e.g., 'burn_aoe', 'slow_pierce') into
@@ -158,6 +159,7 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
 
   // Header section
   private nameText!: Phaser.GameObjects.Text;
+  private descText!: Phaser.GameObjects.Text;
   private digimonSprite!: Phaser.GameObjects.Image;
   private closeBtn!: Phaser.GameObjects.Text;
 
@@ -285,6 +287,17 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
       wordWrap: { width: w - 100 },
     });
     this.add(this.nameText);
+
+    // Description subtitle
+    this.descText = this.scene.add.text(75, 44, '', {
+      fontFamily: FONTS.BODY,
+      fontSize: '10px',
+      color: '#7788aa',
+      wordWrap: { width: w - 90 },
+      maxLines: 2,
+      resolution: 2,
+    });
+    this.add(this.descText);
 
     // Separator
     const separator1 = this.scene.add.graphics();
@@ -605,6 +618,11 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
 
     // Header
     this.nameText.setText(tower.stats.name);
+
+    // Description
+    const desc = DIGIMON_DESCRIPTIONS[tower.digimonId] || tower.stats.description || '';
+    this.descText.setText(desc);
+    this.descText.setVisible(!!desc);
 
     // Update sprite
     const spriteKey = tower.stats.spriteKey ?? tower.digimonId;

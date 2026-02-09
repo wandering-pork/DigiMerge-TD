@@ -67,7 +67,7 @@ export class CreditsScene extends Phaser.Scene {
     sepGfx.fillCircle(width / 2, 82, 3);
 
     // Credits panel
-    const panelW = 620;
+    const panelW = 580;
     const panelH = 520;
     const panelX = (width - panelW) / 2;
     const panelY = 100;

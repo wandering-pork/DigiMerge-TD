@@ -10,7 +10,7 @@ export const GRID = {
 } as const;
 
 // Game Area - landscape layout (1280x720) with Left HUD | Center Grid | Right HUD
-export const GAME_WIDTH = 1280;
+export const GAME_WIDTH = 940;
 export const GAME_HEIGHT = 720;
 export const GRID_OFFSET_X = 315;
 export const GRID_OFFSET_Y = 36;

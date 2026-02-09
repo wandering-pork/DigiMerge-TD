@@ -22,6 +22,27 @@
       /* Removed image-rendering: pixelated — it made text blocky when canvas is scaled.
          Phaser pixelArt:true handles sprite NEAREST filtering internally. */
     }
+    /* High score name input */
+    .digimerge-name-input {
+      background: rgba(15, 10, 20, 0.9);
+      border: 2px solid #00ddff;
+      border-radius: 6px;
+      color: #ffffff;
+      font-family: 'Fira Code', monospace;
+      font-size: 16px;
+      padding: 8px 12px;
+      width: 200px;
+      text-align: center;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .digimerge-name-input:focus {
+      border-color: #ffdd44;
+      box-shadow: 0 0 8px rgba(255, 221, 68, 0.3);
+    }
+    .digimerge-name-input::placeholder {
+      color: #556677;
+    }
   </style>
 </head>
 <body>
