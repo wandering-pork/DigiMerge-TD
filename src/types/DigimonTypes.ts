@@ -21,7 +21,6 @@ export enum TargetPriority {
   WEAKEST = 'weakest',
   FASTEST = 'fastest',
   CLOSEST = 'closest',
-  FLYING = 'flying',
 }
 
 export interface DigimonStats {
@@ -67,7 +66,7 @@ export interface EnemyStats {
   description?: string;
 }
 
-export type EnemyType = 'swarm' | 'standard' | 'tank' | 'speedster' | 'flying' | 'regen' | 'shielded' | 'splitter';
+export type EnemyType = 'swarm' | 'standard' | 'tank' | 'speedster' | 'regen' | 'shielded' | 'splitter';
 
 export enum SpawnType {
   RANDOM = 'random',

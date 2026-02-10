@@ -238,7 +238,6 @@ export class CombatManager {
       maxHp: enemy.maxHp,
       speed: enemy.speed,
       pathIndex: enemy.pathIndex,
-      isFlying: enemy.enemyType === 'flying',
       isAlive: enemy.isAlive,
     };
   }

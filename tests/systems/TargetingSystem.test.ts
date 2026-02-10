@@ -9,10 +9,10 @@ import { TargetPriority } from '@/types';
 describe('TargetingSystem', () => {
   function makeTargets(): MockTarget[] {
     return [
-      { x: 100, y: 100, hp: 50, maxHp: 100, speed: 60, pathIndex: 5, isFlying: false, isAlive: true },
-      { x: 200, y: 100, hp: 10, maxHp: 80, speed: 120, pathIndex: 10, isFlying: false, isAlive: true },
-      { x: 150, y: 200, hp: 200, maxHp: 200, speed: 36, pathIndex: 3, isFlying: true, isAlive: true },
-      { x: 300, y: 100, hp: 80, maxHp: 100, speed: 78, pathIndex: 8, isFlying: false, isAlive: true },
+      { x: 100, y: 100, hp: 50, maxHp: 100, speed: 60, pathIndex: 5, isAlive: true },
+      { x: 200, y: 100, hp: 10, maxHp: 80, speed: 120, pathIndex: 10, isAlive: true },
+      { x: 150, y: 200, hp: 200, maxHp: 200, speed: 36, pathIndex: 3, isAlive: true },
+      { x: 300, y: 100, hp: 80, maxHp: 100, speed: 78, pathIndex: 8, isAlive: true },
     ];
   }
 
@@ -45,12 +45,6 @@ describe('TargetingSystem', () => {
       const targets = makeTargets();
       const sorted = sortByPriority(targets, TargetPriority.FASTEST);
       expect(sorted[0].speed).toBe(120);
-    });
-
-    it('FLYING: flying enemies first, then by pathIndex', () => {
-      const targets = makeTargets();
-      const sorted = sortByPriority(targets, TargetPriority.FLYING);
-      expect(sorted[0].isFlying).toBe(true);
     });
 
     it('CLOSEST: sorts by distance to tower position', () => {
@@ -90,7 +84,7 @@ describe('TargetingSystem', () => {
 
     it('includes targets exactly at range boundary', () => {
       const targets: MockTarget[] = [
-        { x: 200, y: 100, hp: 50, maxHp: 100, speed: 60, pathIndex: 5, isFlying: false, isAlive: true },
+        { x: 200, y: 100, hp: 50, maxHp: 100, speed: 60, pathIndex: 5, isAlive: true },
       ];
       const inRange = filterInRange(targets, 100, 100, 100);
       expect(inRange.length).toBe(1);

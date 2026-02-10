@@ -45,7 +45,6 @@ function getSkillDisplay(effectType?: string, effectChance?: number): { name: st
       case 'reflect': modLabels.push('Reflect'); break;
       case 'lifesteal': modLabels.push('+ Lifesteal'); break;
       case 'all': modLabels.push('All'); break;
-      case 'air': modLabels.push('Anti-Air'); break;
       case 'fear': modLabels.push('+ Fear'); break;
       case 'damage': modLabels.push('Damage'); break;
       case 'break': modLabels.push('Break'); break;
@@ -63,9 +62,6 @@ function getSkillDisplay(effectType?: string, effectChance?: number): { name: st
   } else if (effectType === 'armor_pierce') {
     name = 'Armor Pierce';
     description = 'Ignores target armor';
-  } else if (effectType === 'anti_air') {
-    name = 'Anti-Air';
-    description = 'Bonus damage vs Flying';
   } else if (effectType === 'aura_damage') {
     name = 'Damage Aura';
     description = 'Buffs nearby tower damage';
@@ -115,7 +111,6 @@ const TARGET_PRIORITY_ORDER: TargetPriority[] = [
   TargetPriority.WEAKEST,
   TargetPriority.FASTEST,
   TargetPriority.CLOSEST,
-  TargetPriority.FLYING,
 ];
 
 /**
@@ -128,7 +123,6 @@ const TARGET_PRIORITY_LABELS: Record<TargetPriority, string> = {
   [TargetPriority.WEAKEST]: 'Weakest',
   [TargetPriority.FASTEST]: 'Fastest',
   [TargetPriority.CLOSEST]: 'Closest',
-  [TargetPriority.FLYING]: 'Flying',
 };
 
 /**
@@ -219,6 +213,10 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
   private dnaFuseBtn!: Phaser.GameObjects.Container;
   private dnaFuseBtnBg!: Phaser.GameObjects.Graphics;
   private dnaFuseBtnText!: Phaser.GameObjects.Text;
+
+  // Evo Tree section
+  private evoTreeBtn!: Phaser.GameObjects.Container;
+  private evoTreeBtnBg!: Phaser.GameObjects.Graphics;
 
   // Separator before action buttons (repositioned dynamically)
   private actionSeparator!: Phaser.GameObjects.Graphics;
@@ -501,6 +499,37 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
 
     statsY += 50;
 
+    // --- Evo Tree Button (compact) ---
+    const evoTreeBtnW = 200;
+    const evoTreeBtnH = 30;
+    this.evoTreeBtn = this.scene.add.container(w / 2, statsY);
+    this.evoTreeBtnBg = this.scene.add.graphics();
+    drawButton(this.evoTreeBtnBg, evoTreeBtnW, evoTreeBtnH, COLORS.BG_PANEL_LIGHT);
+    this.evoTreeBtn.add(this.evoTreeBtnBg);
+
+    const evoTreeText = this.scene.add.text(0, 0, 'Evo Tree', {
+      ...TEXT_STYLES.BUTTON_SM,
+      fontSize: '11px',
+      color: '#88bbdd',
+    }).setOrigin(0.5);
+    this.evoTreeBtn.add(evoTreeText);
+
+    const evoTreeHitArea = new Phaser.Geom.Rectangle(-evoTreeBtnW / 2, -evoTreeBtnH / 2, evoTreeBtnW, evoTreeBtnH);
+    this.evoTreeBtn.setInteractive(evoTreeHitArea, Phaser.Geom.Rectangle.Contains);
+    this.evoTreeBtn.input!.cursor = 'pointer';
+    this.evoTreeBtn.on('pointerdown', () => this.onEvoTree());
+    this.evoTreeBtn.on('pointerover', () => {
+      drawButton(this.evoTreeBtnBg, evoTreeBtnW, evoTreeBtnH, COLORS.BG_HOVER, { glowRing: true });
+      animateButtonHover(this.scene, this.evoTreeBtn, true);
+    });
+    this.evoTreeBtn.on('pointerout', () => {
+      drawButton(this.evoTreeBtnBg, evoTreeBtnW, evoTreeBtnH, COLORS.BG_PANEL_LIGHT);
+      animateButtonHover(this.scene, this.evoTreeBtn, false);
+    });
+    this.add(this.evoTreeBtn);
+
+    statsY += 40;
+
     // --- Digivolve Button (hidden by default, shown at max level) ---
     this.digivolveBtn = this.scene.add.container(w / 2, statsY);
     this.digivolveBtnBg = this.scene.add.graphics();
@@ -745,6 +774,9 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
     const sellPrice = this.getSellPrice();
     this.sellBtnText.setText(`Sell [S] (+${sellPrice} DB)`);
     stack.add(this.sellBtn, 44);
+
+    // Evo Tree button (always visible)
+    stack.add(this.evoTreeBtn, 36);
 
     // Digivolve button - show only at max level with evolution paths
     const evolutions = getEvolutions(tower.digimonId, tower.dp);
@@ -1036,6 +1068,17 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
     if (!tower) return;
 
     EventBus.emit(GameEvents.MERGE_INITIATED, tower);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Evolution Tree
+  // ---------------------------------------------------------------------------
+
+  private onEvoTree(): void {
+    const tower = this.currentTower;
+    if (!tower) return;
+
+    EventBus.emit(GameEvents.EVO_TREE_REQUESTED, tower.digimonId);
   }
 
   // ---------------------------------------------------------------------------

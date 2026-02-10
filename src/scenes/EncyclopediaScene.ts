@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { DIGIMON_DATABASE } from '@/data/DigimonDatabase';
-import { EVOLUTION_PATHS } from '@/data/EvolutionPaths';
+import { getEvolutionChain } from '@/data/EvolutionPaths';
 import { DigimonStats, EnemyStats, Stage, Attribute, STAGE_NAMES, ATTRIBUTE_NAMES } from '@/types';
 import { GAME_WIDTH, GAME_HEIGHT } from '@/config/Constants';
 import { COLORS, TEXT_STYLES, FONTS, ANIM } from '@/ui/UITheme';
@@ -9,7 +9,6 @@ import { ATTRIBUTE_COLORS_STR } from '@/ui/UITheme';
 import { canDisplaySprite, getStaticFrame } from '@/utils/SpriteAnimHelper';
 import { DIGIMON_DESCRIPTIONS } from '@/data/DigimonDescriptions';
 
-type FilterMode = 'all' | 'towers' | 'enemies';
 type StageFilter = 'all' | Stage;
 
 const SKILL_DISPLAY_NAMES: Record<string, string> = {
@@ -25,7 +24,6 @@ const SKILL_DISPLAY_NAMES: Record<string, string> = {
   'stun_aoe': 'Stun Burst (AoE)',
   'armor_break': 'Armor Break',
   'armor_pierce': 'Armor Pierce',
-  'anti_air': 'Anti-Air',
   'burn_multishot': 'Fire Barrage',
   'slow_multishot': 'Slow Barrage',
   'freeze_multishot': 'Frost Barrage',
@@ -53,7 +51,6 @@ interface DigimonEntry {
 export class EncyclopediaScene extends Phaser.Scene {
   private entries: DigimonEntry[] = [];
   private filteredEntries: DigimonEntry[] = [];
-  private filterMode: FilterMode = 'towers';
   private stageFilter: StageFilter = 'all';
 
   // Pagination
@@ -67,8 +64,6 @@ export class EncyclopediaScene extends Phaser.Scene {
   private detailPanel!: Phaser.GameObjects.Container;
   private detailVisible: boolean = false;
   private pageText!: Phaser.GameObjects.Text;
-  private filterBtnTexts: Phaser.GameObjects.Text[] = [];
-  private filterBtnBgs: Phaser.GameObjects.Graphics[] = [];
   private stageBtnTexts: Phaser.GameObjects.Text[] = [];
   private stageBtnBgs: Phaser.GameObjects.Graphics[] = [];
 
@@ -99,9 +94,6 @@ export class EncyclopediaScene extends Phaser.Scene {
       ...TEXT_STYLES.SCENE_TITLE,
       fontSize: '36px',
     }).setOrigin(0.5);
-
-    // Filter buttons row
-    this.createFilterButtons();
 
     // Stage filter buttons
     this.createStageFilterButtons();
@@ -175,27 +167,24 @@ export class EncyclopediaScene extends Phaser.Scene {
 
   private applyFilters(): void {
     let filtered = this.entries.filter(entry => {
-      if (this.filterMode === 'towers' && !entry.isTower) return false;
       if (this.stageFilter !== 'all' && entry.stage !== this.stageFilter) return false;
       return true;
     });
 
-    // In "all" mode, deduplicate by name (prefer tower entries)
-    if (this.filterMode === 'all') {
-      const seen = new Map<string, DigimonEntry>();
-      for (const entry of filtered) {
-        const existing = seen.get(entry.name);
-        if (!existing || (entry.isTower && !existing.isTower)) {
-          seen.set(entry.name, entry);
-        }
+    // Deduplicate by name (prefer tower entries)
+    const seen = new Map<string, DigimonEntry>();
+    for (const entry of filtered) {
+      const existing = seen.get(entry.name);
+      if (!existing || (entry.isTower && !existing.isTower)) {
+        seen.set(entry.name, entry);
       }
-      filtered = Array.from(seen.values());
-      // Re-sort by stage then name
-      filtered.sort((a, b) => {
-        if (a.stage !== b.stage) return a.stage - b.stage;
-        return a.name.localeCompare(b.name);
-      });
     }
+    filtered = Array.from(seen.values());
+    // Re-sort by stage then name
+    filtered.sort((a, b) => {
+      if (a.stage !== b.stage) return a.stage - b.stage;
+      return a.name.localeCompare(b.name);
+    });
 
     this.filteredEntries = filtered;
     this.page = 0;
@@ -211,7 +200,7 @@ export class EncyclopediaScene extends Phaser.Scene {
     const cellW = 100;
     const cellH = 110;
     const gridStartX = (GAME_WIDTH - this.GRID_COLS * cellW) / 2;
-    const gridStartY = 150;
+    const gridStartY = 120;
 
     for (let i = 0; i < pageEntries.length; i++) {
       const entry = pageEntries[i];
@@ -305,24 +294,6 @@ export class EncyclopediaScene extends Phaser.Scene {
     g.strokeRoundedRect(x, y, w, h, 8);
   }
 
-  private getEvolutionChain(digimonId: string): { prevIds: string[]; nextIds: string[] } {
-    const prevIds: string[] = [];
-    // Search all keys in EVOLUTION_PATHS for entries where resultId matches digimonId
-    for (const [sourceId, paths] of Object.entries(EVOLUTION_PATHS)) {
-      for (const path of paths) {
-        if (path.resultId === digimonId) {
-          prevIds.push(sourceId);
-        }
-      }
-    }
-
-    // Next evolutions: look up this Digimon's own paths
-    const nextPaths = EVOLUTION_PATHS[digimonId] ?? [];
-    const nextIds = nextPaths.map(p => p.resultId);
-
-    return { prevIds, nextIds };
-  }
-
   private showDetail(entry: DigimonEntry): void {
     this.detailPanel.removeAll(true);
     this.detailVisible = true;
@@ -343,7 +314,7 @@ export class EncyclopediaScene extends Phaser.Scene {
     const cardW = 420;
     let evoChain: { prevIds: string[]; nextIds: string[] } | null = null;
     if (entry.isTower) {
-      evoChain = this.getEvolutionChain(entry.id);
+      evoChain = getEvolutionChain(entry.id);
     }
     const hasEvoData = evoChain && (evoChain.prevIds.length > 0 || evoChain.nextIds.length > 0);
     const hasDesc = !!(DIGIMON_DESCRIPTIONS[entry.id] || entry.stats.description);
@@ -717,42 +688,6 @@ export class EncyclopediaScene extends Phaser.Scene {
     this.detailPanel.removeAll(true);
   }
 
-  private createFilterButtons(): void {
-    const filters: { label: string; mode: FilterMode }[] = [
-      { label: 'All', mode: 'all' },
-      { label: 'Towers', mode: 'towers' },
-    ];
-
-    const btnW = 85;
-    const btnH = 30;
-    const startX = GAME_WIDTH / 2 - (filters.length * (btnW + 10)) / 2 + btnW / 2;
-    const y = 70;
-
-    filters.forEach((f, i) => {
-      const x = startX + i * (btnW + 10);
-      const container = this.add.container(x, y);
-      const bg = this.add.graphics();
-      drawButton(bg, btnW, btnH, f.mode === this.filterMode ? COLORS.CYAN : COLORS.BG_PANEL_LIGHT);
-      container.add(bg);
-      this.filterBtnBgs.push(bg);
-
-      const text = this.add.text(0, 0, f.label, TEXT_STYLES.BUTTON_SM).setOrigin(0.5);
-      container.add(text);
-      this.filterBtnTexts.push(text);
-
-      const hitArea = new Phaser.Geom.Rectangle(-btnW / 2, -btnH / 2, btnW, btnH);
-      container.setInteractive(hitArea, Phaser.Geom.Rectangle.Contains);
-      container.input!.cursor = 'pointer';
-
-      container.on('pointerdown', () => {
-        this.filterMode = f.mode;
-        this.updateFilterHighlights();
-        this.applyFilters();
-        this.renderGrid();
-      });
-    });
-  }
-
   private createStageFilterButtons(): void {
     const stages: { label: string; filter: StageFilter }[] = [
       { label: 'All', filter: 'all' },
@@ -767,7 +702,7 @@ export class EncyclopediaScene extends Phaser.Scene {
     const btnW = 60;
     const btnH = 26;
     const startX = GAME_WIDTH / 2 - (stages.length * (btnW + 6)) / 2 + btnW / 2;
-    const y = 108;
+    const y = 70;
 
     stages.forEach((s, i) => {
       const x = startX + i * (btnW + 6);
@@ -794,15 +729,6 @@ export class EncyclopediaScene extends Phaser.Scene {
         this.applyFilters();
         this.renderGrid();
       });
-    });
-  }
-
-  private updateFilterHighlights(): void {
-    const modes: FilterMode[] = ['all', 'towers'];
-    modes.forEach((m, i) => {
-      if (this.filterBtnBgs[i]) {
-        drawButton(this.filterBtnBgs[i], 85, 30, m === this.filterMode ? COLORS.CYAN : COLORS.BG_PANEL_LIGHT);
-      }
     });
   }
 

@@ -8,6 +8,7 @@ import { EventBus, GameEvents } from '@/utils/EventBus';
 import { COLORS, ATTRIBUTE_COLORS_STR, TEXT_STYLES, FONTS } from './UITheme';
 import { drawPanel, drawButton, animateModalIn, animateModalOut, animateButtonHover, animateButtonPress } from './UIHelpers';
 import { canDisplaySprite, getStaticFrame } from '@/utils/SpriteAnimHelper';
+import { STATUS_EFFECTS } from '@/data/StatusEffects';
 
 /**
  * EvolutionModal is a centered overlay that shows available evolution
@@ -31,7 +32,7 @@ export class EvolutionModal extends Phaser.GameObjects.Container {
   private currentCost: number = 0;
 
   private static readonly PANEL_WIDTH = 500;
-  private static readonly PANEL_HEIGHT = 400;
+  private static readonly PANEL_HEIGHT = 430;
 
   constructor(
     scene: Phaser.Scene,
@@ -194,12 +195,14 @@ export class EvolutionModal extends Phaser.GameObjects.Container {
       const stats = DIGIMON_DATABASE.towers[evo.resultId];
       if (!stats) return;
 
-      const optionY = py + 90 + index * 80;
+      const cardH = 78;
+      const cardSpacing = 90;
+      const optionY = py + 90 + index * cardSpacing;
       const optionCont = this.scene.add.container(0, 0);
 
       // Card background — mini panel with attribute accent
       const bg = this.scene.add.graphics();
-      drawPanel(bg, px + 20, optionY, w - 40, 68, {
+      drawPanel(bg, px + 20, optionY, w - 40, cardH, {
         borderColor: canAfford ? COLORS.CYAN_DIM : COLORS.DANGER,
         borderAlpha: 0.5,
         radius: 6,
@@ -210,7 +213,7 @@ export class EvolutionModal extends Phaser.GameObjects.Container {
       const attrColor = (COLORS as any)[['VACCINE', 'DATA', 'VIRUS', 'FREE'][stats.attribute]] || COLORS.CYAN;
       const stripe = this.scene.add.graphics();
       stripe.fillStyle(attrColor, 0.6);
-      stripe.fillRoundedRect(px + 20, optionY, 4, 68, { tl: 6, bl: 6, tr: 0, br: 0 });
+      stripe.fillRoundedRect(px + 20, optionY, 4, cardH, { tl: 6, bl: 6, tr: 0, br: 0 });
       optionCont.add(stripe);
 
       // Sprite
@@ -218,14 +221,14 @@ export class EvolutionModal extends Phaser.GameObjects.Container {
       if (canDisplaySprite(this.scene, evoSpriteKey)) {
         const evoStaticFrame = getStaticFrame(evoSpriteKey);
         const sprite = evoStaticFrame
-          ? this.scene.add.image(px + 55, optionY + 34, evoStaticFrame.atlas, evoStaticFrame.frame)
-          : this.scene.add.image(px + 55, optionY + 34, evoSpriteKey);
+          ? this.scene.add.image(px + 55, optionY + cardH / 2, evoStaticFrame.atlas, evoStaticFrame.frame)
+          : this.scene.add.image(px + 55, optionY + cardH / 2, evoSpriteKey);
         sprite.setScale(3);
         optionCont.add(sprite);
       }
 
       // Name and stage
-      const nameText = this.scene.add.text(px + 90, optionY + 8, stats.name, {
+      const nameText = this.scene.add.text(px + 90, optionY + 6, stats.name, {
         fontFamily: FONTS.DISPLAY,
         fontSize: '16px',
         color: '#ffffff',
@@ -236,16 +239,24 @@ export class EvolutionModal extends Phaser.GameObjects.Container {
       // Stats line
       const stageName = STAGE_NAMES[stats.stageTier];
       const attrName = ATTRIBUTE_NAMES[stats.attribute];
-      const attrStrColor = ATTRIBUTE_COLORS_STR[stats.attribute] || COLORS.TEXT_DIM;
-      const infoText = this.scene.add.text(px + 90, optionY + 30, `${stageName} | ${attrName} | DMG: ${stats.baseDamage} | SPD: ${stats.baseSpeed}`, {
+      const infoText = this.scene.add.text(px + 90, optionY + 26, `${stageName} | ${attrName} | DMG: ${stats.baseDamage} | SPD: ${stats.baseSpeed}`, {
         fontFamily: FONTS.BODY,
         fontSize: '11px',
         color: COLORS.TEXT_DIM,
       });
       optionCont.add(infoText);
 
+      // Skill line
+      const skillStr = this.getSkillString(stats.effectType, stats.effectChance);
+      const skillText = this.scene.add.text(px + 90, optionY + 42, skillStr, {
+        fontFamily: FONTS.BODY,
+        fontSize: '10px',
+        color: '#ffaa44',
+      });
+      optionCont.add(skillText);
+
       // DP requirement
-      const dpText = this.scene.add.text(px + 90, optionY + 48, `DP: ${evo.minDP}-${evo.maxDP}${evo.isDefault ? ' (Default)' : ' (Alternate)'}`, {
+      const dpText = this.scene.add.text(px + 90, optionY + 56, `DP: ${evo.minDP}-${evo.maxDP}${evo.isDefault ? ' (Default)' : ' (Alternate)'}`, {
         fontFamily: FONTS.MONO,
         fontSize: '11px',
         color: evo.isDefault ? COLORS.VACCINE_STR : COLORS.FREE_STR,
@@ -256,7 +267,7 @@ export class EvolutionModal extends Phaser.GameObjects.Container {
       if (canAfford) {
         const evoBtnW = 84;
         const evoBtnH = 32;
-        const evoBtn = this.scene.add.container(px + w - 62, optionY + 34);
+        const evoBtn = this.scene.add.container(px + w - 62, optionY + cardH / 2);
         const evoBtnBg = this.scene.add.graphics();
         drawButton(evoBtnBg, evoBtnW, evoBtnH, COLORS.SPECIAL);
         evoBtn.add(evoBtnBg);
@@ -281,7 +292,7 @@ export class EvolutionModal extends Phaser.GameObjects.Container {
         });
         optionCont.add(evoBtn);
       } else {
-        const cantAffordText = this.scene.add.text(px + w - 62, optionY + 34, 'Need DB', {
+        const cantAffordText = this.scene.add.text(px + w - 62, optionY + cardH / 2, 'Need DB', {
           fontFamily: FONTS.BODY,
           fontSize: '12px',
           color: COLORS.TEXT_LIVES,
@@ -322,6 +333,31 @@ export class EvolutionModal extends Phaser.GameObjects.Container {
   // ---------------------------------------------------------------------------
   // Helpers
   // ---------------------------------------------------------------------------
+
+  private getSkillString(effectType?: string, effectChance?: number): string {
+    if (!effectType || !effectChance) return 'Skill: None';
+    const parts = effectType.split('_');
+    const baseEffect = parts[0];
+    const effectDef = STATUS_EFFECTS[baseEffect];
+    let name = effectDef?.name || baseEffect.charAt(0).toUpperCase() + baseEffect.slice(1);
+    // Add modifiers
+    const mods = parts.slice(1);
+    const labels: string[] = [];
+    for (const m of mods) {
+      if (m === 'aoe') labels.push('AoE');
+      else if (m === 'pierce') labels.push('Pierce');
+      else if (m === 'multishot' || m === 'multihit') labels.push('Multi');
+      else if (m === 'holy') labels.push('Holy');
+      else if (m === 'lifesteal') labels.push('Lifesteal');
+    }
+    // Special compound names
+    if (effectType === 'armor_break') name = 'Armor Break';
+    else if (effectType === 'armor_pierce') name = 'Armor Pierce';
+    else if (effectType === 'aura_damage') name = 'Damage Aura';
+    else if (effectType === 'aura_all_holy') name = 'Holy Aura';
+    else if (labels.length > 0) name += ` (${labels.join(', ')})`;
+    return `Skill: ${name} (${Math.round(effectChance * 100)}%)`;
+  }
 
   private getDigivolveCost(currentStage: number): number {
     if (currentStage >= 0 && currentStage < DIGIVOLVE_COSTS.length) {

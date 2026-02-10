@@ -1,5 +1,4 @@
 import Phaser from 'phaser';
-import { SaveManager } from '@/managers/SaveManager';
 import { AudioManager } from '@/managers/AudioManager';
 import { HighScoreManager } from '@/managers/HighScoreManager';
 import { COLORS, TEXT_STYLES, ANIM, FONTS } from '@/ui/UITheme';
@@ -37,17 +36,6 @@ export class MainMenuScene extends Phaser.Scene {
 
     // --- Collect button configs first to compute layout ---
     const buttonConfigs: { label: string; normalColor: number; hoverColor: number; onClick: () => void }[] = [];
-
-    if (SaveManager.hasSave()) {
-      const save = SaveManager.load();
-      if (save) {
-        buttonConfigs.push({
-          label: `Continue (Wave ${save.gameState.currentWave})`,
-          normalColor: COLORS.SUCCESS, hoverColor: COLORS.SUCCESS_HOVER,
-          onClick: () => { this.registry.set('loadSave', true); this.scene.start('GameScene'); },
-        });
-      }
-    }
 
     buttonConfigs.push({
       label: 'New Game',

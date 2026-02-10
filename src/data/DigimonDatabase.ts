@@ -164,7 +164,7 @@ const towers = {
     range: 3.0,
     effectType: 'knockback',
     effectChance: 0.35,
-    priority: TargetPriority.FLYING,
+    priority: TargetPriority.FIRST,
   },
   angemon: {
     id: 'angemon',
@@ -176,7 +176,7 @@ const towers = {
     range: 3.0,
     effectType: 'holy',
     effectChance: 1.0,
-    priority: TargetPriority.FLYING,
+    priority: TargetPriority.FIRST,
   },
   magnaangemon: {
     id: 'magnaangemon',
@@ -726,7 +726,7 @@ const towers = {
     range: 2.5,
     effectType: 'burn',
     effectChance: 0.15,
-    priority: TargetPriority.FLYING,
+    priority: TargetPriority.FIRST,
     spriteKey: 'biyomon',
   },
   birdramon_tower: {
@@ -739,7 +739,7 @@ const towers = {
     range: 3.0,
     effectType: 'burn_aoe',
     effectChance: 0.2,
-    priority: TargetPriority.FLYING,
+    priority: TargetPriority.FIRST,
     spriteKey: 'birdramon',
   },
   garudamon_tower: {
@@ -750,9 +750,9 @@ const towers = {
     baseDamage: 33,
     baseSpeed: 0.7,
     range: 3.5,
-    effectType: 'burn_anti_air',
+    effectType: 'burn',
     effectChance: 0.3,
-    priority: TargetPriority.FLYING,
+    priority: TargetPriority.FIRST,
     spriteKey: 'garudamon',
   },
   hououmon: {
@@ -1376,9 +1376,9 @@ const towers = {
     baseDamage: 14,
     baseSpeed: 1.0,
     range: 3.5,
-    effectType: 'anti_air',
+    effectType: 'burn',
     effectChance: 1.0,
-    priority: TargetPriority.FLYING,
+    priority: TargetPriority.FIRST,
   },
   shakkoumon: {
     id: 'shakkoumon',
@@ -1695,7 +1695,7 @@ const towers = {
     range: 3.0,
     effectType: 'burn',
     effectChance: 0.15,
-    priority: TargetPriority.FLYING,
+    priority: TargetPriority.FIRST,
     spriteKey: 'airdramon',
   },
   meramon_tower: {
@@ -1829,7 +1829,7 @@ const towers = {
     range: 3.5,
     effectType: 'burn_multihit',
     effectChance: 0.25,
-    priority: TargetPriority.FLYING,
+    priority: TargetPriority.FIRST,
     spriteKey: 'megadramon',
   },
   mamemon_tower: {
@@ -2427,7 +2427,7 @@ const enemies = {
     baseHP: 27,
     moveSpeed: 72,
     armor: 0,
-    type: 'flying',
+    type: 'speedster',
     reward: 6,
   },
   enemy_guilmon: {
@@ -2515,7 +2515,7 @@ const enemies = {
     baseHP: 27,
     moveSpeed: 72,
     armor: 0,
-    type: 'flying',
+    type: 'speedster',
     reward: 6,
   },
   enemy_tentomon: {
@@ -2662,7 +2662,7 @@ const enemies = {
     baseHP: 80,
     moveSpeed: 72,
     armor: 0,
-    type: 'flying',
+    type: 'speedster',
     reward: 12,
   },
   enemy_airdramon: {
@@ -2673,7 +2673,7 @@ const enemies = {
     baseHP: 85,
     moveSpeed: 70,
     armor: 0,
-    type: 'flying',
+    type: 'speedster',
     reward: 12,
   },
   enemy_angemon: {
@@ -2684,7 +2684,7 @@ const enemies = {
     baseHP: 90,
     moveSpeed: 72,
     armor: 0,
-    type: 'flying',
+    type: 'speedster',
     reward: 13,
   },
   enemy_kabuterimon: {
@@ -2695,7 +2695,7 @@ const enemies = {
     baseHP: 95,
     moveSpeed: 68,
     armor: 0,
-    type: 'flying',
+    type: 'speedster',
     reward: 13,
   },
   enemy_meramon: {
@@ -2954,7 +2954,7 @@ const enemies = {
     baseHP: 320,
     moveSpeed: 60,
     armor: 0.1,
-    type: 'flying',
+    type: 'speedster',
     reward: 25,
   },
   enemy_megakabuterimon: {
@@ -2965,7 +2965,7 @@ const enemies = {
     baseHP: 300,
     moveSpeed: 62,
     armor: 0.1,
-    type: 'flying',
+    type: 'speedster',
     reward: 25,
   },
   enemy_garudamon: {
@@ -2976,7 +2976,7 @@ const enemies = {
     baseHP: 280,
     moveSpeed: 65,
     armor: 0,
-    type: 'flying',
+    type: 'speedster',
     reward: 24,
   },
   enemy_megadramon: {
@@ -2987,7 +2987,7 @@ const enemies = {
     baseHP: 350,
     moveSpeed: 58,
     armor: 0.1,
-    type: 'flying',
+    type: 'speedster',
     reward: 26,
   },
 
@@ -3150,7 +3150,7 @@ const enemies = {
     baseHP: 800,
     moveSpeed: 60,
     armor: 0.1,
-    type: 'flying',
+    type: 'speedster',
     reward: 45,
   },
   enemy_herculeskabuterimon: {
@@ -3161,7 +3161,7 @@ const enemies = {
     baseHP: 750,
     moveSpeed: 62,
     armor: 0.15,
-    type: 'flying',
+    type: 'speedster',
     reward: 45,
   },
   enemy_metalseadramon: {

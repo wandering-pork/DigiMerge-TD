@@ -22,6 +22,7 @@ import { EvolutionModal } from '@/ui/EvolutionModal';
 import { TowerInfoPanel } from '@/ui/TowerInfoPanel';
 import { MergeModal } from '@/ui/MergeModal';
 import { DNAModal } from '@/ui/DNAModal';
+import { EvolutionTreeModal } from '@/ui/EvolutionTreeModal';
 import { TowerManager } from '@/managers/TowerManager';
 import { AudioManager } from '@/managers/AudioManager';
 import { Tower } from '@/entities/Tower';
@@ -61,6 +62,7 @@ export class GameScene extends Phaser.Scene {
   private towerInfoPanel!: TowerInfoPanel;
   private mergeModal!: MergeModal;
   private dnaModal!: DNAModal;
+  private evoTreeModal!: EvolutionTreeModal;
 
   // HUD text
   private waveText!: Phaser.GameObjects.Text;
@@ -284,6 +286,7 @@ export class GameScene extends Phaser.Scene {
     // Create merge modal
     this.mergeModal = new MergeModal(this);
     this.dnaModal = new DNAModal(this);
+    this.evoTreeModal = new EvolutionTreeModal(this);
 
     // Listen for game events
     EventBus.on(GameEvents.ENEMY_DIED, this.onEnemyDied, this);
@@ -296,6 +299,7 @@ export class GameScene extends Phaser.Scene {
     EventBus.on(GameEvents.MERGE_INITIATED, this.onMergeInitiated, this);
     EventBus.on(GameEvents.DIGIVOLVE_INITIATED, this.onDigivolveInitiated, this);
     EventBus.on(GameEvents.DNA_FUSE_INITIATED, this.onDNAFuseInitiated, this);
+    EventBus.on(GameEvents.EVO_TREE_REQUESTED, this.onEvoTreeRequested, this);
     EventBus.on(GameEvents.BOSS_SPAWNED, this.onBossSpawned, this);
     EventBus.on(GameEvents.TOWER_PLACED, this.onTowerPlaced, this);
     EventBus.on(GameEvents.TOWER_MERGED, this.onMergeCompleted, this);
@@ -395,6 +399,7 @@ export class GameScene extends Phaser.Scene {
     EventBus.off(GameEvents.MERGE_INITIATED, this.onMergeInitiated, this);
     EventBus.off(GameEvents.DIGIVOLVE_INITIATED, this.onDigivolveInitiated, this);
     EventBus.off(GameEvents.DNA_FUSE_INITIATED, this.onDNAFuseInitiated, this);
+    EventBus.off(GameEvents.EVO_TREE_REQUESTED, this.onEvoTreeRequested, this);
     EventBus.off(GameEvents.BOSS_SPAWNED, this.onBossSpawned, this);
     EventBus.off(GameEvents.TOWER_PLACED, this.onTowerPlaced, this);
     EventBus.off(GameEvents.TOWER_MERGED, this.onMergeCompleted, this);
@@ -901,6 +906,10 @@ export class GameScene extends Phaser.Scene {
   // ============================================================
   // DNA Fuse
   // ============================================================
+
+  private onEvoTreeRequested(digimonId: string): void {
+    this.evoTreeModal.show(digimonId);
+  }
 
   private onDNAFuseInitiated(tower: Tower): void {
     this.towerInfoPanel.hide();
@@ -1848,7 +1857,7 @@ export class GameScene extends Phaser.Scene {
     });
     settingsContainer.on('pointerdown', () => {
       animateButtonPress(this, settingsContainer);
-      this.scene.launch('SettingsScene');
+      this.scene.launch('SettingsScene', { from: 'GameScene' });
     });
 
     // Encyclopedia button (compact)
@@ -2108,7 +2117,6 @@ export class GameScene extends Phaser.Scene {
       standard: '#aaaaaa',
       tank: '#6688cc',
       speedster: '#ffaa00',
-      flying: '#cc88ff',
       regen: '#44cc88',
       shielded: '#4488ff',
       splitter: '#ff88cc',

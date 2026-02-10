@@ -112,7 +112,7 @@ export const DIGIMON_DESCRIPTIONS: Record<string, string> = {
   pyocomon: 'A small Vegetation Digimon with a flower-like head. It dreams of soaring through the skies above.',
   piyomon: 'A Bird Digimon that spits scorching embers at enemies, prioritizing aerial threats with its keen eyes.',
   birdramon_tower: 'A powerful Firebird Digimon that rains burning feathers over groups of enemies from above.',
-  garudamon_tower: 'A formidable Bird Man Digimon specializing in incinerating flying enemies with its Shadow Wing attack.',
+  garudamon_tower: 'A formidable Bird Man Digimon specializing in incinerating enemies with its Shadow Wing attack.',
   hououmon: 'A legendary Holy Bird Digimon reborn in flame. Its Starlight Explosion scorches foes while healing allies.',
 
   // --------------------------------------------------------------------------
@@ -248,7 +248,7 @@ export const DIGIMON_DESCRIPTIONS: Record<string, string> = {
   ogremon_tower: 'A savage Ogre Digimon whose bone club smashes through enemy armor with brute strength.',
   monochromon_tower: 'A heavily armored Dinosaur Digimon whose charge attacks bypass enemy defenses entirely.',
   darktyrannomon_tower: 'A corrupted Dinosaur Digimon wreathed in dark flames that sear anything in its path.',
-  airdramon_tower: 'A winged Mythical Dragon Digimon that swoops down to incinerate flying enemies with fiery breath.',
+  airdramon_tower: 'A winged Mythical Dragon Digimon that swoops down to incinerate enemies with fiery breath.',
   meramon_tower: 'A blazing Flame Digimon whose body of living fire scorches groups of nearby enemies.',
   kuwagamon_tower: 'A vicious Insectoid Digimon whose Scissor Arms shatter enemy armor at blinding speed.',
   numemon_tower: 'A repulsive Mollusk Digimon that flings toxic sludge, slowly poisoning anything it hits.',
@@ -262,7 +262,7 @@ export const DIGIMON_DESCRIPTIONS: Record<string, string> = {
   warumonzaemon_tower: 'A formidable corrupted puppet Digimon whose Heartbreak Attack instills crippling fear in enemies.',
   ladydevimon_tower: 'A formidable Fallen Angel Digimon that drains the life force of her victims with each strike.',
   bluemeramon_tower: 'A formidable Flame Digimon that wields both searing fire and biting frost simultaneously.',
-  megadramon_tower: 'A formidable Machine Dragon Digimon that targets flying enemies with rapid-fire incendiary rounds.',
+  megadramon_tower: 'A formidable Machine Dragon Digimon that targets enemies with rapid-fire incendiary rounds.',
   mamemon_tower: 'A formidable Mutant Digimon that hurls rapid-fire Smiley Bombs at enemies in quick succession.',
   andromon_tower: 'A formidable Cyborg Digimon whose Gatling Missiles bypass armor and explode across wide areas.',
 
@@ -397,7 +397,7 @@ export const DIGIMON_DESCRIPTIONS: Record<string, string> = {
   enemy_magnaangemon: 'A wild MagnaAngemon soaring above the battlefield, untouchable by ground attacks.',
   enemy_megakabuterimon: 'A wild MegaKabuterimon buzzing overhead with moderate armor and aerial mobility.',
   enemy_garudamon: 'A wild Garudamon soaring through the skies with speed and grace.',
-  enemy_megadramon: 'A wild Megadramon flying overhead, raining destruction while evading ground fire.',
+  enemy_megadramon: 'A wild Megadramon streaking past at high speed, raining destruction on defenders.',
   enemy_angewomon: 'A wild Angewomon that slowly regenerates health through divine energy as she advances.',
 
   // --------------------------------------------------------------------------

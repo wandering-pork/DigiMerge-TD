@@ -281,7 +281,7 @@ export const EVOLUTION_PATHS: Record<string, EvolutionPath[]> = {
   ],
 
   // ========================================
-  // Pyocomon Line (Data) — Fire / Flying
+  // Pyocomon Line (Data) — Fire
   // ========================================
 
   pyocomon: [
@@ -676,6 +676,25 @@ export const EVOLUTION_PATHS: Record<string, EvolutionPath[]> = {
 export function getEvolutions(digimonId: string, currentDP: number): EvolutionPath[] {
   const paths = EVOLUTION_PATHS[digimonId] ?? [];
   return paths.filter(path => currentDP >= path.minDP && currentDP <= path.maxDP);
+}
+
+/**
+ * Get the evolution chain for a given Digimon: who it evolves from and who it evolves to.
+ */
+export function getEvolutionChain(digimonId: string): { prevIds: string[]; nextIds: string[] } {
+  const prevIds: string[] = [];
+  for (const [sourceId, paths] of Object.entries(EVOLUTION_PATHS)) {
+    for (const path of paths) {
+      if (path.resultId === digimonId) {
+        prevIds.push(sourceId);
+      }
+    }
+  }
+
+  const nextPaths = EVOLUTION_PATHS[digimonId] ?? [];
+  const nextIds = nextPaths.map(p => p.resultId);
+
+  return { prevIds, nextIds };
 }
 
 /**

@@ -11,7 +11,6 @@ export interface MockTarget {
   maxHp: number;
   speed: number;
   pathIndex: number;
-  isFlying: boolean;
   isAlive: boolean;
 }
 
@@ -51,13 +50,6 @@ export function sortByPriority(
     case TargetPriority.FASTEST:
       // Highest speed
       return [...alive].sort((a, b) => b.speed - a.speed);
-
-    case TargetPriority.FLYING:
-      // Flying first, then by pathIndex (first priority)
-      return [...alive].sort((a, b) => {
-        if (a.isFlying !== b.isFlying) return a.isFlying ? -1 : 1;
-        return b.pathIndex - a.pathIndex;
-      });
 
     case TargetPriority.CLOSEST:
       if (!towerPosition) return [...alive].sort((a, b) => b.pathIndex - a.pathIndex);

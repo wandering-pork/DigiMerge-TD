@@ -43,6 +43,7 @@ export const GameEvents = {
   MERGE_INITIATED: 'ui:mergeInitiated',
   DIGIVOLVE_INITIATED: 'ui:digivolveInitiated',
   DNA_FUSE_INITIATED: 'ui:dnaFuseInitiated',
+  EVO_TREE_REQUESTED: 'ui:evoTreeRequested',
 
   // Boss ability events
   BOSS_ABILITY_ACTIVATED: 'boss:abilityActivated',

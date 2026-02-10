@@ -16,9 +16,7 @@ export class SettingsScene extends Phaser.Scene {
   }
 
   create(data?: { from?: string }) {
-    if (data?.from) {
-      this.callerScene = data.from;
-    }
+    this.callerScene = data?.from ?? 'GameScene';
     const { width, height } = this.cameras.main;
 
     // Semi-transparent dark overlay
