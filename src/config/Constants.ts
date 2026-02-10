@@ -55,7 +55,7 @@ export const TOTAL_WAVES_MVP = 100;
 export const STAGE_LEVEL_COST_MULTIPLIER: Record<Stage, number> = {
   [Stage.IN_TRAINING]: 1,
   [Stage.ROOKIE]: 1.5,
-  [Stage.CHAMPION]: 2,
+  [Stage.CHAMPION]: 1.75,
   [Stage.ULTIMATE]: 2.5,
   [Stage.MEGA]: 3,
   [Stage.ULTRA]: 3.5,

@@ -87,8 +87,8 @@ describe('Constants', () => {
     it('stage multiplier increases cost for higher stages', () => {
       // Rookie: 2 * 10 * 1.5 = 30
       expect(getLevelUpCost(10, Stage.ROOKIE)).toBe(30);
-      // Champion: 2 * 10 * 2 = 40
-      expect(getLevelUpCost(10, Stage.CHAMPION)).toBe(40);
+      // Champion: 2 * 10 * 1.75 = 35
+      expect(getLevelUpCost(10, Stage.CHAMPION)).toBe(35);
     });
   });
 

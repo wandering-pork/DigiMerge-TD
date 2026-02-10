@@ -52,9 +52,9 @@ export interface StatusEffectConfig {
 }
 
 export const STATUS_EFFECT_CONFIGS: Record<string, StatusEffectConfig> = {
-  burn: { duration: 3, tickInterval: 0.5, strength: 0.05 },
+  burn: { duration: 3, tickInterval: 0.5, strength: 0.12 },
   poison: { duration: 4, tickInterval: 1, strength: 0.03, maxStacks: 3 },
-  slow: { duration: 2, strength: 0.4 },
+  slow: { duration: 3, strength: 0.4 },
   freeze: { duration: 1.5, strength: 1.0 },
   stun: { duration: 1, strength: 1.0 },
   armorBreak: { duration: 3, strength: 0.5 },

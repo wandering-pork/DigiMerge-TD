@@ -190,32 +190,32 @@ describe('getEffectiveArmorMultiplier', () => {
 
 describe('calculateDotDamage', () => {
   describe('burn', () => {
-    it('deals 5% of source damage per tick', () => {
+    it('deals 12% of source damage per tick', () => {
       const effect = createEffect({ id: 'burn', sourceDamage: 100 });
       const config = STATUS_EFFECT_CONFIGS['burn'];
-      // 100 * 0.05 = 5, ceil(5) = 5
-      expect(calculateDotDamage(effect, config)).toBe(5);
+      // 100 * 0.12 = 12, ceil(12) = 12
+      expect(calculateDotDamage(effect, config)).toBe(12);
     });
 
     it('rounds up fractional damage with Math.ceil', () => {
       const effect = createEffect({ id: 'burn', sourceDamage: 33 });
       const config = STATUS_EFFECT_CONFIGS['burn'];
-      // 33 * 0.05 = 1.65, ceil(1.65) = 2
-      expect(calculateDotDamage(effect, config)).toBe(2);
+      // 33 * 0.12 = 3.96, ceil(3.96) = 4
+      expect(calculateDotDamage(effect, config)).toBe(4);
     });
 
     it('deals minimum 1 damage even with very low source damage', () => {
       const effect = createEffect({ id: 'burn', sourceDamage: 1 });
       const config = STATUS_EFFECT_CONFIGS['burn'];
-      // 1 * 0.05 = 0.05, ceil(0.05) = 1
+      // 1 * 0.12 = 0.12, ceil(0.12) = 1
       expect(calculateDotDamage(effect, config)).toBe(1);
     });
 
     it('stacks do not affect burn damage', () => {
       const effect = createEffect({ id: 'burn', sourceDamage: 100, stacks: 3 });
       const config = STATUS_EFFECT_CONFIGS['burn'];
-      // Burn does not stack; damage is always 100 * 0.05 = 5
-      expect(calculateDotDamage(effect, config)).toBe(5);
+      // Burn does not stack; damage is always 100 * 0.12 = 12
+      expect(calculateDotDamage(effect, config)).toBe(12);
     });
   });
 
@@ -296,7 +296,7 @@ describe('STATUS_EFFECT_CONFIGS', () => {
     const config = STATUS_EFFECT_CONFIGS['burn'];
     expect(config.duration).toBe(3);
     expect(config.tickInterval).toBe(0.5);
-    expect(config.strength).toBe(0.05);
+    expect(config.strength).toBe(0.12);
     expect(config.maxStacks).toBeUndefined();
   });
 
@@ -310,7 +310,7 @@ describe('STATUS_EFFECT_CONFIGS', () => {
 
   it('slow has correct configuration', () => {
     const config = STATUS_EFFECT_CONFIGS['slow'];
-    expect(config.duration).toBe(2);
+    expect(config.duration).toBe(3);
     expect(config.strength).toBe(0.4);
     expect(config.tickInterval).toBeUndefined();
   });
@@ -387,7 +387,7 @@ describe('Effect application logic', () => {
       const burn = effects.get('burn')!;
       expect(burn.id).toBe('burn');
       expect(burn.remainingDuration).toBe(3);
-      expect(burn.strength).toBe(0.05);
+      expect(burn.strength).toBe(0.12);
       expect(burn.stacks).toBe(1);
       expect(burn.sourceDamage).toBe(100);
       expect(burn.tickTimer).toBe(0);
@@ -398,7 +398,7 @@ describe('Effect application logic', () => {
       applyEffect(effects, 'slow', 50);
 
       const slow = effects.get('slow')!;
-      expect(slow.remainingDuration).toBe(2);
+      expect(slow.remainingDuration).toBe(3);
       expect(slow.strength).toBe(0.4);
     });
 
@@ -576,14 +576,14 @@ describe('Effect expiry logic', () => {
       id: 'burn',
       remainingDuration: 3,
       sourceDamage: 100,
-      strength: 0.05,
+      strength: 0.12,
     }));
     effects.get('burn')!.tickTimer = 0;
 
     // Tick for 0.5s -> should trigger one burn tick
     const damage = tickEffects(effects, 0.5);
-    // 100 * 0.05 = 5
-    expect(damage).toBe(5);
+    // 100 * 0.12 = 12
+    expect(damage).toBe(12);
   });
 
   it('processes multiple burn ticks in a large delta', () => {
@@ -592,13 +592,13 @@ describe('Effect expiry logic', () => {
       id: 'burn',
       remainingDuration: 3,
       sourceDamage: 100,
-      strength: 0.05,
+      strength: 0.12,
     }));
     effects.get('burn')!.tickTimer = 0;
 
     // Tick for 1.0s -> should trigger two burn ticks (at 0.5 interval)
     const damage = tickEffects(effects, 1.0);
-    expect(damage).toBe(10); // 5 * 2
+    expect(damage).toBe(24); // 12 * 2
   });
 
   it('processes poison ticks with stacking', () => {

@@ -39,9 +39,9 @@ describe('LevelSystem', () => {
       expect(getLevelUpCost(10, Stage.ROOKIE)).toBe(30);
     });
 
-    it('Champion uses 2x multiplier', () => {
-      // 2 * 10 * 2 = 40
-      expect(getLevelUpCost(10, Stage.CHAMPION)).toBe(40);
+    it('Champion uses 1.75x multiplier', () => {
+      // 2 * 10 * 1.75 = 35
+      expect(getLevelUpCost(10, Stage.CHAMPION)).toBe(35);
     });
 
     it('Ultimate uses 2.5x multiplier', () => {
@@ -206,8 +206,8 @@ describe('LevelSystem', () => {
     });
 
     it('stage multiplier applies to total cost', () => {
-      // Champion Lv1 -> Lv5: ceil(2*1*2) + ceil(2*2*2) + ceil(2*3*2) + ceil(2*4*2) = 4+8+12+16 = 40
-      expect(getTotalLevelUpCost(1, 5, Stage.CHAMPION)).toBe(40);
+      // Champion Lv1 -> Lv5: ceil(2*1*1.75) + ceil(2*2*1.75) + ceil(2*3*1.75) + ceil(2*4*1.75) = 4+7+11+14 = 36
+      expect(getTotalLevelUpCost(1, 5, Stage.CHAMPION)).toBe(36);
     });
   });
 

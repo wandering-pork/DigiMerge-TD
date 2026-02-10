@@ -56,9 +56,9 @@ export const WAVE_DATA: Record<number, WaveConfig> = {
   3: {
     enemies: [
       { id: 'enemy_pagumon', count: 6 },
-      { id: 'enemy_agumon', count: 5 },
+      { id: 'enemy_gigimon', count: 5 },
     ],
-    spawnInterval: 2000,
+    spawnInterval: 2200,
   },
 
   4: {
@@ -66,7 +66,7 @@ export const WAVE_DATA: Record<number, WaveConfig> = {
       { id: 'enemy_gigimon', count: 6 },
       { id: 'enemy_gabumon', count: 5 },
     ],
-    spawnInterval: 2000,
+    spawnInterval: 2200,
   },
 
   5: {
@@ -75,7 +75,7 @@ export const WAVE_DATA: Record<number, WaveConfig> = {
       { id: 'enemy_pagumon', count: 5 },
       { id: 'enemy_agumon', count: 5 },
     ],
-    spawnInterval: 2000,
+    spawnInterval: 2200,
   },
 
   // ========================================
@@ -428,8 +428,9 @@ export const WAVE_DATA: Record<number, WaveConfig> = {
   // Waves 41-45: Ultimate Introduction
   41: {
     enemies: [
+      { id: 'enemy_greymon', count: 4 },
+      { id: 'enemy_garurumon', count: 4 },
       { id: 'enemy_metalgreymon', count: 4 },
-      { id: 'enemy_zudomon', count: 4 },
       { id: 'enemy_megaseadramon', count: 5 },
       { id: 'enemy_myotismon', count: 5 },
     ],
@@ -480,7 +481,8 @@ export const WAVE_DATA: Record<number, WaveConfig> = {
   // Waves 46-50: Special Types
   46: {
     enemies: [
-      { id: 'enemy_mamemon', count: 10 },
+      { id: 'enemy_mamemon', count: 6 },
+      { id: 'enemy_weregarurumon', count: 5 },
     ],
     spawnInterval: 1400,
   },
@@ -861,11 +863,11 @@ export const WAVE_DATA: Record<number, WaveConfig> = {
 
   82: {
     enemies: [
-      { id: 'enemy_omegamon', count: 7 },
-      { id: 'enemy_omegamon_zwart', count: 7 },
-      { id: 'enemy_imperialdramon_dm', count: 7 },
-      { id: 'enemy_machinedramon', count: 6 },
-      { id: 'enemy_blackwargreymon', count: 6 },
+      { id: 'enemy_saberleomon', count: 8 },
+      { id: 'enemy_beelzemon', count: 8 },
+      { id: 'enemy_puppetmon', count: 7 },
+      { id: 'enemy_omegamon', count: 5 },
+      { id: 'enemy_omegamon_zwart', count: 5 },
     ],
     spawnInterval: 1000,
   },
@@ -883,11 +885,11 @@ export const WAVE_DATA: Record<number, WaveConfig> = {
 
   84: {
     enemies: [
-      { id: 'enemy_omegamon', count: 7 },
-      { id: 'enemy_omegamon_zwart', count: 7 },
-      { id: 'enemy_imperialdramon_dm', count: 7 },
-      { id: 'enemy_armageddemon', count: 7 },
-      { id: 'enemy_millenniummon', count: 7 },
+      { id: 'enemy_machinedramon', count: 8 },
+      { id: 'enemy_blackwargreymon', count: 8 },
+      { id: 'enemy_leviamon', count: 7 },
+      { id: 'enemy_metalseadramon', count: 7 },
+      { id: 'enemy_cherubimon', count: 5 },
     ],
     spawnInterval: 1000,
   },
@@ -906,11 +908,10 @@ export const WAVE_DATA: Record<number, WaveConfig> = {
   // Waves 86-90: Peak Difficulty
   86: {
     enemies: [
-      { id: 'enemy_omegamon', count: 8 },
-      { id: 'enemy_omegamon_zwart', count: 8 },
-      { id: 'enemy_imperialdramon_dm', count: 7 },
-      { id: 'enemy_armageddemon', count: 7 },
-      { id: 'enemy_millenniummon', count: 7 },
+      { id: 'enemy_diaboromon', count: 12 },
+      { id: 'enemy_armageddemon', count: 8 },
+      { id: 'enemy_omegamon', count: 5 },
+      { id: 'enemy_omegamon_zwart', count: 5 },
     ],
     spawnInterval: 1000,
   },
@@ -928,11 +929,11 @@ export const WAVE_DATA: Record<number, WaveConfig> = {
 
   88: {
     enemies: [
-      { id: 'enemy_armageddemon', count: 9 },
-      { id: 'enemy_millenniummon', count: 9 },
-      { id: 'enemy_omegamon', count: 8 },
-      { id: 'enemy_omegamon_zwart', count: 7 },
-      { id: 'enemy_imperialdramon_dm', count: 7 },
+      { id: 'enemy_phoenixmon', count: 9 },
+      { id: 'enemy_herculeskabuterimon', count: 9 },
+      { id: 'enemy_omegamon', count: 6 },
+      { id: 'enemy_omegamon_zwart', count: 6 },
+      { id: 'enemy_imperialdramon_dm', count: 5 },
     ],
     spawnInterval: 1000,
   },
