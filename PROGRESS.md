@@ -2,7 +2,7 @@
 
 ## Current Status
 
-**All 11 sprints complete + Sprint 12A-D + Sprint 13-16 + Sprint 18-24B (full) + Sprint 23B + Sprint 25 (balance) + Sprint 26 (DNA) + Sprint 27 (full) + Sprint 28-29 + Sprint 23/24 (merged) done** | 548 tests passing | 21 test files | 53 source files | TypeScript clean | Vite build succeeds
+**All 11 sprints complete + Sprint 12A-D + Sprint 13-16 + Sprint 18-24B (full) + Sprint 23B + Sprint 25 (balance) + Sprint 26 (DNA) + Sprint 27 (full) + Sprint 28-30 + Sprint 23/24 (merged) done** | 558 tests passing | 21 test files | 53 source files | TypeScript clean | Vite build succeeds
 
 Live at: https://wandering-pork.github.io/DigiMerge-TD/
 
@@ -45,9 +45,10 @@ Live at: https://wandering-pork.github.io/DigiMerge-TD/
 - Persistent game speed indicator badge (shows "2x"/"3x" over grid when speed > 1x)
 - Colorblind mode: attribute symbols (V/D/X/F) on tower and enemy sprites, toggle in Settings
 - Settings: Colorblind Mode toggle under Display section
-- Armor bar visual on enemies (gray bar below HP, turns red on armor break)
+- Shield bar visual on enemies (gray bar below HP showing shield HP depletion, turns red on armor break)
 - DoT damage floating numbers (orange for burn, purple for poison)
-- armor_pierce (bypass armor entirely), holy (+25% bonus damage), heal (restore player lives) effects
+- Shield HP system: armor converted from % damage reduction to depletable shield pool (shieldHP = baseHP × armorRatio × 2)
+- armor_pierce (bypass shield entirely), holy (+25% bonus damage), heal (restore player lives) effects
 - Cleaner TowerInfoPanel (evolution preview removed, players use Encyclopedia instead)
 - Particle pool (ParticlePool utility) — pools Graphics objects for merge effects, hit/death particles, boss death ring
 - FPS counter — toggleable overlay (bottom-right), color-coded by performance, toggle in Settings
@@ -89,7 +90,7 @@ Live at: https://wandering-pork.github.io/DigiMerge-TD/
 - Wave preview with sprites, Lv+5/MAX with affordable level calc, auto-start wave toggle
 
 ### Enemy Mechanics
-- Regen (2% HP/sec, blocked by poison), Shielded (60% armor, blue tint), Splitter (x2/x4 on death)
+- Regen (2% HP/sec, blocked by poison), Shielded (high shield HP, blue tint), Splitter (x2/x4 on death)
 
 ### Content Expansion
 - **Phase 2 (Waves 21-40)**: 18 Champion enemies, bosses Devimon + Myotismon
@@ -197,8 +198,8 @@ Live at: https://wandering-pork.github.io/DigiMerge-TD/
 
 #### 20B: Tower Effect Audit ✓ (via Sprint 29)
 - [x] Fixed armor_break naming bug (underscore→camelCase mapping) — 15+ towers fixed
-- [x] Implemented armor_pierce (bypass armor), holy (+25% damage), heal (restore lives)
-- [x] Added armor bar visual, DoT floating numbers (burn=orange, poison=purple)
+- [x] Implemented armor_pierce (bypass shield), holy (+25% damage), heal (restore lives)
+- [x] Added shield bar visual, DoT floating numbers (burn=orange, poison=purple)
 - [x] Manual playtest of all proc rates and bonus effect inheritance
 
 #### 20C: Statistics Activation ✓
@@ -372,15 +373,33 @@ Live at: https://wandering-pork.github.io/DigiMerge-TD/
 
 - [x] **Starter card fix**: Pyocomon & Kyokyomon render correctly (force individual PNG load for all starters)
 - [x] **armor_break naming bug (CRITICAL)**: Fixed `getBaseEffectType` underscore→camelCase mapping — 15+ towers now properly apply armor break
-- [x] **armor_pierce**: New projectile property — bypasses enemy armor entirely (6+ towers affected)
+- [x] **armor_pierce**: New projectile property — bypasses enemy shield entirely (6+ towers affected)
 - [x] **holy effect**: New projectile property — 25% bonus damage to all targets (7+ towers affected)
 - [x] **heal effect**: New event-driven system — restores 1 player life on proc with "+1 Life" floating text (2+ towers)
-- [x] **Armor bar visual**: Gray/silver bar below HP bar for armored enemies, turns red when armor break active
+- [x] **Shield bar visual**: Gray/silver bar below HP bar for shielded enemies, turns red when armor break active
 - [x] **DoT floating numbers**: Burn ticks show orange numbers, poison ticks show purple numbers
 - [x] **In-game Encyclopedia**: HUD button below Pause/Settings, launches EncyclopediaScene as overlay (pauses game)
 - [x] **EncyclopediaScene overlay**: callerScene tracking — Back/ESC resumes GameScene or returns to MainMenu
 - [x] **TowerInfoPanel cleanup**: Removed evolution preview section (cluttered, overflow-prone); players use Encyclopedia
 - [x] 4 new tests for effect type mappings (522 total)
+
+---
+
+### Sprint 30 — Shield HP System ✓
+
+- [x] **Shield HP conversion**: Armor changed from permanent % damage reduction to depletable shield HP pool
+- [x] `SHIELD_HP_MULTIPLIER = 2` constant: `shieldHP = baseHP × armorRatio × 2 × waveScaling`
+- [x] `EnemyStats.armor` → `EnemyStats.armorRatio` (86 enemy entries renamed)
+- [x] `EnemyInstance.armor` → `shieldHp` + `maxShieldHp` (runtime fields)
+- [x] **takeDamage rewrite**: Damage hits shield first, overflow carries to HP at original ratio
+- [x] **armor_pierce**: Bypasses shield entirely (hits HP directly)
+- [x] **armor_break rework**: Shield takes 1.5x damage (strength 0.5 = +50%) instead of reducing armor%
+- [x] **DoT**: Burn/poison still bypass shield via `takeDamageRaw`
+- [x] Removed `getEffectiveArmorMultiplier()` and `getEffectiveArmor()` — no longer needed
+- [x] Shield bar shows depletion ratio, red when armorBreak active
+- [x] UI updated: Encyclopedia/wave preview show computed shield HP instead of armor%
+- [x] TowerInfoPanel armorBreak tooltip: `+50% shield dmg` instead of `-50% armor`
+- [x] 10 new shield HP tests (558 total)
 
 ---
 

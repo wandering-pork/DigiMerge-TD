@@ -58,7 +58,7 @@ function getSkillDisplay(effectType?: string, effectChance?: number): { name: st
   // Handle special compound names
   if (effectType === 'armor_break') {
     name = 'Armor Break';
-    description = 'Reduces target armor';
+    description = 'Bonus damage to shield';
   } else if (effectType === 'armor_pierce') {
     name = 'Armor Pierce';
     description = 'Ignores target armor';
@@ -90,7 +90,7 @@ function getSkillDisplay(effectType?: string, effectChance?: number): { name: st
     } else if (baseKey === 'stun') {
       details.push('Cannot move');
     } else if (baseKey === 'armorBreak') {
-      details.push(`-${Math.round(config.strength * 100)}% armor`);
+      details.push(`+${Math.round(config.strength * 100)}% shield dmg`);
     }
     if (config.duration) details.push(`${config.duration}s`);
     // Add AoE note if applicable

@@ -1996,7 +1996,7 @@ export interface EnemyData {
   attribute: Attribute;
   baseHP: number;
   baseSpeed: number; // Pixels per second
-  armor: number;     // Percentage damage reduction (0-100)
+  armorRatio: number; // Ratio used to compute shield HP (0-0.6)
   type: EnemyType;
   reward: number;
   spriteKey?: string;
@@ -2007,7 +2007,8 @@ export class Enemy extends Phaser.GameObjects.Sprite {
   public currentHP: number;
   public maxHP: number;
   public speed: number;
-  public armor: number;
+  public shieldHp: number;
+  public maxShieldHp: number;
   public attribute: Attribute;
   public pathProgress: number = 0;
   public isFlying: boolean;
@@ -2045,7 +2046,7 @@ export class Enemy extends Phaser.GameObjects.Sprite {
     // Calculate final stats with modifiers
     let hpMod = hpMultiplier;
     let speedMod = 1;
-    let armorMod = 0;
+    let shieldMod = 1;
 
     if (this.modifiers.has('giant')) {
       hpMod *= 2;
@@ -2055,7 +2056,7 @@ export class Enemy extends Phaser.GameObjects.Sprite {
     }
 
     if (this.modifiers.has('armored')) {
-      armorMod = 20;
+      shieldMod = 1.3; // +30% shield HP
     }
 
     if (this.modifiers.has('hasty')) {
@@ -2070,7 +2071,8 @@ export class Enemy extends Phaser.GameObjects.Sprite {
     this.maxHP = Math.floor(data.baseHP * hpMod);
     this.currentHP = this.maxHP;
     this.speed = data.baseSpeed * speedMod;
-    this.armor = Math.min(80, data.armor + armorMod); // Cap at 80%
+    this.maxShieldHp = data.baseHP * data.armorRatio * 2 * hpMod * shieldMod; // SHIELD_HP_MULTIPLIER = 2
+    this.shieldHp = this.maxShieldHp;
 
     scene.add.existing(this);
     this.createHealthBar();
@@ -2145,17 +2147,24 @@ export class Enemy extends Phaser.GameObjects.Sprite {
     return total;
   }
 
-  takeDamage(damage: number, source?: any): void {
-    // Calculate armor reduction
-    let effectiveArmor = this.armor;
-
-    if (this.statusEffects.has('armorBreak')) {
-      const reduction = this.statusEffects.get('armorBreak')!.value;
-      effectiveArmor = Math.max(0, this.armor - reduction);
+  takeDamage(damage: number, ignoreArmor: boolean = false): void {
+    // Shield HP system: damage hits shield first, overflow to HP
+    if (ignoreArmor || this.shieldHp <= 0) {
+      this.currentHP -= damage;
+    } else {
+      let shieldDamage = damage;
+      // Armor Break = +50% bonus damage to shield
+      if (this.statusEffects.has('armorBreak')) {
+        const ab = this.statusEffects.get('armorBreak')!;
+        shieldDamage *= (1 + ab.strength);
+      }
+      this.shieldHp -= shieldDamage;
+      if (this.shieldHp < 0) {
+        const overflowRatio = -this.shieldHp / shieldDamage;
+        this.currentHP -= damage * overflowRatio;
+        this.shieldHp = 0;
+      }
     }
-
-    const actualDamage = damage * (1 - effectiveArmor / 100);
-    this.currentHP -= actualDamage;
 
     // Flash white on hit
     this.setTintFill(0xffffff);
@@ -2276,10 +2285,12 @@ export class Enemy extends Phaser.GameObjects.Sprite {
     this.healthBar.fillStyle(color);
     this.healthBar.fillRect(x, y, width * healthPercent, height);
 
-    // Armor indicator (if any)
-    if (this.armor > 0) {
-      this.healthBar.fillStyle(0x888888);
-      this.healthBar.fillRect(x, y + height, width * (this.armor / 100), 2);
+    // Shield bar indicator (if any)
+    if (this.maxShieldHp > 0) {
+      const shieldRatio = Math.max(0, this.shieldHp / this.maxShieldHp);
+      const hasArmorBreak = this.statusEffects.has('armorBreak');
+      this.healthBar.fillStyle(hasArmorBreak ? 0xff4444 : 0xaaaaaa);
+      this.healthBar.fillRect(x, y + height, width * shieldRatio, 2);
     }
   }
 

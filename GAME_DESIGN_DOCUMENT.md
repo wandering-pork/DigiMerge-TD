@@ -895,12 +895,12 @@ Combine two **specific max-level Mega** Digimon to create an Ultra-tier result. 
 ```
 Wave 101+:
   Enemy HP   = Base HP × (1.0 + (wave - 100) × 0.05)
-  Enemy Armor = Base Armor + (wave - 100) × 0.5%
+  Enemy Shield = Base Shield HP + (wave - 100) × 0.5% bonus
   Enemy Speed = Base Speed × (1.0 + (wave - 100) × 0.01)  [caps at 1.5×]
 
 Example Wave 150:
   HP: 250% of base
-  Armor: +25% bonus
+  Shield: +25% bonus
   Speed: 150% of base (capped)
 ```
 
@@ -955,11 +955,11 @@ The leaderboard tracks two metrics for competitive play:
 
 Bosses are tanky enemies with special abilities. They do NOT attack towers directly - they simply try to reach the base like normal enemies, but have powerful abilities that affect gameplay.
 
-| Boss Type | HP Multiplier | Armor | Abilities | Appears |
-|-----------|---------------|-------|-----------|---------|
-| Mini-Boss | 5x normal | 20% | 1 ability | Wave 10, 30, 50, 70, 90 |
-| Phase Boss | 15x normal | 35% | 2 abilities | Wave 20, 40, 60, 80 |
-| Final Boss | 30x normal | 50% | 3 abilities | Wave 100 |
+| Boss Type | HP Multiplier | Shield (armorRatio) | Abilities | Appears |
+|-----------|---------------|---------------------|-----------|---------|
+| Mini-Boss | 5x normal | 0.2 | 1 ability | Wave 10, 30, 50, 70, 90 |
+| Phase Boss | 15x normal | 0.35 | 2 abilities | Wave 20, 40, 60, 80 |
+| Final Boss | 30x normal | 0.5 | 3 abilities | Wave 100 |
 
 ### Boss Abilities Pool
 
@@ -1110,14 +1110,14 @@ Example:
 | **Freeze** | 2s | Stun, then 50% slow 3s |
 | **Slow** | 3s | -30% to -50% move speed |
 | **Stun** | 1-2s | Cannot move or attack |
-| **Armor Break** | 5s | -20% to -50% defense |
+| **Armor Break** | 3s | +50% bonus damage to shield |
 | **Fear** | 3s | Enemy runs backward |
 | **Root** | 2s | Cannot move, can attack |
 
 ### Enemy Types
 
-| Type | Speed | HP | Armor | Special |
-|------|-------|-----|-------|---------|
+| Type | Speed | HP | Shield | Special |
+|------|-------|-----|--------|---------|
 | Swarm | Fast | Low | None | Many weak units |
 | Standard | Medium | Medium | Low | Balanced |
 | Tank | Slow | High | High | Hard to kill |
@@ -2680,21 +2680,21 @@ EXPECTED ACTION: Player learns to prioritize fast enemies
 ```
 ENEMIES: Mixed ×8 (Standard), Patamon ×2 (Vaccine, Flying), Gotsumon ×2 (Data, Tank)
 ATTRIBUTES: Mixed
-NEW TYPES: Flying (Patamon) - aerial, Tank (Gotsumon) - high HP/armor
+NEW TYPES: Flying (Patamon) - aerial, Tank (Gotsumon) - high HP/shield
 
 TRIGGER: First Flying enemy (Patamon) spawns
 HINT 1: "FLYING enemy! Patamon ignores ground-based attacks."
         [Wing icon on Patamon, show which towers can hit air]
 
 TRIGGER: First Tank enemy (Gotsumon) spawns
-HINT 2: "TANK enemy! Gotsumon has high HP and 40% armor. Use Armor Break!"
-        [Shield icon on Gotsumon, armor bar visible]
+HINT 2: "TANK enemy! Gotsumon has high HP and a shield. Use Armor Break!"
+        [Shield icon on Gotsumon, shield bar visible]
 
 TRIGGER: Tower with Armor Break hits Gotsumon
-HINT 3: "Armor Break reduces enemy defense. Great against Tanks!"
-        [Show armor reduction effect]
+HINT 3: "Armor Break shreds enemy shields faster. Great against Tanks!"
+        [Show shield depletion effect]
 
-CONCEPTS: Flying enemies (targeting), Tank enemies (armor), counter-strategies
+CONCEPTS: Flying enemies (targeting), Tank enemies (shield), counter-strategies
 EXPECTED ACTION: Player notes tower capabilities for future composition planning
 ```
 
@@ -2758,10 +2758,10 @@ Additional hints trigger when new enemy types first appear:
 | 13 | Flying (swarm) | Patamon, Biyomon ×4+ | "Flying swarm! Make sure you have enough anti-air coverage." |
 | 15 | Regen | Floramon | "Regenerating enemy! It heals 2% HP/sec. Burst it down or use Poison!" |
 | 26 | Swarm (Champion) | Bakemon ×10 | "Massive swarm! AoE attacks like Greymon's fire breath are perfect here." |
-| 33 | Shielded | Centarumon | "Shielded enemy! 60% armor - Armor Break is almost required." |
+| 33 | Shielded | Centarumon | "Shielded enemy! Thick shield - Armor Break shreds it faster!" |
 | 46 | Splitter | Mamemon | "Splitter enemy! Kills split into 2 smaller copies. Sustained DPS wins." |
 | 51 | Modifier: Enraged | Red glow enemies | "Enraged modifier! +50% speed, +25% damage. Prioritize these threats!" |
-| 52 | Modifier: Armored | Metal sheen enemies | "Armored modifier! +30% armor on top of base stats." |
+| 52 | Modifier: Armored | Metal sheen enemies | "Armored modifier! +30% bonus shield HP on top of base stats." |
 | 53 | Modifier: Hasty | Blur trail enemies | "Hasty modifier! Double speed but less HP. Like super-Speedsters!" |
 | 54 | Modifier: Vampiric | Purple aura enemies | "Vampiric modifier! Heals 10% of damage dealt. Kill fast!" |
 | 55 | Modifier: Giant | Large sprite enemies | "Giant modifier! +200% HP, bigger target. Focus fire!" |

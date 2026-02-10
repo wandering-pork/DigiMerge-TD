@@ -12,6 +12,7 @@ import {
   GAME_WIDTH,
   GAME_HEIGHT,
   GAME_SPEEDS,
+  SHIELD_HP_MULTIPLIER,
 } from '@/config/Constants';
 import { EventBus, GameEvents } from '@/utils/EventBus';
 import { WaveManager } from '@/managers/WaveManager';
@@ -2346,7 +2347,7 @@ export class GameScene extends Phaser.Scene {
     const statLines = [
       { label: 'HP', value: `${enemy.baseHP}`, color: '#ff6666' },
       { label: 'Speed', value: `${enemy.moveSpeed}`, color: '#ffaa44' },
-      { label: 'Armor', value: `${Math.round(enemy.armor * 100)}%`, color: '#4488ff' },
+      { label: 'Shield', value: enemy.armorRatio > 0 ? `${Math.round(enemy.baseHP * enemy.armorRatio * SHIELD_HP_MULTIPLIER)}` : '0', color: '#4488ff' },
       { label: 'Type', value: enemy.type, color: '#cccccc' },
       { label: 'Weak to', value: this.getWeakness(enemy.attribute), color: '#ff4444' },
     ];

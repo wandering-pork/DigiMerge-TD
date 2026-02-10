@@ -174,8 +174,14 @@ export class CombatManager {
             const baseEffect = getBaseEffectType(effectType);
             if (baseEffect === 'armorPierce') {
               projectile.ignoresArmor = true;
+              // Preserve compound effectType for AoE/other modifiers
+              projectile.effectType = effectType;
+              projectile.sourceDamage = baseDamage;
             } else if (baseEffect === 'holy') {
               projectile.holyBonus = true;
+              // Preserve compound effectType for AoE/other modifiers
+              projectile.effectType = effectType;
+              projectile.sourceDamage = baseDamage;
             } else if (baseEffect === 'heal') {
               EventBus.emit('tower:healed', { amount: 1 });
             } else if (baseEffect) {

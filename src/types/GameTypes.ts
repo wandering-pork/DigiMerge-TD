@@ -23,7 +23,8 @@ export interface EnemyInstance {
   hp: number;
   maxHp: number;
   speed: number;
-  armor: number;
+  shieldHp: number;
+  maxShieldHp: number;
   attribute: Attribute;
   pathIndex: number;
   type: string;

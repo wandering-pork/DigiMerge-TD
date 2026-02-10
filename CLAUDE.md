@@ -235,16 +235,18 @@ const ATTRIBUTE_MULTIPLIERS: Record<Attribute, Record<Attribute, number>> = {
 | Endless | 101+ | Scaling | Every 10 |
 
 ### Enemy Types
-| Type | Speed | HP | Armor | Counter |
-|------|-------|-----|-------|---------|
-| Swarm | 1.3x | 0.5x | 0% | AoE |
-| Standard | 1.0x | 1.0x | 10% | Any |
-| Tank | 0.6x | 2.5x | 40% | Armor Break |
-| Speedster | 2.0x | 0.4x | 0% | Slow, Freeze |
-| Flying | 1.2x | 0.8x | 0% | Anti-air |
-| Regen | 0.8x | 1.5x | 10% | Burst, Poison |
-| Shielded | 0.9x | 1.0x | 60% | Armor Break |
-| Splitter | 1.0x | 0.8x | 0% | Sustained DPS |
+| Type | Speed | HP | Shield (armorRatio) | Counter |
+|------|-------|-----|---------------------|---------|
+| Swarm | 1.3x | 0.5x | 0 (0.0) | AoE |
+| Standard | 1.0x | 1.0x | low (0.1) | Any |
+| Tank | 0.6x | 2.5x | high (0.4) | Armor Break, sustained fire |
+| Speedster | 2.0x | 0.4x | 0 (0.0) | Slow, Freeze |
+| Flying | 1.2x | 0.8x | 0 (0.0) | Anti-air |
+| Regen | 0.8x | 1.5x | low (0.1) | Burst, Poison |
+| Shielded | 0.9x | 1.0x | very high (0.6) | Armor Break |
+| Splitter | 1.0x | 0.8x | 0 (0.0) | Sustained DPS |
+
+**Shield HP**: `shieldHP = baseHP × armorRatio × SHIELD_HP_MULTIPLIER(2) × scaling`. Shield absorbs damage before HP. Armor Break = +50% shield damage. Armor Pierce = bypasses shield. DoT bypasses shield.
 
 ---
 
@@ -503,6 +505,16 @@ This project follows TDD methodology: **RED → GREEN → REFACTOR**
 ### Damage Formula
 ```typescript
 finalDamage = baseDamage * (1 + level * 0.02) * attributeMultiplier;
+// Damage hits shield first (if any), overflow carries to HP
+// armor_pierce: bypasses shield entirely
+// armor_break: shield takes damage * (1 + 0.5) = 1.5x
+// DoT (burn/poison): bypasses shield via takeDamageRaw
+```
+
+### Shield HP Formula
+```typescript
+shieldHP = baseHP * armorRatio * SHIELD_HP_MULTIPLIER * scaling;
+// SHIELD_HP_MULTIPLIER = 2; armorRatio is 0..0.6
 ```
 
 ### Max Level Formula
@@ -581,7 +593,7 @@ cost = Math.ceil(3 * currentLevel * stageMultiplier);
 | Keyboard shortcuts | ✅ | S/Del=sell, U=level up, D=deselect, Tab=cycle |
 | Range preview | ✅ | Teal range circle + ghost sprite on placement hover |
 | Object pooling | ✅ | Lazy pooling for projectiles and enemies |
-| Visual polish | ✅ | Boss death effects, tower attack animation, armor bar, DoT floating numbers |
+| Visual polish | ✅ | Boss death effects, tower attack animation, shield bar, DoT floating numbers |
 | Roster expansion | ✅ | ~171 towers including Ultra tier entries |
 | Colorblind mode | ✅ | V/D/X/F attribute symbols on sprites, toggle in Settings |
 | Game speed indicator | ✅ | Persistent badge over grid (amber 2x, red 3x) |
@@ -610,8 +622,9 @@ cost = Math.ceil(3 * currentLevel * stageMultiplier);
 - **Sprint 27**: Colorblind mode (V/D/X/F symbols), game speed indicator, high-contrast mode (✅)
 - **Sprint 23B**: Texture atlases + sprite idle animations (✅)
 - **Sprint 28**: Background tab support (Web Worker), main menu + starter select UI polish (✅)
-- **Sprint 29**: Effect audit fixes, armor_pierce/holy/heal, armor bar, DoT numbers, in-game Encyclopedia, TowerInfoPanel cleanup (✅)
+- **Sprint 29**: Effect audit fixes, armor_pierce/holy/heal, shield bar, DoT numbers, in-game Encyclopedia, TowerInfoPanel cleanup (✅)
 - **Sprint 23/24 (merged)**: Screen centering (940px), player name high scores, 257 Digimon descriptions (✅)
+- **Sprint 30**: Shield HP system — armor converted from % reduction to depletable shield HP pool (✅)
 
 ### Remaining Work
 - Manual playtest of all proc rates and bonus effect inheritance

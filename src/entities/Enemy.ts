@@ -9,10 +9,10 @@ import {
   EFFECT_INDICATOR_COLORS,
   getBaseEffectType,
   getEffectiveSpeedMultiplier,
-  getEffectiveArmorMultiplier,
   calculateDotDamage,
   calculateRegenAmount,
 } from '@/data/StatusEffects';
+import { SHIELD_HP_MULTIPLIER } from '@/config/Constants';
 import {
   BossAbilityState,
   createBossAbilityState,
@@ -43,7 +43,8 @@ export class Enemy extends Phaser.GameObjects.Container {
   public hp: number;
   public maxHp: number;
   public speed: number;
-  public armor: number;
+  public shieldHp: number;
+  public maxShieldHp: number;
   public attribute: Attribute;
   public enemyType: EnemyType;
   public reward: number;
@@ -105,7 +106,8 @@ export class Enemy extends Phaser.GameObjects.Container {
     this.maxHp = dbStats.baseHP * scaling;
     this.hp = this.maxHp;
     this.speed = dbStats.moveSpeed;
-    this.armor = dbStats.armor;
+    this.maxShieldHp = dbStats.baseHP * dbStats.armorRatio * SHIELD_HP_MULTIPLIER * scaling;
+    this.shieldHp = this.maxShieldHp;
     this.attribute = dbStats.attribute;
     this.enemyType = dbStats.type;
     this.reward = dbStats.reward;
@@ -184,8 +186,8 @@ export class Enemy extends Phaser.GameObjects.Container {
     this.healthBarFill = scene.add.graphics();
     this.add(this.healthBarFill);
 
-    // Create armor bar (only for armored enemies)
-    if (this.armor > 0) {
+    // Create armor bar (only for shielded enemies)
+    if (this.maxShieldHp > 0) {
       this.armorBarBg = scene.add.graphics();
       this.armorBarFill = scene.add.graphics();
       this.add(this.armorBarBg);
@@ -293,7 +295,7 @@ export class Enemy extends Phaser.GameObjects.Container {
 
   /**
    * Draw the armor bar below the HP bar.
-   * Silver when full, red when armor_break is active.
+   * Shows shield HP depletion. Red when armor_break is active.
    */
   private drawArmorBar(): void {
     if (!this.armorBarBg || !this.armorBarFill) return;
@@ -304,13 +306,15 @@ export class Enemy extends Phaser.GameObjects.Container {
     this.armorBarBg.fillStyle(0x555555, 0.6);
     this.armorBarBg.fillRect(-Enemy.HEALTH_BAR_WIDTH / 2, y, Enemy.HEALTH_BAR_WIDTH, 2);
 
-    // Fill (effective armor ratio)
+    // Fill (shield HP ratio)
     this.armorBarFill.clear();
-    if (this.armor > 0) {
-      const effectiveRatio = this.getEffectiveArmor() / this.armor;
-      const color = effectiveRatio < 1 ? 0xff4444 : 0xaaaaaa;
+    if (this.maxShieldHp > 0) {
+      const ratio = Math.max(0, this.shieldHp / this.maxShieldHp);
+      const hasArmorBreak = this.activeEffects.has('armorBreak') &&
+        (this.activeEffects.get('armorBreak')!.remainingDuration > 0);
+      const color = hasArmorBreak ? 0xff4444 : 0xaaaaaa;
       this.armorBarFill.fillStyle(color, 0.8);
-      this.armorBarFill.fillRect(-Enemy.HEALTH_BAR_WIDTH / 2, y, Enemy.HEALTH_BAR_WIDTH * effectiveRatio, 2);
+      this.armorBarFill.fillRect(-Enemy.HEALTH_BAR_WIDTH / 2, y, Enemy.HEALTH_BAR_WIDTH * ratio, 2);
     }
   }
 
@@ -323,14 +327,14 @@ export class Enemy extends Phaser.GameObjects.Container {
   }
 
   /**
-   * Apply damage to this enemy, reduced by effective armor.
-   * actualDamage = amount * (1 - effectiveArmor)
+   * Apply damage to this enemy. Hits shield first, overflow goes to HP.
+   * If ignoreArmor is true, damage bypasses the shield entirely.
+   * When armorBreak debuff is active, shield takes bonus damage (1 + strength).
    */
   public takeDamage(amount: number, ignoreArmor: boolean = false): void {
     if (!this.isAlive) return;
 
-    const effectiveArmor = ignoreArmor ? 0 : this.getEffectiveArmor();
-    let actualDamage = amount * (1 - effectiveArmor);
+    let actualDamage = amount;
 
     // Boss damage shield (e.g. Transcendent Sword)
     if (this.bossAbilityState) {
@@ -340,9 +344,28 @@ export class Enemy extends Phaser.GameObjects.Container {
       }
     }
 
-    this.hp -= actualDamage;
+    if (ignoreArmor || this.shieldHp <= 0) {
+      // Bypass shield: full damage to HP
+      this.hp -= actualDamage;
+    } else {
+      // Damage hits shield first; armorBreak makes shield take bonus damage
+      let shieldDamage = actualDamage;
+      const armorBreakEffect = this.activeEffects.get('armorBreak');
+      if (armorBreakEffect && armorBreakEffect.remainingDuration > 0) {
+        shieldDamage *= (1 + armorBreakEffect.strength);
+      }
+
+      this.shieldHp -= shieldDamage;
+      if (this.shieldHp < 0) {
+        // Overflow carries to HP (at original damage ratio, not boosted)
+        const overflowRatio = -this.shieldHp / shieldDamage;
+        this.hp -= actualDamage * overflowRatio;
+        this.shieldHp = 0;
+      }
+    }
 
     this.updateHealthBar();
+    this.drawArmorBar();
 
     if (this.hp <= 0) {
       this.hp = 0;
@@ -573,7 +596,8 @@ export class Enemy extends Phaser.GameObjects.Container {
     this.maxHp = dbStats.baseHP * scaling;
     this.hp = this.maxHp;
     this.speed = dbStats.moveSpeed;
-    this.armor = dbStats.armor;
+    this.maxShieldHp = dbStats.baseHP * dbStats.armorRatio * SHIELD_HP_MULTIPLIER * scaling;
+    this.shieldHp = this.maxShieldHp;
     this.attribute = dbStats.attribute;
     this.enemyType = dbStats.type;
     this.reward = dbStats.reward;
@@ -671,7 +695,7 @@ export class Enemy extends Phaser.GameObjects.Container {
     this.updateHealthBar();
 
     // Recreate armor bar if needed
-    if (this.armor > 0 && !this.armorBarBg) {
+    if (this.maxShieldHp > 0 && !this.armorBarBg) {
       this.armorBarBg = this.scene.add.graphics();
       this.armorBarFill = this.scene.add.graphics();
       this.add(this.armorBarBg);
@@ -821,14 +845,6 @@ export class Enemy extends Phaser.GameObjects.Container {
    */
   public getEffectiveSpeed(): number {
     return this.speed * getEffectiveSpeedMultiplier(this.activeEffects);
-  }
-
-  /**
-   * Get the effective armor after applying debuff effects.
-   * Returns the base armor multiplied by the armor multiplier from active effects.
-   */
-  public getEffectiveArmor(): number {
-    return this.armor * getEffectiveArmorMultiplier(this.activeEffects);
   }
 
   /**

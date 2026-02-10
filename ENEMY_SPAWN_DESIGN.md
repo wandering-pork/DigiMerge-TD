@@ -42,22 +42,24 @@ ENDLESS (Wave 101+):    Scaling mixed enemies
 
 ### Type Definitions
 
-| Type | Speed | HP | Armor | Behavior | Counter |
-|------|-------|-----|-------|----------|---------|
-| **Swarm** | 1.3x | 0.5x | 0% | Many weak units, tight groups | AoE attacks |
-| **Standard** | 1.0x | 1.0x | 10% | Balanced, predictable | Any |
-| **Tank** | 0.6x | 2.5x | 40% | Slow, absorbs damage | Armor Break, % damage |
-| **Speedster** | 2.0x | 0.4x | 0% | Rushes through, hard to hit | Slow, Freeze, high DPS |
-| **Flying** | 1.2x | 0.8x | 0% | Ignores ground hazards | Anti-air, ranged |
-| **Regen** | 0.8x | 1.5x | 10% | Heals 2% HP/sec | Burst damage, Poison |
-| **Shielded** | 0.9x | 1.0x | 60% | High armor, vulnerable to magic | Armor Break, % damage |
-| **Splitter** | 1.0x | 0.8x | 0% | Splits into 2 smaller on death | Sustained DPS |
+| Type | Speed | HP | Shield (armorRatio) | Behavior | Counter |
+|------|-------|-----|---------------------|----------|---------|
+| **Swarm** | 1.3x | 0.5x | 0 (0.0) | Many weak units, tight groups | AoE attacks |
+| **Standard** | 1.0x | 1.0x | low (0.1) | Balanced, predictable | Any |
+| **Tank** | 0.6x | 2.5x | high (0.4) | Slow, absorbs damage | Armor Break, sustained fire |
+| **Speedster** | 2.0x | 0.4x | 0 (0.0) | Rushes through, hard to hit | Slow, Freeze, high DPS |
+| **Flying** | 1.2x | 0.8x | 0 (0.0) | Ignores ground hazards | Anti-air, ranged |
+| **Regen** | 0.8x | 1.5x | low (0.1) | Heals 2% HP/sec | Burst damage, Poison |
+| **Shielded** | 0.9x | 1.0x | very high (0.6) | High shield, vulnerable to magic | Armor Break, sustained fire |
+| **Splitter** | 1.0x | 0.8x | 0 (0.0) | Splits into 2 smaller on death | Sustained DPS |
+
+> **Shield HP** = baseHP × armorRatio × SHIELD_HP_MULTIPLIER(2) × wave scaling. Shield absorbs damage before HP. Any tower can break a shield through sustained fire. Armor Break (+50% shield damage) and Armor Pierce (bypass shield) are faster counters.
 
 ### Special Enemy Modifiers (Wave 50+)
 | Modifier | Effect | Visual |
 |----------|--------|--------|
 | **Enraged** | +50% speed, +25% damage | Red glow |
-| **Armored** | +30% armor | Metal sheen |
+| **Armored** | +30% shield HP | Metal sheen |
 | **Hasty** | +100% speed, -30% HP | Blur trail |
 | **Vampiric** | Heals 10% of damage dealt | Purple aura |
 | **Giant** | +200% HP, +50% size, -20% speed | Larger sprite |
@@ -108,10 +110,10 @@ ENDLESS (Wave 101+):    Scaling mixed enemies
 | Seadramon | Data | Standard | Slows on hit |
 | Birdramon | Data | Flying | Fast flyer |
 | Kuwagamon | Virus | Speedster | Armor pierce |
-| Centarumon | Data | Shielded | High armor |
+| Centarumon | Data | Shielded | High shield |
 | Wizardmon | Data | Standard | Magic damage |
 | Numemon | Virus | Swarm | Many weak |
-| Monochromon | Data | Tank | Very armored |
+| Monochromon | Data | Tank | High shield |
 | Airdramon | Virus | Flying | Fast |
 | DarkTyrannomon | Virus | Tank | Dark aura |
 | Kabuterimon | Data | Flying | Chain shock |
@@ -125,7 +127,7 @@ ENDLESS (Wave 101+):    Scaling mixed enemies
 | MagnaAngemon | Vaccine | Flying | Gate attack |
 | Myotismon | Virus | Standard | Lifesteal |
 | SkullGreymon | Virus | Tank | Berserk |
-| Andromon | Vaccine | Shielded | Very armored |
+| Andromon | Vaccine | Shielded | High shield |
 | MegaKabuterimon | Data | Flying | Chain lightning |
 | Garudamon | Data | Flying | Pierce attack |
 | Zudomon | Vaccine | Tank | AoE stun |
@@ -134,7 +136,7 @@ ENDLESS (Wave 101+):    Scaling mixed enemies
 | LadyDevimon | Virus | Speedster | Fear |
 | Pumpkinmon | Data | Swarm | Groups |
 | Mamemon | Data | Splitter | Splits into 2 |
-| MetalMamemon | Data | Shielded | Armored splitter |
+| MetalMamemon | Data | Shielded | Shielded splitter |
 | BlueMeramon | Virus | Speedster | Burns |
 | Megadramon | Virus | Flying | Bombing run |
 | Gigadramon | Virus | Tank | Heavy bomber |
@@ -553,7 +555,7 @@ Spawn Interval = max(0.3, 0.6 - (wave - 100) × 0.01)
 | Stat | Value |
 |------|-------|
 | HP | 200,000 |
-| Armor | 30% |
+| Shield (armorRatio) | 0.3 |
 | Speed | 0.5x |
 
 **Abilities:**

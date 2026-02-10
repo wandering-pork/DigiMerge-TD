@@ -651,7 +651,7 @@ Kapurimon → Hagurumon → Guardromon (DP 0-2) → Andromon (DP 0-3) → HiAndr
 
 | Effect | Reduction | Duration |
 |--------|-----------|----------|
-| Armor Break | -15% to -50% armor | 3-5s |
+| Armor Break | +50% bonus damage to shield | 3s |
 | Blind | Attacks miss | 2-3s |
 
 ### Special

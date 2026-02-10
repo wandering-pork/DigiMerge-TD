@@ -21,7 +21,7 @@ export const STATUS_EFFECTS: Record<string, StatusEffectDef> = {
   knockback: { id: 'knockback', name: 'Knockback', category: 'cc', description: 'Pushed back along path' },
 
   // Debuffs
-  armorBreak: { id: 'armorBreak', name: 'Armor Break', category: 'debuff', description: 'Reduces target armor' },
+  armorBreak: { id: 'armorBreak', name: 'Armor Break', category: 'debuff', description: 'Bonus damage to shield' },
   blind: { id: 'blind', name: 'Blind', category: 'debuff', description: 'Attacks miss' },
 
   // Special
@@ -148,19 +148,6 @@ export function getEffectiveSpeedMultiplier(effects: Map<string, ActiveEffect>):
   }
 
   return Math.max(0, slowMultiplier);
-}
-
-/**
- * Calculate the armor multiplier from all active effects.
- * armorBreak reduces armor by its strength percentage.
- * Returns a multiplier between 0 and 1.
- */
-export function getEffectiveArmorMultiplier(effects: Map<string, ActiveEffect>): number {
-  const armorBreakEffect = effects.get('armorBreak');
-  if (armorBreakEffect && armorBreakEffect.remainingDuration > 0) {
-    return 1 - armorBreakEffect.strength;
-  }
-  return 1;
 }
 
 /**

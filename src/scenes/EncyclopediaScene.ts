@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { DIGIMON_DATABASE } from '@/data/DigimonDatabase';
 import { getEvolutionChain } from '@/data/EvolutionPaths';
 import { DigimonStats, EnemyStats, Stage, Attribute, STAGE_NAMES, ATTRIBUTE_NAMES } from '@/types';
-import { GAME_WIDTH, GAME_HEIGHT } from '@/config/Constants';
+import { GAME_WIDTH, GAME_HEIGHT, SHIELD_HP_MULTIPLIER } from '@/config/Constants';
 import { COLORS, TEXT_STYLES, FONTS, ANIM } from '@/ui/UITheme';
 import { drawPanel, drawButton, drawDigitalGrid, drawSeparator, LayoutStack, animateButtonHover, animateButtonPress, animateModalIn, animateModalOut, createDigitalParticles } from '@/ui/UIHelpers';
 import { ATTRIBUTE_COLORS_STR } from '@/ui/UITheme';
@@ -615,7 +615,7 @@ export class EncyclopediaScene extends Phaser.Scene {
       const statLines = [
         { label: 'HP', value: es.baseHP.toLocaleString() },
         { label: 'Speed', value: `${es.moveSpeed}` },
-        { label: 'Armor', value: `${Math.round(es.armor * 100)}%` },
+        { label: 'Shield', value: es.armorRatio > 0 ? `${Math.round(es.baseHP * es.armorRatio * SHIELD_HP_MULTIPLIER)}` : '0' },
         { label: 'Type', value: es.type },
         { label: 'Reward', value: `${es.reward} DB` },
       ];

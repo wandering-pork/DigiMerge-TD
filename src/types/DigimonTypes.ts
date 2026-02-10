@@ -59,7 +59,7 @@ export interface EnemyStats {
   attribute: Attribute;
   baseHP: number;
   moveSpeed: number;
-  armor: number;
+  armorRatio: number;
   type: EnemyType;
   reward: number;
   bossAbility?: BossAbility;

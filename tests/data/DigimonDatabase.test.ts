@@ -185,7 +185,7 @@ describe('DigimonDatabase', () => {
         expect(enemy.name, `${key} missing name`).toBeDefined();
         expect(enemy.baseHP, `${key} missing baseHP`).toBeGreaterThan(0);
         expect(enemy.moveSpeed, `${key} missing moveSpeed`).toBeGreaterThan(0);
-        expect(typeof enemy.armor, `${key} armor should be number`).toBe('number');
+        expect(typeof enemy.armorRatio, `${key} armorRatio should be number`).toBe('number');
         expect(enemy.type, `${key} missing type`).toBeDefined();
         expect(enemy.reward, `${key} missing reward`).toBeGreaterThan(0);
       }
@@ -208,10 +208,10 @@ describe('DigimonDatabase', () => {
       }
     });
 
-    it('tank enemies should have higher HP and armor', () => {
+    it('tank enemies should have higher HP and armorRatio', () => {
       for (const [key, enemy] of Object.entries(enemies)) {
         if (enemy.type === 'tank') {
-          expect(enemy.armor, `${key} tank should have armor`).toBeGreaterThan(0);
+          expect(enemy.armorRatio, `${key} tank should have armorRatio`).toBeGreaterThan(0);
         }
       }
     });

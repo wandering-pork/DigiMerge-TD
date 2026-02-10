@@ -45,6 +45,9 @@ export const ORIGIN_MAX_STAGE: Record<Stage, Stage> = {
   [Stage.ULTRA]: Stage.ULTRA,
 };
 
+// Shield HP: shieldHP = baseHP * armorRatio * SHIELD_HP_MULTIPLIER * scaling
+export const SHIELD_HP_MULTIPLIER = 2;
+
 // Game Defaults
 export const STARTING_LIVES = 25;
 export const MAX_LIVES = 25;

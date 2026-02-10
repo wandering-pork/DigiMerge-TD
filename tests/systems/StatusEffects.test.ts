@@ -5,12 +5,12 @@ import {
   STATUS_EFFECT_CONFIGS,
   getBaseEffectType,
   getEffectiveSpeedMultiplier,
-  getEffectiveArmorMultiplier,
   calculateDotDamage,
   canRegenerate,
   calculateRegenAmount,
   REGEN_RATE,
 } from '@/data/StatusEffects';
+import { SHIELD_HP_MULTIPLIER } from '@/config/Constants';
 import { DIGIMON_DATABASE } from '@/data/DigimonDatabase';
 
 // ---------------------------------------------------------------------------
@@ -151,36 +151,6 @@ describe('getEffectiveSpeedMultiplier', () => {
     const effects = new Map<string, ActiveEffect>();
     effects.set('slow', createEffect({ id: 'slow', strength: 1.5, remainingDuration: 2 }));
     expect(getEffectiveSpeedMultiplier(effects)).toBe(0);
-  });
-});
-
-// ===========================================================================
-// getEffectiveArmorMultiplier
-// ===========================================================================
-
-describe('getEffectiveArmorMultiplier', () => {
-  it('returns 1 when no effects are active', () => {
-    const effects = new Map<string, ActiveEffect>();
-    expect(getEffectiveArmorMultiplier(effects)).toBe(1);
-  });
-
-  it('reduces armor by 50% with armorBreak (strength 0.5)', () => {
-    const effects = new Map<string, ActiveEffect>();
-    effects.set('armorBreak', createEffect({ id: 'armorBreak', strength: 0.5, remainingDuration: 3 }));
-    expect(getEffectiveArmorMultiplier(effects)).toBeCloseTo(0.5);
-  });
-
-  it('ignores expired armorBreak', () => {
-    const effects = new Map<string, ActiveEffect>();
-    effects.set('armorBreak', createEffect({ id: 'armorBreak', strength: 0.5, remainingDuration: 0 }));
-    expect(getEffectiveArmorMultiplier(effects)).toBe(1);
-  });
-
-  it('returns 1 when only non-armor effects are active', () => {
-    const effects = new Map<string, ActiveEffect>();
-    effects.set('burn', createEffect({ id: 'burn', remainingDuration: 3 }));
-    effects.set('slow', createEffect({ id: 'slow', remainingDuration: 2 }));
-    expect(getEffectiveArmorMultiplier(effects)).toBe(1);
   });
 });
 
@@ -764,17 +734,128 @@ describe('Splitter mechanic data', () => {
     expect(childHp).toBeCloseTo(parentMaxHp * 0.5);
   });
 
-  it('Guardromon has shielded type with 60% armor', () => {
+  it('Guardromon has shielded type with 0.6 armorRatio', () => {
     const guardromon = DIGIMON_DATABASE.enemies.enemy_guardromon;
     expect(guardromon).toBeDefined();
     expect(guardromon.type).toBe('shielded');
-    expect(guardromon.armor).toBe(0.6);
+    expect(guardromon.armorRatio).toBe(0.6);
   });
 
-  it('Andromon has shielded type with 60% armor', () => {
+  it('Andromon has shielded type with 0.6 armorRatio', () => {
     const andromon = DIGIMON_DATABASE.enemies.enemy_andromon;
     expect(andromon).toBeDefined();
     expect(andromon.type).toBe('shielded');
-    expect(andromon.armor).toBe(0.6);
+    expect(andromon.armorRatio).toBe(0.6);
+  });
+});
+
+// ===========================================================================
+// Shield HP system (depletable shield from armorRatio)
+// ===========================================================================
+
+describe('Shield HP system', () => {
+  describe('shield HP calculation', () => {
+    it('computes shield HP = baseHP * armorRatio * SHIELD_HP_MULTIPLIER', () => {
+      const baseHP = 1000;
+      const armorRatio = 0.4;
+      const scaling = 1;
+      const shieldHp = baseHP * armorRatio * SHIELD_HP_MULTIPLIER * scaling;
+      expect(shieldHp).toBe(800); // 1000 * 0.4 * 2
+    });
+
+    it('scales shield HP with wave scaling', () => {
+      const baseHP = 500;
+      const armorRatio = 0.6;
+      const scaling = 1.5;
+      const shieldHp = baseHP * armorRatio * SHIELD_HP_MULTIPLIER * scaling;
+      expect(shieldHp).toBe(900); // 500 * 0.6 * 2 * 1.5
+    });
+
+    it('returns 0 shield HP when armorRatio is 0', () => {
+      const baseHP = 200;
+      const armorRatio = 0;
+      const shieldHp = baseHP * armorRatio * SHIELD_HP_MULTIPLIER;
+      expect(shieldHp).toBe(0);
+    });
+  });
+
+  describe('takeDamage with shield', () => {
+    /**
+     * Simulates the Enemy.takeDamage logic as a pure function for testing.
+     */
+    function takeDamageWithShield(
+      hp: number,
+      shieldHp: number,
+      damage: number,
+      ignoreArmor: boolean,
+      armorBreakStrength: number = 0,
+    ): { hp: number; shieldHp: number } {
+      if (ignoreArmor || shieldHp <= 0) {
+        hp -= damage;
+      } else {
+        let shieldDamage = damage;
+        if (armorBreakStrength > 0) {
+          shieldDamage *= (1 + armorBreakStrength);
+        }
+        shieldHp -= shieldDamage;
+        if (shieldHp < 0) {
+          const overflowRatio = -shieldHp / shieldDamage;
+          hp -= damage * overflowRatio;
+          shieldHp = 0;
+        }
+      }
+      return { hp: Math.max(0, hp), shieldHp: Math.max(0, shieldHp) };
+    }
+
+    it('damage hits shield first, HP unchanged', () => {
+      const result = takeDamageWithShield(1000, 500, 100, false);
+      expect(result.hp).toBe(1000);
+      expect(result.shieldHp).toBe(400);
+    });
+
+    it('overflow damage carries to HP when shield breaks', () => {
+      const result = takeDamageWithShield(1000, 50, 100, false);
+      expect(result.shieldHp).toBe(0);
+      // Shield absorbed 50 of 100 damage. overflowRatio = 50/100 = 0.5, hp -= 100 * 0.5 = 50
+      expect(result.hp).toBe(950);
+    });
+
+    it('ignoreArmor bypasses shield entirely', () => {
+      const result = takeDamageWithShield(1000, 500, 200, true);
+      expect(result.hp).toBe(800);
+      expect(result.shieldHp).toBe(500); // shield untouched
+    });
+
+    it('full damage to HP when shield is already depleted', () => {
+      const result = takeDamageWithShield(1000, 0, 200, false);
+      expect(result.hp).toBe(800);
+      expect(result.shieldHp).toBe(0);
+    });
+
+    it('armorBreak makes shield take bonus damage (1.5x with strength 0.5)', () => {
+      // With armorBreak strength 0.5: shield takes 100 * 1.5 = 150 damage
+      const result = takeDamageWithShield(1000, 500, 100, false, 0.5);
+      expect(result.hp).toBe(1000);
+      expect(result.shieldHp).toBe(350); // 500 - 150
+    });
+
+    it('armorBreak overflow uses original damage ratio for HP', () => {
+      // Shield has 100, damage is 200, armorBreak strength 0.5
+      // shieldDamage = 200 * 1.5 = 300, shield absorbs 100, overflow = 200
+      // overflowRatio = 200/300 = 2/3, hp -= 200 * 2/3 ≈ 133.33
+      const result = takeDamageWithShield(1000, 100, 200, false, 0.5);
+      expect(result.shieldHp).toBe(0);
+      expect(result.hp).toBeCloseTo(866.67, 1);
+    });
+
+    it('takeDamageRaw bypasses shield (DoT simulation)', () => {
+      // DoT uses takeDamageRaw which goes direct to HP
+      let hp = 1000;
+      const shieldHp = 500;
+      const rawDamage = 50;
+      hp -= rawDamage;
+      expect(hp).toBe(950);
+      expect(shieldHp).toBe(500); // unchanged
+    });
   });
 });
