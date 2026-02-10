@@ -6,7 +6,7 @@ import { EVOLUTION_PATHS } from '@/data/EvolutionPaths';
 import { EventBus, GameEvents } from '@/utils/EventBus';
 import { Tower } from '@/entities/Tower';
 import { COLORS, ATTRIBUTE_COLORS_STR, TEXT_STYLES, FONTS } from './UITheme';
-import { drawPanel, drawButton, drawSeparator, animateSlideIn, animateSlideOut, animateButtonHover, animateButtonPress } from './UIHelpers';
+import { drawPanelFill, drawButton, drawSeparator, animateSlideIn, animateSlideOut, animateButtonHover, animateButtonPress } from './UIHelpers';
 import { canDisplaySprite, getStaticFrame } from '@/utils/SpriteAnimHelper';
 
 /**
@@ -142,9 +142,9 @@ export class SpawnMenu extends Phaser.GameObjects.Container {
     const w = SpawnMenu.PANEL_WIDTH;
     const h = SpawnMenu.PANEL_HEIGHT;
 
-    // Background — themed panel
+    // Background — fill-only (no border stroke; outer drawSidePanel provides border)
     this.panelBg = this.scene.add.graphics();
-    drawPanel(this.panelBg, 0, 0, w, h);
+    drawPanelFill(this.panelBg, 0, 0, w, h);
     this.add(this.panelBg);
 
     // Title

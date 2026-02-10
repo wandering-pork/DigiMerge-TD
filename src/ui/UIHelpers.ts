@@ -35,6 +35,126 @@ export function drawPanel(
   g.strokeRoundedRect(x, y, w, h, r);
 }
 
+/**
+ * Draw a full-height side panel with straight edges, grid-facing border, and corner accents.
+ * Used for HUD panels that span the full screen height and flush against screen edges.
+ */
+export function drawSidePanel(
+  g: Phaser.GameObjects.Graphics,
+  x: number, y: number, w: number, h: number,
+  opts?: {
+    borderColor?: number;
+    borderAlpha?: number;
+    fillAlpha?: number;
+    flushEdges?: { top?: boolean; bottom?: boolean; left?: boolean; right?: boolean };
+  },
+): void {
+  const bc = opts?.borderColor ?? COLORS.CYAN;
+  const ba = opts?.borderAlpha ?? 0.7;
+  const fa = opts?.fillAlpha ?? 0.97;
+  const flush = opts?.flushEdges ?? {};
+  g.clear();
+
+  // Layer 1: outer glow on non-flush edges
+  g.fillStyle(bc, 0.06);
+  const glowPad = 4;
+  const gx = flush.left ? x : x - glowPad;
+  const gy = flush.top ? y : y - glowPad;
+  const gw = w + (flush.left ? 0 : glowPad) + (flush.right ? 0 : glowPad);
+  const gh = h + (flush.top ? 0 : glowPad) + (flush.bottom ? 0 : glowPad);
+  g.fillRect(gx, gy, gw, gh);
+
+  // Layer 2: dark edge
+  g.fillStyle(COLORS.BG_DARK, 1);
+  g.fillRect(x - 1, y, w + 2, h);
+
+  // Layer 3: inner fill
+  g.fillStyle(COLORS.BG_PANEL, fa);
+  g.fillRect(x, y, w, h);
+
+  // Layer 3b: warm top highlight
+  g.fillStyle(0xffddaa, 0.02);
+  g.fillRect(x + 2, y, w - 4, h / 4);
+
+  // Layer 4: border lines on non-flush edges only
+  g.lineStyle(2, bc, ba);
+  if (!flush.top) g.lineBetween(x, y, x + w, y);
+  if (!flush.bottom) g.lineBetween(x, y + h, x + w, y + h);
+  if (!flush.left) g.lineBetween(x, y, x, y + h);
+  if (!flush.right) g.lineBetween(x + w, y, x + w, y + h);
+
+  // Layer 5: subtle inner-edge glow (1px accent on grid-facing edges)
+  g.lineStyle(1, bc, 0.15);
+  if (!flush.left) g.lineBetween(x + 1, y, x + 1, y + h);
+  if (!flush.right) g.lineBetween(x + w - 1, y, x + w - 1, y + h);
+
+  // Layer 6: decorative corner accents ("tech brackets") on non-flush vertical borders
+  const accentLen = 12;
+  const accentAlpha = ba * 0.8;
+  g.lineStyle(2, bc, accentAlpha);
+
+  // Top corners (only if top edge isn't flush)
+  if (!flush.top) {
+    if (!flush.left) {
+      // Top-left L-bracket
+      g.lineBetween(x, y, x + accentLen, y);
+      g.lineBetween(x, y, x, y + accentLen);
+    }
+    if (!flush.right) {
+      // Top-right L-bracket
+      g.lineBetween(x + w, y, x + w - accentLen, y);
+      g.lineBetween(x + w, y, x + w, y + accentLen);
+    }
+  }
+
+  // Bottom corners (only if bottom edge isn't flush)
+  if (!flush.bottom) {
+    if (!flush.left) {
+      // Bottom-left L-bracket
+      g.lineBetween(x, y + h, x + accentLen, y + h);
+      g.lineBetween(x, y + h, x, y + h - accentLen);
+    }
+    if (!flush.right) {
+      // Bottom-right L-bracket
+      g.lineBetween(x + w, y + h, x + w - accentLen, y + h);
+      g.lineBetween(x + w, y + h, x + w, y + h - accentLen);
+    }
+  }
+
+  // Mid-edge accents on visible vertical borders (small tick marks at ~1/3 and ~2/3 height)
+  const tickLen = 6;
+  g.lineStyle(1, bc, accentAlpha * 0.5);
+  if (!flush.left) {
+    g.lineBetween(x, y + h * 0.33, x + tickLen, y + h * 0.33);
+    g.lineBetween(x, y + h * 0.66, x + tickLen, y + h * 0.66);
+  }
+  if (!flush.right) {
+    g.lineBetween(x + w, y + h * 0.33, x + w - tickLen, y + h * 0.33);
+    g.lineBetween(x + w, y + h * 0.66, x + w - tickLen, y + h * 0.66);
+  }
+}
+
+/**
+ * Draw a lightweight fill-only panel background (no border stroke).
+ * Used for inner panels (TowerInfoPanel, SpawnMenu) that sit inside a drawSidePanel
+ * to avoid double-border overlap.
+ */
+export function drawPanelFill(
+  g: Phaser.GameObjects.Graphics,
+  x: number, y: number, w: number, h: number,
+  opts?: { fillAlpha?: number; radius?: number },
+): void {
+  const r = opts?.radius ?? 8;
+  const fa = opts?.fillAlpha ?? 0.95;
+  g.clear();
+  // Dark background fill
+  g.fillStyle(COLORS.BG_PANEL, fa);
+  g.fillRoundedRect(x, y, w, h, r);
+  // Subtle top highlight for depth
+  g.fillStyle(0xffddaa, 0.02);
+  g.fillRoundedRect(x + 2, y + 2, w - 4, h / 3, { tl: r - 2, tr: r - 2, bl: 0, br: 0 });
+}
+
 /** Draw a button background (centered at origin) with gradient-like depth */
 export function drawButton(
   g: Phaser.GameObjects.Graphics,

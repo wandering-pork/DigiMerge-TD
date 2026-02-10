@@ -31,7 +31,7 @@ import { DIGIMON_DATABASE } from '@/data/DigimonDatabase';
 import { getWaveConfig } from '@/data/WaveData';
 import { Stage, TargetPriority, Attribute, ATTRIBUTE_NAMES, STAGE_NAMES, EnemyStats, GameStatistics } from '@/types';
 import { COLORS, TEXT_STYLES, FONTS, ANIM, ATTRIBUTE_COLORS_STR } from '@/ui/UITheme';
-import { drawPanel, drawButton, drawSeparator, drawDigitalGrid, animateButtonHover, animateButtonPress, LayoutStack } from '@/ui/UIHelpers';
+import { drawPanel, drawSidePanel, drawButton, drawSeparator, drawDigitalGrid, animateButtonHover, animateButtonPress, LayoutStack } from '@/ui/UIHelpers';
 import { BossAbilityAction, getCooldownProgress } from '@/systems/BossAbilitySystem';
 import { Projectile } from '@/entities/Projectile';
 import { TutorialOverlay } from '@/ui/TutorialOverlay';
@@ -1646,16 +1646,18 @@ export class GameScene extends Phaser.Scene {
 
     // Full-height left HUD panel background
     const hudPanelBg = this.add.graphics();
-    drawPanel(hudPanelBg, leftPanelX - 5, 0, leftPanelW + 10, GAME_HEIGHT, {
+    drawSidePanel(hudPanelBg, leftPanelX - 5, 0, leftPanelW + 10, GAME_HEIGHT, {
       borderColor: COLORS.CYAN_DIM, borderAlpha: 0.3,
+      flushEdges: { top: true, bottom: true },
     });
     hudPanelBg.setDepth(9);
 
     // Full-height right panel background (behind TowerInfoPanel / SpawnMenu)
     const rightPanelStartX = GRID_OFFSET_X + GRID.COLUMNS * GRID.CELL_SIZE + 15; // 618
     const rightPanelBg = this.add.graphics();
-    drawPanel(rightPanelBg, rightPanelStartX - 5, 0, GAME_WIDTH - rightPanelStartX + 5, GAME_HEIGHT, {
+    drawSidePanel(rightPanelBg, rightPanelStartX - 5, 0, GAME_WIDTH - rightPanelStartX + 5, GAME_HEIGHT, {
       borderColor: COLORS.CYAN_DIM, borderAlpha: 0.3,
+      flushEdges: { top: true, bottom: true, right: true },
     });
     rightPanelBg.setDepth(9);
 

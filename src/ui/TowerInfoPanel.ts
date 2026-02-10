@@ -9,7 +9,7 @@ import { canMerge, MergeCandidate } from '@/systems/MergeSystem';
 import { GRID, GRID_OFFSET_X, getSellPrice as calculateSellPrice } from '@/config/Constants';
 import { STATUS_EFFECTS, STATUS_EFFECT_CONFIGS } from '@/data/StatusEffects';
 import { COLORS, ATTRIBUTE_COLORS_STR, TEXT_STYLES, FONTS, ANIM } from './UITheme';
-import { drawPanel, drawButton, drawSeparator, LayoutStack, animateSlideIn, animateSlideOut, animateButtonHover, animateButtonPress } from './UIHelpers';
+import { drawPanelFill, drawButton, drawSeparator, LayoutStack, animateSlideIn, animateSlideOut, animateButtonHover, animateButtonPress } from './UIHelpers';
 import { canDisplaySprite, getStaticFrame } from '@/utils/SpriteAnimHelper';
 // DIGIMON_DESCRIPTIONS import removed — skill info shown in header instead of lore
 
@@ -274,9 +274,9 @@ export class TowerInfoPanel extends Phaser.GameObjects.Container {
     const w = TowerInfoPanel.PANEL_WIDTH;
     const h = TowerInfoPanel.PANEL_HEIGHT;
 
-    // Background — themed 4-layer panel
+    // Background — fill-only (no border stroke; outer drawSidePanel provides border)
     this.panelBg = this.scene.add.graphics();
-    drawPanel(this.panelBg, 0, 0, w, h);
+    drawPanelFill(this.panelBg, 0, 0, w, h);
     this.add(this.panelBg);
 
     // Close button (top right)

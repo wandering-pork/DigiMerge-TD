@@ -110,6 +110,11 @@ export class StarterSelectScene extends Phaser.Scene {
       });
     });
 
+    // Safety net: ensure all cards are fully visible after entrance animations
+    this.time.delayedCall(this.starters.length * 30 + 400, () => {
+      this.starterContainers.forEach(c => c.setAlpha(1));
+    });
+
     // Start Game button (disabled initially)
     const btnW = 220;
     const btnH = 50;
@@ -237,6 +242,7 @@ export class StarterSelectScene extends Phaser.Scene {
 
     container.on('pointerover', () => {
       if (!this.selected.has(starter.key)) {
+        container.setAlpha(1); // Ensure visible if entrance tween was interrupted
         this.drawCardBg(bg, cw, ch, false, true);
         this.tweens.killTweensOf(container);
         this.tweens.add({
@@ -249,6 +255,7 @@ export class StarterSelectScene extends Phaser.Scene {
 
     container.on('pointerout', () => {
       if (!this.selected.has(starter.key)) {
+        container.setAlpha(1); // Ensure visible if entrance tween was interrupted
         this.drawCardBg(bg, cw, ch, false);
         this.tweens.killTweensOf(container);
         this.tweens.add({
